@@ -32,11 +32,11 @@ export function cleanTitle(title: string, primaryLanguage: string | null): { cle
   return { cleanTitle: t, year };
 }
 
-/** Rows are (category, film) placements: dedupe on trackList, drop the placeholder channel. */
+/** Rows are (category, film) placements: dedupe on trackList, drop the placeholder channels ("What's new on ice", "iceologies"). */
 export function parseMovies(rows: IceRow[]): Film[] {
   const films = new Map<string, Film>();
   for (const r of rows) {
-    if (!r.trackList || PLACEHOLDER.test(r.title.trim())) continue;
+    if (!r.trackList || PLACEHOLDER.test(r.title.trim()) || r.director === "The ice team") continue;
     const existing = films.get(r.trackList);
     if (existing) {
       if (!existing.categoryIds.includes(r.categoryId)) existing.categoryIds.push(r.categoryId);

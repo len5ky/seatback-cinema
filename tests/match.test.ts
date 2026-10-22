@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { normalizeTitle, splitNames, surname } from "../src/text.ts";
+import { normalizeTitle, splitNames, surname, titleVariants } from "../src/text.ts";
 import { directorsMatch, findCandidates, pickMatch, type Candidate } from "../src/match.ts";
 import { openDb } from "../src/db.ts";
 
@@ -63,4 +63,26 @@ test("findCandidates uses normalised primary and original titles", () => {
   db.run("INSERT INTO imdb_keys VALUES ('amelie','tt1'), ('fabuleux destin damelie poulain','tt1')");
   const c = findCandidates(db, "Le Fabuleux Destin d'Amélie Poulain");
   expect(c.map((x) => [x.tconst, x.directorNames])).toEqual([["tt1", ["Jean-Pierre Jeunet"]]]);
+});
+
+test("numerals and alternative titles", () => {
+  expect(normalizeTitle("Frozen II")).toBe(normalizeTitle("Frozen 2"));
+  expect(normalizeTitle("Back to the Future Part II")).toBe(normalizeTitle("Back to the Future II"));
+  expect(normalizeTitle("Malcolm X")).toBe("malcolm x");
+  expect(titleVariants("Marvel's The Avengers")).toContain("avengers");
+  expect(titleVariants("From the World of John Wick: Ballerina")).toContain("ballerina");
+});
+
+test("director typos still match", () => {
+  expect(directorsMatch(["Jon Turtletaub"], ["Jon Turteltaub"])).toBe(true);
+  expect(directorsMatch(["Phil Alden Robison"], ["Phil Alden Robinson"])).toBe(true);
+  expect(directorsMatch(["Toby L."], ["Toby L."])).toBe(true);
+  expect(directorsMatch(["Kevin Lee"], ["Ang Lee"])).toBe(true); // surname-only by design; runtime/year break ties
+  expect(directorsMatch(["Andrew Stanton"], ["Andrew Stone"])).toBe(false);
+});
+
+test("airline-edited runtime does not sink a director+year match", () => {
+  const m = pickMatch({ cleanTitle: "The Shawshank Redemption", year: 1994, duration: 120, director: "Frank Darabont" },
+    [cand("tt0111161", 1994, 142, ["Frank Darabont"], 3000000)], 2026);
+  expect(m.confidence).toBe("high");
 });

@@ -4,9 +4,12 @@ import { DATA_DIR } from "./db.ts";
 import { normalizeTitle } from "./text.ts";
 
 const BASE = "https://datasets.imdbws.com";
-const FILES = ["title.basics", "title.ratings", "title.crew", "name.basics"] as const;
+const FILES = ["title.basics", "title.akas", "title.ratings", "title.crew", "name.basics"] as const;
 const MAX_AGE_MS = 7 * 24 * 3600 * 1000;
-const KEEP_TYPES = new Set(["movie", "tvMovie"]);
+// tvSpecial/video cover the concert films and documentaries airlines carry
+const KEEP_TYPES = new Set(["movie", "tvMovie", "tvSpecial", "video"]);
+// English-market and UAE release titles: "Zootropolis", "Philosopher's Stone", "Escape to Victory"
+const AKA_REGIONS = new Set(["GB", "US", "XWW", "AU", "CA", "IE", "IN", "AE"]);
 const BATCH = 50_000;
 
 const dir = () => `${DATA_DIR}/imdb`;
@@ -79,7 +82,15 @@ export async function loadImdb(db: Database, log: (m: string) => void = console.
       if (b !== a) insKey.run(b, tconst);
     }
   });
-  log(`  title.basics: ${kept.size} movies/tvMovies`);
+  log(`  title.basics: ${kept.size} titles (${[...KEEP_TYPES].join(", ")})`);
+
+  let akas = 0;
+  // titleId ordering title region language types attributes isOriginalTitle
+  await batched(db, tsvRows(gzPath("title.akas")), ([tconst, , title, region]) => {
+    if (!tconst || !title || !region || !AKA_REGIONS.has(region) || !kept.has(tconst)) return;
+    if (insKey.run(normalizeTitle(title), tconst).changes) akas++;
+  });
+  log(`  title.akas: ${akas} extra title keys`);
 
   const setRating = db.prepare("UPDATE imdb_titles SET rating = ?, votes = ? WHERE tconst = ?");
   await batched(db, tsvRows(gzPath("title.ratings")), ([tconst, rating, votes]) => {
