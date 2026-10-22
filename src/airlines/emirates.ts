@@ -5,6 +5,9 @@ import { DATA_DIR } from "../db.ts";
 const BASE = "https://www.emirates.com/service/exp/ice";
 const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36";
 const PLACEHOLDER = /^what'?s new on ice$/i;
+// Regional channels prefix titles with a language ("Kannada - Kantara"), not always the row's first audio language
+const PREFIX_LANGUAGES = new Set(["arabic", "bengali", "bhojpuri", "gujarati", "hindi", "kannada", "malayalam", "marathi",
+  "pashto", "punjabi", "sinhala", "tamil", "telugu", "urdu"]);
 
 export interface IceRow {
   id: number; categoryId: number; title: string; starring: string | null; director: string | null;
@@ -21,14 +24,15 @@ export interface Film {
   subtitles: string | null; image: string | null; trailer: string | null; categoryIds: number[];
 }
 
-/** Strip "(1985)" year suffix and a "Telugu - " language prefix that repeats the film's language. */
+/** Strip a "(1985)" year suffix and a "Telugu - " language prefix (a known regional language or the film's own). */
 export function cleanTitle(title: string, primaryLanguage: string | null): { cleanTitle: string; year: number | null } {
   let t = title.trim();
   let year: number | null = null;
   const y = t.match(/\s*\((\d{4})\)$/);
   if (y?.[1]) { year = Number(y[1]); t = t.slice(0, y.index).trim(); }
   const p = t.match(/^([A-Za-z]+) - (.+)$/);
-  if (p?.[1] && p[2] && primaryLanguage && p[1].toLowerCase() === primaryLanguage.toLowerCase()) t = p[2].trim();
+  const lang = p?.[1]?.toLowerCase();
+  if (lang && p?.[2] && (PREFIX_LANGUAGES.has(lang) || lang === primaryLanguage?.toLowerCase())) t = p[2].trim();
   return { cleanTitle: t, year };
 }
 

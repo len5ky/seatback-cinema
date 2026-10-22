@@ -1,5 +1,5 @@
 {
-  "liked_genres": ["Sci-Fi", "Thriller", "Mystery", "Drama", "Documentary"],
+  "liked_genres": ["Sci-Fi", "Thriller", "Mystery", "Documentary"],
   "disliked_genres": ["Horror", "Musical"],
   "min_rating": 6.5,
   "min_votes": 5000,

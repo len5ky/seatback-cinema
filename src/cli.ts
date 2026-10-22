@@ -66,7 +66,7 @@ async function main(): Promise<void> {
       console.log(`Emirates ${m}: top ${r.picks.length} picks (excluded: ${r.excludedLow} low-confidence, ${r.unmatched} unmatched)\n`);
       r.picks.forEach((p, i) => {
         const x = p.row;
-        console.log(`${String(i + 1).padStart(2)}. ${x.title}${x.start_year ? ` [${x.start_year}]` : ""}  score ${p.score.toFixed(2)}  ${x.duration ?? "?"} min  ${x.genre ?? ""}`);
+        console.log(`${String(i + 1).padStart(2)}. ${x.title}${x.start_year && !/\(\d{4}\)$/.test(x.title) ? ` (${x.start_year})` : ""}  score ${p.score.toFixed(2)}  ${x.duration ?? "?"} min  ${x.genre ?? ""}`);
         console.log(`    ${p.reasons.join(", ")}; ${x.director ?? "?"}; ${x.primary_language ?? "?"}; https://www.imdb.com/title/${x.tconst}/ (${x.confidence})`);
       });
       return;

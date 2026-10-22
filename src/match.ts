@@ -52,7 +52,7 @@ export function scoreCandidate(film: FilmInfo, c: Candidate, nowYear: number): S
 const DOWNGRADE: Record<Confidence, Confidence> = { high: "medium", medium: "low", low: "low", none: "none" };
 
 /** Pick the best candidate and grade it. Low means "plausible but unverified": never used for ranking. */
-export function pickMatch(film: FilmInfo, candidates: Candidate[], nowYear = new Date().getFullYear()): MatchResult {
+export function pickMatch(film: FilmInfo, candidates: Candidate[], nowYear = new Date().getFullYear(), viaVariant = false): MatchResult {
   if (!candidates.length) return { tconst: null, confidence: "none", score: 0, reasons: ["no IMDb title with this name"] };
   const ranked = candidates.map((c) => scoreCandidate(film, c, nowYear)).sort((a, b) => b.score - a.score);
   const best = ranked[0]!;
@@ -64,24 +64,31 @@ export function pickMatch(film: FilmInfo, candidates: Candidate[], nowYear = new
     confidence = DOWNGRADE[confidence];
     reasons.push(`ambiguous with ${runner.candidate.tconst}`);
   }
+  if (viaVariant) {
+    // a title fragment ("Kantara" for "Kantara: Chapter 1") often names the franchise, not the film
+    confidence = DOWNGRADE[confidence];
+    reasons.push(`via partial title "${best.candidate.primaryTitle}"`);
+  }
   return { tconst: best.candidate.tconst, confidence, score: Math.round(best.score * 100) / 100, reasons };
 }
 
 interface CandRow { tconst: string; primary_title: string; start_year: number | null; runtime: number | null; votes: number | null; directors: string | null }
 
-export function findCandidates(db: Database, title: string): Candidate[] {
+export function findCandidates(db: Database, title: string): { candidates: Candidate[]; viaVariant: boolean } {
   const q = db.query<CandRow, [string]>(
     "SELECT DISTINCT t.tconst, t.primary_title, t.start_year, t.runtime, t.votes, t.directors FROM imdb_keys k JOIN imdb_titles t USING (tconst) WHERE k.norm = ?");
   let rows = q.all(normalizeTitle(title));
-  if (!rows.length) {
+  const viaVariant = !rows.length;
+  if (viaVariant) {
     const seen = new Set<string>();
     rows = titleVariants(title).flatMap((v) => q.all(v)).filter((r) => !seen.has(r.tconst) && !!seen.add(r.tconst));
   }
   const nameQ = db.query<{ name: string }, [string]>("SELECT name FROM imdb_names WHERE nconst = ?");
-  return rows.map((r) => ({
+  const candidates = rows.map((r) => ({
     tconst: r.tconst, primaryTitle: r.primary_title, startYear: r.start_year, runtime: r.runtime, votes: r.votes,
     directorNames: (r.directors?.split(",") ?? []).map((n) => nameQ.get(n)?.name).filter((n): n is string => !!n),
   }));
+  return { candidates, viaVariant: viaVariant && candidates.length > 0 };
 }
 
 /** Match every film of an airline (all snapshots) against IMDb and store the results. */
@@ -95,7 +102,8 @@ export function matchAll(db: Database, airline = "emirates"): Record<Confidence,
   const now = new Date().toISOString();
   db.transaction(() => {
     for (const f of films) {
-      const m = pickMatch({ cleanTitle: f.clean_title, year: f.year, duration: f.duration, director: f.director }, findCandidates(db, f.clean_title));
+      const { candidates, viaVariant } = findCandidates(db, f.clean_title);
+      const m = pickMatch({ cleanTitle: f.clean_title, year: f.year, duration: f.duration, director: f.director }, candidates, undefined, viaVariant);
       counts[m.confidence]++;
       ins.run(airline, f.track_list, m.tconst, m.confidence, m.score, m.reasons.join("; "), now);
     }

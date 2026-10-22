@@ -27,6 +27,7 @@ test("maps category ids to names", () => {
 test("cleans year suffix and language prefix", () => {
   expect(cleanTitle("Casablanca (1942)", "English")).toEqual({ cleanTitle: "Casablanca", year: 1942 });
   expect(cleanTitle("Telugu - War 2", "Telugu")).toEqual({ cleanTitle: "War 2", year: null });
+  expect(cleanTitle("Kannada - Kantara: A Legend Chapter 1", "Hindi").cleanTitle).toBe("Kantara: A Legend Chapter 1");
   expect(cleanTitle("Wicked - The Real Story", "English")).toEqual({ cleanTitle: "Wicked - The Real Story", year: null });
   expect(films.find((f) => f.trackList === "1297012")?.year).toBe(1942);
 });

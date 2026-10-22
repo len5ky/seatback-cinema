@@ -61,7 +61,8 @@ test("findCandidates uses normalised primary and original titles", () => {
   db.run("INSERT INTO imdb_titles VALUES ('tt1','movie','Amelie','Le fabuleux destin d''Amélie Poulain',2001,122,'Comedy,Romance',8.3,800000,'nm1')");
   db.run("INSERT INTO imdb_names VALUES ('nm1','Jean-Pierre Jeunet')");
   db.run("INSERT INTO imdb_keys VALUES ('amelie','tt1'), ('fabuleux destin damelie poulain','tt1')");
-  const c = findCandidates(db, "Le Fabuleux Destin d'Amélie Poulain");
+  const { candidates: c, viaVariant } = findCandidates(db, "Le Fabuleux Destin d'Amélie Poulain");
+  expect(viaVariant).toBe(false);
   expect(c.map((x) => [x.tconst, x.directorNames])).toEqual([["tt1", ["Jean-Pierre Jeunet"]]]);
 });
 
@@ -85,4 +86,10 @@ test("airline-edited runtime does not sink a director+year match", () => {
   const m = pickMatch({ cleanTitle: "The Shawshank Redemption", year: 1994, duration: 120, director: "Frank Darabont" },
     [cand("tt0111161", 1994, 142, ["Frank Darabont"], 3000000)], 2026);
   expect(m.confidence).toBe("high");
+});
+
+test("partial-title matches are downgraded one level", () => {
+  const film = { cleanTitle: "Kantara: A Legend Chapter 1", year: null, duration: 166, director: "Rishab Shetty" };
+  const kantara = [cand("tt15327088", 2022, 148, ["Rishab Shetty"], 119000)];
+  expect(pickMatch(film, kantara, 2026, true).confidence).toBe("low");
 });
