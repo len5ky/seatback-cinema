@@ -13,15 +13,17 @@ export interface MatchResult { tconst: string | null; confidence: Confidence; sc
 
 const tokens = (name: string) => new Set(normalizeTitle(name).split(" ").filter((t) => t.length >= 2));
 
-/** Surname close to some token of the other name: tolerates "Turtletaub"/"Turteltaub" and "Gam-sung Pil"/"Pil Gam-sung". */
-function nameHit(sur: string, other: string): boolean {
-  if (sur.length < 2) return false;
-  const tol = sur.length >= 6 ? 2 : sur.length >= 4 ? 1 : 0;
-  return [...tokens(other)].some((t) => t === sur || (tol > 0 && editDistance(t, sur, tol) <= tol));
+/** Surnames close (typo-tolerant: "Turtletaub"/"Turteltaub"), or the same name in another order ("Gam-sung Pil"/"Pil Gam-sung"). */
+function sameDirector(x: string, y: string): boolean {
+  const a = surname(x), b = surname(y);
+  const tol = Math.min(a.length, b.length) >= 6 ? 2 : Math.min(a.length, b.length) >= 4 ? 1 : 0;
+  if (a && (a === b || (tol > 0 && editDistance(a, b, tol) <= tol))) return true;
+  const tx = [...tokens(x)].sort().join(" ");
+  return tx !== "" && tx === [...tokens(y)].sort().join(" ");
 }
 
 export function directorsMatch(a: string[], b: string[]): boolean {
-  return a.some((x) => b.some((y) => normalizeTitle(x) === normalizeTitle(y) || nameHit(surname(x), y) || nameHit(surname(y), x)));
+  return a.some((x) => b.some((y) => normalizeTitle(x) === normalizeTitle(y) || sameDirector(x, y)));
 }
 
 export function scoreCandidate(film: FilmInfo, c: Candidate, nowYear: number): Scored {

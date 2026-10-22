@@ -80,6 +80,9 @@ test("director typos still match", () => {
   expect(directorsMatch(["Toby L."], ["Toby L."])).toBe(true);
   expect(directorsMatch(["Kevin Lee"], ["Ang Lee"])).toBe(true); // surname-only by design; runtime/year break ties
   expect(directorsMatch(["Andrew Stanton"], ["Andrew Stone"])).toBe(false);
+  // a surname that is the other director's first name is not a match
+  expect(directorsMatch(["James Cameron"], ["Cameron Crowe"])).toBe(false);
+  expect(directorsMatch(["Cameron Crowe"], ["James Cameron"])).toBe(false);
 });
 
 test("airline-edited runtime does not sink a director+year match", () => {
@@ -92,4 +95,10 @@ test("partial-title matches are downgraded one level", () => {
   const film = { cleanTitle: "Kantara: A Legend Chapter 1", year: null, duration: 166, director: "Rishab Shetty" };
   const kantara = [cand("tt15327088", 2022, 148, ["Rishab Shetty"], 119000)];
   expect(pickMatch(film, kantara, 2026, true).confidence).toBe("low");
+});
+
+test("James Cameron is not Cameron Crowe: no high-confidence match on runtime alone", () => {
+  const m = pickMatch({ cleanTitle: "Billie Eilish - Hit Me Hard and Soft: The Tour", year: null, duration: 107, director: "James Cameron" },
+    [cand("tt1", 2025, 107, ["Cameron Crowe"])], 2026);
+  expect(m.confidence).toBe("low");
 });

@@ -23,10 +23,24 @@ const { values: opt, positionals: pos } = parseArgs({
 
 const db = openDb();
 const currentMonth = new Date().toISOString().slice(0, 7);
-function month(): string {
-  const m = opt.month ?? latestMonth(db, "emirates");
-  if (!m) throw new Error("no snapshot yet: run `bun run cli fetch emirates` first");
+const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
+function validMonth(m: string): string {
+  if (!MONTH.test(m)) throw new Error(`--month must be YYYY-MM (got "${m}")`);
   return m;
+}
+/** Snapshot month to query: --month (must have been fetched) or the latest snapshot. */
+function month(): string {
+  const m = opt.month ? validMonth(opt.month) : latestMonth(db, "emirates");
+  if (!m) throw new Error("no snapshot yet: run `bun run cli fetch emirates` first");
+  if (!db.query("SELECT 1 FROM snapshots WHERE airline = 'emirates' AND month = ?").get(m))
+    throw new Error(`no Emirates snapshot for ${m}: run \`bun run cli fetch emirates --month ${m}\` first`);
+  return m;
+}
+function numberOpt(name: string, value: string | undefined, fallback: number | undefined, ok: (n: number) => boolean, rule: string): number | undefined {
+  if (value === undefined) return fallback;
+  const n = Number(value);
+  if (value.trim() === "" || !ok(n)) throw new Error(`--${name} must be ${rule} (got "${value}")`);
+  return n;
 }
 const pct = (n: number, d: number) => (d ? `${((100 * n) / d).toFixed(1)}%` : "-");
 
@@ -35,8 +49,7 @@ async function main(): Promise<void> {
   switch (cmd) {
     case "fetch": {
       if (arg !== "emirates") throw new Error("only `fetch emirates` is supported");
-      const m = opt.month ?? currentMonth;
-      if (!/^\d{4}-\d{2}$/.test(m)) throw new Error("--month must be YYYY-MM");
+      const m = validMonth(opt.month ?? currentMonth);
       const r = await fetchEmirates(db, m, opt.refresh ?? false);
       console.log(`emirates ${m}: ${r.rows} rows -> ${r.films} films${r.cached ? " (cached raw file; --refresh to refetch)" : ""}`);
       return;
@@ -47,7 +60,7 @@ async function main(): Promise<void> {
       console.log(fetched.length ? `downloaded: ${fetched.join(", ")}` : "datasets fresh (<7 days), skipping download");
       const t0 = performance.now();
       const r = await loadImdb(db);
-      console.log(`loaded ${r.titles} titles, ${r.names} director names in ${((performance.now() - t0) / 1000).toFixed(0)}s`);
+      console.log(`loaded ${r.titles} titles, ${r.names} director names in ${((performance.now() - t0) / 1000).toFixed(0)}s, peak RSS ${Math.round(process.resourceUsage().maxRSS / 1024)} MB`);
       return;
     }
     case "match": {
@@ -57,12 +70,11 @@ async function main(): Promise<void> {
       return;
     }
     case "picks": {
+      const top = numberOpt("top", opt.top, 30, (n) => Number.isInteger(n) && n > 0, "a positive integer") ?? 30;
+      const minRating = numberOpt("min-rating", opt["min-rating"], undefined, (n) => n >= 0 && n <= 10, "a number from 0 to 10");
       const m = month();
       const taste = await loadTaste();
-      const r = picks(db, taste, {
-        month: m, top: Number(opt.top ?? 30), genre: opt.genre, language: opt.language,
-        minRating: opt["min-rating"] ? Number(opt["min-rating"]) : undefined,
-      });
+      const r = picks(db, taste, { month: m, top, genre: opt.genre, language: opt.language, minRating });
       console.log(`Emirates ${m}: top ${r.picks.length} picks (excluded: ${r.excludedLow} low-confidence, ${r.unmatched} unmatched)\n`);
       r.picks.forEach((p, i) => {
         const x = p.row;
