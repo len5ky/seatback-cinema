@@ -1,0 +1,14 @@
+{
+  "name": "plane_movie",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "cli": "bun src/cli.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "1.2.23",
+    "typescript": "5.9.3"
+  }
+}

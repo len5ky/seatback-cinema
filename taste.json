@@ -1,0 +1,8 @@
+{
+  "liked_genres": ["Sci-Fi", "Thriller", "Mystery", "Drama", "Documentary"],
+  "disliked_genres": ["Horror", "Musical"],
+  "min_rating": 6.5,
+  "min_votes": 5000,
+  "seen": ["Casablanca", "Avengers: Endgame"],
+  "favourites": ["Arrival", "Parasite"]
+}
