@@ -1,7 +1,7 @@
 import type { AirlineAdapter, CatalogueFilm } from "../types.ts";
 import { cachedJson, fetchDate, monthDir, splitList, uniq } from "../http.ts";
 import { languageName } from "../lang.ts";
-import { splitNames } from "../../text.ts";
+import { splitNames, splitYearSuffix } from "../../text.ts";
 
 /**
  * Gee Media / Anuvu "Airtime" content API (United, KLM; Cathay runs the same API at afg.anuvu.cloud/api/v1).
@@ -48,10 +48,11 @@ function firstUrl(v: unknown): string | undefined {
 export function toFilm(n: AirtimeNode, category: string | undefined): CatalogueFilm {
   const attrs = n.attributes ?? [];
   const label = (a: Attribute) => a.title?.trim() || a.name?.trim() || "";
+  const t = splitYearSuffix(n.title ?? n.name ?? "");
   return {
     sourceId: String(n.id),
-    title: (n.title ?? n.name ?? "").trim(),
-    year: int(n.year) ?? int(n.release_date?.slice(0, 4)),
+    title: t.title,
+    year: int(n.year) ?? int(n.release_date?.slice(0, 4)) ?? t.year,
     runtime: int(n.duration_minute),
     directors: splitNames(n.director_list),
     cast: splitNames(n.cast_list),

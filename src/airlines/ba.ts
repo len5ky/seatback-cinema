@@ -1,6 +1,7 @@
 import type { AirlineAdapter, CatalogueFilm } from "./types.ts";
 import { assertCurrentMonth, BROWSER_UA, cachedJson, monthDir, uniq } from "./http.ts";
 import { languageName } from "./lang.ts";
+import { splitYearSuffix } from "../text.ts";
 
 /**
  * British Airways High Life (entertainment.ba.com, an Anuvu microsite). The direct Anuvu API is 403; the site's
@@ -36,8 +37,9 @@ export function parseBa(raw: BaRaw): CatalogueFilm[] {
         continue;
       }
       const poster = it.images?.poster_image?.variants;
+      const t = splitYearSuffix(it.title);
       films.set(it.id, {
-        sourceId: it.id, title: it.title.trim(), year: it.year ?? undefined, runtime: it.durationMinutes || undefined,
+        sourceId: it.id, title: t.title, year: it.year ?? t.year, runtime: it.durationMinutes || undefined,
         directors: names(it.directors), cast: names(it.cast), genres: names(it.genres), rating: names(it.classifications)[0],
         languages: langs(it.audioLanguages), subtitles: langs(it.subtitleLanguages), synopsis: it.description?.trim() || undefined,
         poster: poster?.desktop ?? poster?.mobile ?? Object.values(poster ?? {})[0], categories: [s.title],

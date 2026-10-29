@@ -21,7 +21,7 @@ export function normalizeTitle(title: string): string {
 /** Alternative titles to try when the catalogue title has no exact IMDb hit. */
 export function titleVariants(title: string): string[] {
   const out = new Set<string>();
-  const noPossessive = title.replace(/^[\p{L}. ]+['\u2019]s\s+/u, "");
+  const noPossessive = title.replace(/^[\p{L}. ]+(['\u2019]s|s['\u2019])\s+/u, "");
   for (const t of [noPossessive, ...title.split(/:| - /)]) {
     const n = normalizeTitle(t);
     if (n.length >= 3 && n !== normalizeTitle(title)) out.add(n);
@@ -52,4 +52,13 @@ export function surname(name: string): string {
 export function splitNames(s: string | null | undefined): string[] {
   if (!s) return [];
   return s.split(/,|&|\band\b|\//).map((n) => n.trim()).filter(Boolean);
+}
+
+/** Split a remake disambiguator off a title: "Superman (2025)" -> 2025, "King Arthur (04)" -> 2004. */
+export function splitYearSuffix(title: string): { title: string; year?: number } {
+  const t = title.trim();
+  const m = t.match(/\s*\((\d{4}|\d{2})\)$/);
+  if (!m?.[1] || m.index === undefined || m.index === 0) return { title: t };
+  const y = Number(m[1]);
+  return { title: t.slice(0, m.index).trim(), year: m[1].length === 4 ? y : y + (y <= (new Date().getFullYear() % 100) + 1 ? 2000 : 1900) };
 }

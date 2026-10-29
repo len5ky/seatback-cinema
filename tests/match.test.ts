@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { normalizeTitle, splitNames, surname, titleVariants } from "../src/text.ts";
+import { normalizeTitle, splitNames, splitYearSuffix, surname, titleVariants } from "../src/text.ts";
 import { directorsMatch, findCandidates, pickMatch, type Candidate } from "../src/match.ts";
 import { openDb } from "../src/db.ts";
 
@@ -101,4 +101,12 @@ test("James Cameron is not Cameron Crowe: no high-confidence match on runtime al
   const m = pickMatch({ cleanTitle: "Billie Eilish - Hit Me Hard and Soft: The Tour", year: null, duration: 107, director: "James Cameron" },
     [cand("tt1", 2025, 107, ["Cameron Crowe"])], 2026);
   expect(m.confidence).toBe("low");
+});
+
+test("remake year suffixes and s' possessives", () => {
+  expect(splitYearSuffix("Superman (2025)")).toEqual({ title: "Superman", year: 2025 });
+  expect(splitYearSuffix("King Arthur (04)")).toEqual({ title: "King Arthur", year: 2004 });
+  expect(splitYearSuffix("Casablanca")).toEqual({ title: "Casablanca" });
+  expect(splitYearSuffix("(500) Days of Summer")).toEqual({ title: "(500) Days of Summer" });
+  expect(titleVariants("Dr. Seuss' Horton Hears a Who!")).toContain("horton hears a who");
 });

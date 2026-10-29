@@ -1,6 +1,6 @@
 import type { AirlineAdapter, CatalogueFilm } from "./types.ts";
 import { assertCurrentMonth, BROWSER_UA, cachedJson, monthDir, splitList, uniq } from "./http.ts";
-import { splitNames } from "../text.ts";
+import { splitNames, splitYearSuffix } from "../text.ts";
 
 /**
  * Singapore Airlines KrisWorld: one AEM servlet GET returns the whole current catalogue. Each film is indexed under
@@ -36,8 +36,9 @@ export function parseSingapore(raw: KrisRaw): CatalogueFilm[] {
   for (const r of Object.values(raw)) {
     if (typeof r !== "object" || !r?.movie_airline_content_id || films.has(r.movie_airline_content_id)) continue;
     const subs = [r.dynamic_subtitle_1, r.dynamic_subtitle_2, r.dynamic_subtitle_3, r.embedded_subs].flatMap((s) => splitList(s, "/"));
+    const t = splitYearSuffix(r.title);
     films.set(r.movie_airline_content_id, {
-      sourceId: r.movie_airline_content_id, title: r.title.trim(), year: r.year_of_release || undefined, runtime: r.rt_min || undefined,
+      sourceId: r.movie_airline_content_id, title: t.title, year: r.year_of_release || t.year, runtime: r.rt_min || undefined,
       directors: splitNames(r.director), cast: splitNames(r.cast), genres: splitList(r.genre, "/"), rating: r.rating?.trim() || undefined,
       languages: uniq([r.lang_1, r.lang_2, r.lang_3, r.lang_4].filter((l): l is string => !!l?.trim()).map(krisLanguage)),
       subtitles: uniq(subs.map(krisLanguage)), synopsis: (r.synopsis_long || r.synopsis_short)?.trim() || undefined,
