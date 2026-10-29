@@ -5,7 +5,8 @@
 #
 # usage: scripts/fetch-all.sh [YYYY-MM]   (default: current UTC month)
 # env:   FETCH_TIMEOUT (per airline, default 20m), HEALTH (default public/data/health.json),
-#        LOG_DIR (default data/logs)
+#        LOG_DIR (default data/logs), SKIP_AIRLINES (space-separated ids fetched elsewhere, recorded as
+#        "skipped" with reason "fetched locally" and their previous lastSuccess kept)
 # exit:  0 if at least one airline succeeded, 1 if every airline failed.
 set -uo pipefail
 
@@ -13,6 +14,7 @@ MONTH="${1:-$(date -u +%Y-%m)}"
 HEALTH="${HEALTH:-public/data/health.json}"
 TIMEOUT="${FETCH_TIMEOUT:-20m}"
 LOG_DIR="${LOG_DIR:-data/logs}"
+SKIP=" ${SKIP_AIRLINES:-} "
 mkdir -p "$LOG_DIR" "$(dirname "$HEALTH")"
 
 if ! IDS=$(bun -e 'import { adapters } from "./src/airlines/index.ts"; console.log(Object.keys(adapters).join(" "))'); then
@@ -27,6 +29,13 @@ ok=0
 failed=0
 
 for id in $IDS; do
+  if [[ "$SKIP" == *" $id "* ]]; then
+    echo "$id: skipped (fetched locally)"
+    RESULTS=$(jq -c --arg id "$id" --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --argjson prev "$PREV" '
+      . + {($id): {status: "skipped", reason: "fetched locally", exitCode: null, films: null, seconds: 0, checkedAt: $now,
+        lastSuccess: ($prev.airlines[$id].lastSuccess // null), error: null}}' <<<"$RESULTS")
+    continue
+  fi
   log="$LOG_DIR/fetch-$id.log"
   start=$(date +%s)
   timeout "$TIMEOUT" bun run cli fetch "$id" --month "$MONTH" >"$log" 2>&1

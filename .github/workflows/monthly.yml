@@ -53,17 +53,16 @@ jobs:
           path: data/imdb/*.gz
           key: imdb-${{ steps.month.outputs.month }}
 
-      # Only once the American adapter (headless Chromium) has landed.
-      - name: Install Playwright Chromium
-        if: hashFiles('src/airlines/american.ts') != ''
-        run: bunx playwright install --with-deps chromium
-
       - name: IMDb sync
         run: bun run cli imdb sync
 
       # One airline at a time; a failure is recorded in public/data/health.json and the rest continue.
       # The step fails only if every airline failed.
+      # American answers 429 to GitHub runner IPs, so it is fetched and published from a local cron
+      # (scripts/american-local.sh) and recorded here as "skipped".
       - name: Fetch all airlines
+        env:
+          SKIP_AIRLINES: american
         run: scripts/fetch-all.sh "${{ steps.month.outputs.month }}"
 
       - name: Match

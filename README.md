@@ -158,13 +158,19 @@ This is a low-volume tool: one fetch per airline and month per day at most, no r
 `.github/workflows/monthly.yml` runs on the 1st and 15th of each month (some airlines switch cycles mid-month) and
 on manual dispatch (optional `month` input). Steps: `bun run cli imdb sync` (downloads ~1.2 GB of IMDb `.gz`
 files, free inbound traffic on GitHub-hosted runners, cached per month), `scripts/fetch-all.sh` (each airline in
-turn with a 20 min timeout; a failure is recorded and the rest continue), `match`, `export`, then
+turn with a 20 min timeout; a failure is recorded and the rest continue), `match`, `ids sync`, `export`, then
 `scripts/build-index.ts` rebuilds `public/data/index.json` from the files on disk so an airline that failed this
 run keeps its last published month. Changed `public/data` is committed to main by the Actions bot with `[skip ci]`.
 Fetch logs are uploaded as a workflow artifact. Expect 10-20 minutes per run.
 
 `public/data/health.json` records each airline's last attempt: `status` (`ok`, `failed`, `timeout`), film count,
-duration, error tail and `lastSuccess`. The Playwright install step only runs once `src/airlines/american.ts` exists.
+duration, error tail and `lastSuccess`.
+
+American answers HTTP 429 to GitHub runner IPs, so CI skips it (`status: "skipped"`, `reason: "fetched locally"`).
+`scripts/american-local.sh` runs from a user crontab on the dev machine at 03:00 UTC on the 1st and 15th: it fetches
+American with `--refresh`, matches, exports that airline only, rebuilds `index.json` and pushes the American file,
+`index.json`, `ids.json` and `health.json` to main with `[skip ci]`. `--dry-run` reuses cached raw files and stops
+before the commit.
 
 Locally: `scripts/fetch-all.sh [YYYY-MM]` runs the same fetch loop.
 
