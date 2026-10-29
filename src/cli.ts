@@ -146,11 +146,15 @@ async function main(): Promise<void> {
       const m = month(airline);
       const taste = await loadTaste();
       const r = picks(db, taste, { airline, month: m, top, genre: opt.genre, language: opt.language, minRating });
-      console.log(`${adapters[airline]?.name} ${m}: top ${r.picks.length} picks (excluded: ${r.excludedLow} low-confidence, ${r.unmatched} unmatched)\n`);
+      console.log(`${adapters[airline]?.name} ${m}: top ${r.picks.length} picks (excluded: ${r.excludedLow} low-confidence, ${r.unmatched} unmatched, ${r.watched} already watched)`);
+      console.log(r.model
+        ? `taste: ${r.model.rated} Letterboxd ratings (mean ${r.model.mean.toFixed(1)}/10), ${r.model.watched.size} watched, ${r.model.watchlist.size} on watchlist; taste.json as overrides\n`
+        : "taste: taste.json only (no Letterboxd export imported: `bun run cli taste import`)\n");
       r.picks.forEach((p, i) => {
         const x = p.row;
         console.log(`${String(i + 1).padStart(2)}. ${x.title} (${x.start_year ?? x.year ?? "?"})  score ${p.score.toFixed(2)}  ${x.runtime ?? "?"} min  ${x.genres ?? ""}`);
         console.log(`    ${p.reasons.join(", ")}; ${x.directors ?? "?"}; ${x.primary_language ?? "?"}; https://www.imdb.com/title/${x.tconst}/ (${x.confidence})`);
+        console.log(`    sources: ${p.sources.join(" + ")}`);
       });
       return;
     }
