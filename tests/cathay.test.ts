@@ -27,7 +27,8 @@ test("fetchMonth: one guest session, section list, one call per section, all cac
   const calls: string[] = [];
   globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
     const url = String(input);
-    calls.push(url.replace(/\?.*/, "") + (url.includes("max_child_depth=0") ? "#0" : ""));
+    const depth = url.match(/max_child_depth=(\d+)/)?.[1];
+    calls.push(url.replace(/\?.*/, "") + (depth ? `#${depth}` : ""));
     const headers = new Headers(init?.headers);
     expect(headers.get("host-id")).toBe("460e26f4-d499-11e9-b038-6306ca4fd90b");
     if (url.endsWith("/account/session")) return new Response(JSON.stringify({ auth_token: "tok" }));
@@ -42,8 +43,8 @@ test("fetchMonth: one guest session, section list, one call per section, all cac
     const raw = await cathay.fetchMonth("2026-11", { cacheDir });
     expect(calls).toEqual([
       "https://afg.anuvu.cloud/api/v1/account/session",
-      "https://afg.anuvu.cloud/api/v1/content/items/21004340#0",
-      ...root.child_id_list.map((id) => `https://afg.anuvu.cloud/api/v1/content/items/${id}`),
+      "https://afg.anuvu.cloud/api/v1/content/items/21004340#1", // the live API rejects max_child_depth=0
+      ...root.child_id_list.map((id) => `https://afg.anuvu.cloud/api/v1/content/items/${id}#1`),
     ]);
     expect(cathay.parse(raw)).toEqual(cathay.parse(tree));
     expect(await Bun.file(`${cacheDir}/cathay/2026-11/sections/24104650.json`).exists()).toBe(true);

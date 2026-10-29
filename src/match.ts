@@ -1,5 +1,5 @@
 import { Database } from "bun:sqlite";
-import { editDistance, normalizeTitle, splitNames, surname, titleVariants } from "./text.ts";
+import { editDistance, normalizeTitle, splitNames, splitYearSuffix, surname, titleVariants, truncatedPrefix } from "./text.ts";
 
 export type Confidence = "high" | "medium" | "low" | "none";
 export interface FilmInfo { cleanTitle: string; year: number | null; duration: number | null; director: string | null }
@@ -84,6 +84,13 @@ export function findCandidates(db: Database, title: string): { candidates: Candi
   if (viaVariant) {
     const seen = new Set<string>();
     rows = titleVariants(title).flatMap((v) => q.all(v)).filter((r) => !seen.has(r.tconst) && !!seen.add(r.tconst));
+    const prefix = truncatedPrefix(title);
+    if (prefix) {
+      // index range scan over normalised titles starting with the prefix; year/director must then confirm
+      rows.push(...db.query<CandRow, [string, string]>(
+        `SELECT DISTINCT t.tconst, t.primary_title, t.start_year, t.runtime, t.votes, t.directors FROM imdb_keys k JOIN imdb_titles t USING (tconst)
+         WHERE k.norm >= ? AND k.norm < ? LIMIT 200`).all(prefix, `${prefix}\uffff`).filter((r) => !seen.has(r.tconst) && !!seen.add(r.tconst)));
+    }
   }
   const nameQ = db.query<{ name: string }, [string]>("SELECT name FROM imdb_names WHERE nconst = ?");
   const candidates = rows.map((r) => ({
@@ -111,8 +118,9 @@ export function matchAll(db: Database, airline?: string): Record<Confidence, num
       let m: MatchResult;
       if (f.imdb_id && known.get(f.imdb_id)) m = { tconst: f.imdb_id, confidence: "high", score: 100, reasons: ["airline-provided IMDb id"] };
       else {
-        const { candidates, viaVariant } = findCandidates(db, f.title);
-        m = pickMatch({ cleanTitle: f.title, year: f.year, duration: f.runtime, director: f.directors }, candidates, undefined, viaVariant);
+        const t = splitYearSuffix(f.title); // adapters without their own split ("The Breadwinner (2026)")
+        const { candidates, viaVariant } = findCandidates(db, t.title);
+        m = pickMatch({ cleanTitle: t.title, year: f.year ?? t.year ?? null, duration: f.runtime, director: f.directors }, candidates, undefined, viaVariant);
       }
       counts[m.confidence]++;
       ins.run(f.airline, f.source_id, m.tconst, m.confidence, m.score, m.reasons.join("; "), now);

@@ -4,7 +4,8 @@ Which films are on the plane this month, and which of them are worth watching. I
 movie catalogue, matches every film to IMDb using the public bulk datasets, ranks the result against your
 `taste.json`, and exports an open monthly dataset to `public/data/`.
 
-Airlines: Emirates, United, KLM, British Airways, Singapore Airlines (`bun run cli` lists the registered ids).
+Airlines: Emirates, United, KLM, British Airways, Singapore Airlines, Lufthansa, Japan Airlines, Cathay Pacific,
+Qantas and ANA (`bun run cli` lists the registered ids).
 
 ## Setup
 
@@ -36,6 +37,11 @@ Every adapter implements `AirlineAdapter` (`src/airlines/types.ts`): `fetchMonth
 | KLM | same Airtime client as United, KLM host-id and section | 2 | `flight_date=` |
 | British Airways | `entertainment.ba.com/api` proxy: page layout + one call per Movies section, browser UA required | ~20 | none (current cycle only) |
 | Singapore | KrisWorld `catalog-lookup?type=movies`, one GET | 1 | none (current cycle only) |
+| Lufthansa | Spafax API (key from the portal's `/api/config`): A-Z bucket list + one detail call per film, 4 at a time | ~410 | `flightDate=` |
+| JAL | same Spafax client, bucket 15, `flightSystem=NEXT-INT` | ~130 | `flightDate=` |
+| Cathay Pacific | Anuvu AirTime (`afg.anuvu.cloud/api/v1`, same parser as United): section list + one call per section | ~38 | `flight_date=` |
+| Qantas | `qantas.com/api/entertainment/metadata` POST per route (`large_international_seatback`) | 1 | none (current month only) |
+| ANA | CineSend search (Origin/Referer required, month tag) + one detail call per title | ~235 | month tag |
 
 The Airtime client (`src/airlines/platforms/geemedia.ts`) takes a configurable base URL so Anuvu's variant
 (Cathay Pacific) can reuse it. Airlines without a month selector refuse to fetch any month but the current one.
@@ -47,7 +53,9 @@ For the current month the date sent is today, otherwise the 5th.
   `title.ratings`, `title.crew` and `name.basics` (directors only) are streamed into SQLite. About 1.3M titles.
 - **Matching**: an airline-provided IMDb id is trusted directly when IMDb knows it. Otherwise candidates share a
   normalised title (lowercase, no accents, punctuation or leading article, roman numerals as digits), with fallbacks
-  that drop a possessive prefix ("Marvel's", "Dr. Seuss'") or use one side of a colon. Remake suffixes such as
+  that drop a possessive prefix ("Marvel's", "Dr. Seuss'"), use one side of a colon, either side of a trailing
+  parenthesis ("Un Bel Giorno (A Good Day)", "(Audio Descriptive)"), or expand a truncated title ("The Desolation Of ...")
+  by prefix. Matches found through a variant drop one confidence level. Remake suffixes such as
   "Superman (2025)" are split off the title and used as the year. Each candidate is scored on year (exact or ±1;
   a bigger gap blocks a high match), director surname (typo-tolerant) and runtime (within 3 min).
   Confidence: `high` (two confirming signals, no conflict), `medium` (one net signal), `low` (plausible but

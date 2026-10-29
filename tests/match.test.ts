@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { normalizeTitle, splitNames, splitYearSuffix, surname, titleVariants } from "../src/text.ts";
+import { normalizeTitle, splitNames, splitYearSuffix, surname, titleVariants, truncatedPrefix } from "../src/text.ts";
 import { directorsMatch, findCandidates, pickMatch, type Candidate } from "../src/match.ts";
 import { openDb } from "../src/db.ts";
 
@@ -109,4 +109,22 @@ test("remake year suffixes and s' possessives", () => {
   expect(splitYearSuffix("Casablanca")).toEqual({ title: "Casablanca" });
   expect(splitYearSuffix("(500) Days of Summer")).toEqual({ title: "(500) Days of Summer" });
   expect(titleVariants("Dr. Seuss' Horton Hears a Who!")).toContain("horton hears a who");
+});
+
+test("parenthetical translations and truncated titles", () => {
+  expect(titleVariants("Un Bel Giorno (A Good Day)")).toEqual(expect.arrayContaining(["un bel giorno", "good day"]));
+  expect(titleVariants("Toy Story 5 (Audio Descriptive)")).toContain("toy story 5");
+  expect(truncatedPrefix("The Desolation Of ...")).toBe("desolation of");
+  expect(truncatedPrefix("Gail Daughtry \u2026")).toBe("gail daughtry");
+  expect(truncatedPrefix("Hi...")).toBeNull(); // only used when the full title has no exact hit
+  expect(truncatedPrefix("Casablanca")).toBeNull();
+});
+
+test("findCandidates expands a truncated title by prefix", () => {
+  const db = openDb(":memory:");
+  db.run("INSERT INTO imdb_titles VALUES ('tt1170358','movie','The Hobbit: The Desolation of Smaug',NULL,2013,161,'Adventure',7.8,700000,NULL)");
+  db.run("INSERT INTO imdb_keys VALUES ('hobbit the desolation of smaug','tt1170358'), ('desolation of smaug','tt1170358')");
+  const r = findCandidates(db, "The Desolation Of ...");
+  expect(r.candidates.map((c) => c.tconst)).toEqual(["tt1170358"]);
+  expect(r.viaVariant).toBe(true);
 });

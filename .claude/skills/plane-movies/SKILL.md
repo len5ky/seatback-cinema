@@ -1,11 +1,12 @@
 ---
 name: plane-movies
-description: Recommend what to watch on a flight from the airline's in-flight catalogue, ranked by IMDb rating and the user's taste. Use when the user asks what to watch on their flight or plane, what movies are on Emirates / ice, United, KLM, British Airways or Singapore Airlines this month, for plane movie picks, or whether a specific film is available on a given airline.
+description: Recommend what to watch on a flight from the airline's in-flight catalogue, ranked by IMDb rating and the user's taste. Use when the user asks what to watch on their flight or plane, what movies are on Emirates / ice, United, KLM, British Airways, Singapore Airlines, Lufthansa, JAL, Cathay Pacific, Qantas or ANA this month, for plane movie picks, or whether a specific film is available on a given airline.
 ---
 
 # Plane movies
 
-Local monthly catalogues for Emirates, United, KLM, British Airways (`ba`) and Singapore Airlines (`singapore`),
+Local monthly catalogues for Emirates, United, KLM, British Airways (`ba`), Singapore Airlines (`singapore`),
+Lufthansa, Japan Airlines (`jal`), Cathay Pacific (`cathay`), Qantas and ANA,
 matched to IMDb and ranked with `taste.json`. Run everything from the project root `/home/lensky/Dev/plane_movie`
 with bun (`~/.bun/bin` on PATH). `bun run cli` with no arguments lists the registered airline ids.
 
@@ -37,8 +38,10 @@ boost). When the user says they have seen a film, add it to `seen`.
 - All sources are undocumented airline endpoints: personal, low-volume use. Never fetch the same airline-month more
   than once a day (raw responses are cached under `data/raw/`; `--refresh` forces a refetch). Never loop retries,
   especially against BA (Akamai).
-- BA and Singapore only publish the current cycle, so next month cannot be fetched for them until it starts.
-  Emirates, United and KLM accept a future `--month`.
+- BA, Singapore and Qantas only publish the current cycle, so next month cannot be fetched for them until it starts.
+  The others accept a future `--month`. Lufthansa, JAL and ANA make one detail call per film (~130-410 requests,
+  cached), so do not refetch them casually.
+- Qantas is the large international seatback catalogue; domestic and smaller aircraft differ.
 - Matches are graded high/medium/low/none from title, year, director and runtime. Picks use only high and medium.
   Emirates has no year field, so its regional-language films and concert specials match least often.
 - A catalogue can differ by route, aircraft or country; only the airline's public web catalogue is fetched.

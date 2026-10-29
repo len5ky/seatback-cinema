@@ -22,7 +22,10 @@ export function normalizeTitle(title: string): string {
 export function titleVariants(title: string): string[] {
   const out = new Set<string>();
   const noPossessive = title.replace(/^[\p{L}. ]+(['\u2019]s|s['\u2019])\s+/u, "");
-  for (const t of [noPossessive, ...title.split(/:| - /)]) {
+  // "Un Bel Giorno (A Good Day)", "Toy Story 5 (Audio Descriptive)": try outside and inside the parentheses
+  const paren = title.match(/^(.+?)\s*\(([^()]+)\)\s*$/);
+  const parts = paren ? [paren[1]!, paren[2]!] : [];
+  for (const t of [noPossessive, ...parts, ...title.split(/:| - /)]) {
     const n = normalizeTitle(t);
     if (n.length >= 3 && n !== normalizeTitle(title)) out.add(n);
   }
@@ -61,4 +64,11 @@ export function splitYearSuffix(title: string): { title: string; year?: number }
   if (!m?.[1] || m.index === undefined || m.index === 0) return { title: t };
   const y = Number(m[1]);
   return { title: t.slice(0, m.index).trim(), year: m[1].length === 4 ? y : y + (y <= (new Date().getFullYear() % 100) + 1 ? 2000 : 1900) };
+}
+
+/** Normalised prefix of a display-truncated title ("The Desolation Of ...", "Gail Daughtry …"), else null. */
+export function truncatedPrefix(title: string): string | null {
+  const m = title.match(/^(.*?)\s*(\.{2,}|\u2026)\s*$/);
+  const n = m?.[1] ? normalizeTitle(m[1]) : "";
+  return n.length >= 4 ? n : null;
 }
