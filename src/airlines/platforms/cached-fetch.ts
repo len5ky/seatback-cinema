@@ -3,13 +3,15 @@ import { dirname } from "node:path";
 
 export const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36";
 
-/** Return the JSON cached at `path`, or run `request`, check it, write the body to `path` and return it parsed. */
-export async function cachedJson(path: string, refresh: boolean | undefined, request: () => Promise<Response>): Promise<unknown> {
+/** Return the JSON cached at `path`, or run `request`, check it (status, then `validate`), write the body to `path` and return it parsed. */
+export async function cachedJson(path: string, refresh: boolean | undefined, request: () => Promise<Response>,
+  validate?: (parsed: unknown) => void): Promise<unknown> {
   if (!refresh && existsSync(path)) return Bun.file(path).json();
   const res = await request();
   const text = await res.text();
   if (!res.ok) throw new Error(`${res.url || path} -> ${res.status}: ${text.slice(0, 200)}`);
   const parsed: unknown = JSON.parse(text);
+  validate?.(parsed);
   mkdirSync(dirname(path), { recursive: true });
   await Bun.write(path, text);
   return parsed;
