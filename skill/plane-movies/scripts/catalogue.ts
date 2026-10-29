@@ -14,7 +14,6 @@ import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "no
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
-// TODO: set to the published repo, e.g. https://raw.githubusercontent.com/<owner>/<repo>/main/public
 const DEFAULT_BASE_URL = "https://raw.githubusercontent.com/len5ky/seatback/main/public";
 const BASE_URL = (process.env.DATASET_BASE_URL ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
 const CACHE_DIR = join(process.env.XDG_CACHE_HOME ?? join(homedir(), ".cache"), "plane-movies");
@@ -30,7 +29,11 @@ interface CatalogueFile { airline: string; name: string; month: string; fetchedA
 interface IndexFile { generatedAt: string; airlines: { id: string; name: string; months: { month: string; count: number; fetchedAt: string; path: string }[] }[] }
 interface TmdbScore { vote: number | null; votes: number | null; at: number }
 
-function fail(msg: string): never {
+/** Exit with a message, unless a stale cached value can stand in (then warn and return it). */
+function fail(msg: string): never;
+function fail<T>(msg: string, fallback: T | undefined): T;
+function fail<T>(msg: string, fallback?: T): T {
+  if (fallback !== undefined) { console.error(`${msg}; using the cached copy`); return fallback; }
   console.error(msg);
   process.exit(1);
 }
@@ -54,50 +57,74 @@ function parseArgs(argv: string[]) {
   return { opts, pos };
 }
 
+function readCache<T>(path: string): T | undefined {
+  try { return JSON.parse(readFileSync(path, "utf8")) as T; } catch { return undefined; } // missing or corrupt: refetch
+}
+
 async function cachedJson<T>(url: string, file: string, ttlMs: number | null, refresh: boolean): Promise<T> {
   const path = join(CACHE_DIR, file);
   const fresh = existsSync(path) && (ttlMs === null || Date.now() - statSync(path).mtimeMs < ttlMs);
-  if (fresh && !refresh) return JSON.parse(readFileSync(path, "utf8")) as T;
+  if (fresh && !refresh) {
+    const hit = readCache<T>(path);
+    if (hit !== undefined) return hit;
+  }
+  const stale = () => (existsSync(path) ? readCache<T>(path) : undefined); // offline or broken upstream: stale cache beats nothing
   let res: Response;
   try {
     res = await fetch(url);
   } catch (e) {
-    if (existsSync(path)) return JSON.parse(readFileSync(path, "utf8")) as T; // offline: stale cache beats nothing
-    fail(`cannot reach ${url}: ${e instanceof Error ? e.message : e}`);
+    return fail(`cannot reach ${url}: ${e instanceof Error ? e.message : e}`, stale());
   }
   if (!res.ok) {
-    if (existsSync(path)) return JSON.parse(readFileSync(path, "utf8")) as T;
-    fail(`${url} -> HTTP ${res.status}${BASE_URL === DEFAULT_BASE_URL ? " (DATASET_BASE_URL is still the placeholder)" : ""}`);
+    const hint = res.status === 404 || res.status === 403
+      ? " (the dataset repo may be private, or the path is wrong; DATASET_BASE_URL overrides the base URL)"
+      : "";
+    return fail(`${url} -> HTTP ${res.status}${hint}`, stale());
   }
   const text = await res.text();
+  let body: T;
+  try { body = JSON.parse(text) as T; } catch { return fail(`${url} did not return JSON (${text.slice(0, 80).replace(/\s+/g, " ")})`, stale()); }
   mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, text);
-  return JSON.parse(text) as T;
+  writeFileSync(path, text); // only after it parsed, so a bad response never poisons the cache
+  return body;
 }
+
+const TMDB_CONCURRENCY = 4;
+const TMDB_GAP_MS = 100; // <= 10 requests/s, well under TMDB's ~40/s
 
 async function tmdbScores(films: Film[], refresh: boolean): Promise<Map<string, TmdbScore>> {
   const key = process.env.TMDB_API_KEY;
   if (!key) fail("--tmdb needs TMDB_API_KEY (free: themoviedb.org > Settings > API)");
   const path = join(CACHE_DIR, "tmdb.json");
-  const cache: Record<string, TmdbScore> = existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : {};
+  const cache: Record<string, TmdbScore> = (existsSync(path) && readCache<Record<string, TmdbScore>>(path)) || {};
   const bearer = key.length > 40; // v4 read access token vs v3 api key
   const todo = [...new Set(films.map((f) => f.imdbId).filter((id): id is string => !!id))]
     .filter((id) => refresh || !cache[id] || Date.now() - cache[id]!.at > TMDB_TTL_MS);
-  let next = 0;
+  let next = 0, failed = 0, slot = Date.now();
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  // every request takes the next start slot, so all workers together stay under 10/s
+  const paced = async () => { const wait = (slot = Math.max(slot + TMDB_GAP_MS, Date.now())) - Date.now(); if (wait > 0) await sleep(wait); };
   const worker = async () => {
     while (next < todo.length) {
       const id = todo[next++]!;
       const url = `https://api.themoviedb.org/3/find/${id}?external_source=imdb_id${bearer ? "" : `&api_key=${key}`}`;
       try {
-        const res = await fetch(url, bearer ? { headers: { Authorization: `Bearer ${key}` } } : undefined);
-        if (!res.ok) continue;
+        await paced();
+        let res = await fetch(url, bearer ? { headers: { Authorization: `Bearer ${key}` } } : undefined);
+        if (res.status === 429) {
+          await sleep(Math.min(Number(res.headers.get("retry-after")) || 2, 30) * 1000);
+          res = await fetch(url, bearer ? { headers: { Authorization: `Bearer ${key}` } } : undefined);
+        }
+        if (res.status === 401) fail("TMDB rejected TMDB_API_KEY (401): check the key");
+        if (!res.ok) { failed++; continue; }
         const body = (await res.json()) as { movie_results?: { vote_average?: number; vote_count?: number }[]; tv_results?: { vote_average?: number; vote_count?: number }[] };
         const hit = body.movie_results?.[0] ?? body.tv_results?.[0];
         cache[id] = { vote: hit?.vote_average ?? null, votes: hit?.vote_count ?? null, at: Date.now() };
-      } catch { /* network blip: leave uncached, retry next run */ }
+      } catch { failed++; /* network blip: leave uncached, retry next run */ }
     }
   };
-  await Promise.all(Array.from({ length: 8 }, worker));
+  await Promise.all(Array.from({ length: TMDB_CONCURRENCY }, worker));
+  if (failed) console.error(`TMDB: ${failed}/${todo.length} lookups failed; those films show "-" (retried next run)`);
   if (todo.length) {
     mkdirSync(CACHE_DIR, { recursive: true });
     writeFileSync(path, JSON.stringify(cache));
