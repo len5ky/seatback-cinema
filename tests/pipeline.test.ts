@@ -58,7 +58,7 @@ test("export writes catalogue facts and ids only, plus an index", () => {
   const c = data.films.find((f) => f.sourceId === "b1")!;
   expect(c).toEqual({
     sourceId: "b1", title: "Casablanca", year: 1942, runtime: 102, directors: ["Michael Curtiz"], genres: ["Drama"], rating: "PG",
-    languages: ["English"], categories: ["Classics", "Drama"], imdbId: "tt0034583", imdbConfidence: "high", tmdbId: null,
+    languages: ["English"], categories: ["Classics", "Drama"], imdbId: "tt0034583", imdbConfidence: "high", tmdbId: null, versions: 1,
   });
   const text = readFileSync(`${dir}/ba/2026-10.json`, "utf8");
   for (const leaked of ["secret synopsis", "example.invalid", "Someone Famous"]) expect(text).not.toContain(leaked);
@@ -67,4 +67,27 @@ test("export writes catalogue facts and ids only, plus an index", () => {
   expect(existsSync(`${dir}/ba/2026-11.json`)).toBe(false);
   const index = JSON.parse(readFileSync(`${dir}/index.json`, "utf8")) as IndexFile;
   expect(index.airlines).toEqual([{ id: "ba", name: "British Airways", months: [{ month: "2026-10", count: 2, fetchedAt: "2026-10-29T10:00:00.000Z", path: "ba/2026-10.json" }] }]);
+});
+
+test("export folds repeated rows into one film with a versions count and fills tmdbId from external_ids", () => {
+  const db = seeded();
+  db.run("INSERT INTO external_ids (tconst, tmdb_id, source, fetched_at) VALUES ('tt0034583', 289, 'wikidata', 'x')");
+  storeFilms(db, { id: "ek", name: "Emirates" }, "2026-10", [
+    film({ sourceId: "e1", title: "Casablanca", year: 1942, directors: ["Michael Curtiz"], categories: ["Classics"], languages: ["English"] }),
+    film({ sourceId: "e2", title: "Casablanca", year: 1942, directors: ["Michael Curtiz"], categories: ["Latest"], languages: ["French"] }),
+    film({ sourceId: "e3", title: "Home-Made Film", year: 2020 }),
+    film({ sourceId: "e4", title: "Home Made Film", year: 2020 }),
+    film({ sourceId: "e5", title: "Home Made Film", year: 2021 }),
+  ], "x");
+  matchAll(db);
+  const dir = mkdtempSync(`${import.meta.dir}/../tmp/export-test-`);
+  exportAll(db, { dir });
+  const data = JSON.parse(readFileSync(`${dir}/ek/2026-10.json`, "utf8")) as ExportFile;
+  expect(data.count).toBe(3);
+  expect(data.films.find((f) => f.imdbId === "tt0034583")).toMatchObject({
+    sourceId: "e1", versions: 2, tmdbId: 289, categories: ["Classics", "Latest"], languages: ["English", "French"],
+  });
+  expect(data.films.filter((f) => !f.imdbId).map((f) => [f.year, f.versions])).toEqual([[2020, 2], [2021, 1]]);
+  const index = JSON.parse(readFileSync(`${dir}/index.json`, "utf8")) as IndexFile;
+  expect(index.airlines[0]!.months[0]!.count).toBe(3);
 });

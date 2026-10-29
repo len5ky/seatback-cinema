@@ -24,7 +24,7 @@ const TMDB_TTL_MS = 30 * 24 * 3600 * 1000;
 interface Film {
   sourceId: string; title: string; year: number | null; runtime: number | null; directors: string[]; genres: string[];
   rating: string | null; languages: string[]; categories: string[]; imdbId: string | null; imdbConfidence: string | null;
-  tmdbId: number | null; partial?: boolean;
+  tmdbId: number | null; versions?: number; partial?: boolean;
 }
 interface CatalogueFile { airline: string; name: string; month: string; fetchedAt: string; count: number; films: Film[] }
 interface IndexFile { generatedAt: string; airlines: { id: string; name: string; months: { month: string; count: number; fetchedAt: string; path: string }[] }[] }
