@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@types/bun": "1.2.23",
+    "playwright": "1.60.0",
     "typescript": "5.9.3"
   }
 }

@@ -9,7 +9,8 @@ import { jal } from "./jal.ts";
 import { cathay } from "./cathay.ts";
 import { qantas } from "./qantas.ts";
 import { ana } from "./ana.ts";
+import { american } from "./american.ts";
 
 export const adapters: Record<string, AirlineAdapter> = Object.fromEntries(
-  [emirates, united, klm, ba, singapore, lufthansa, jal, cathay, qantas, ana].map((a) => [a.id, a]),
+  [emirates, united, klm, ba, singapore, lufthansa, jal, cathay, qantas, ana, american].map((a) => [a.id, a]),
 );
