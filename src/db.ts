@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS matches (
 );
 -- ratings and taste (v2). ratings.value keeps each source's native scale (tmdb 0-10, letterboxd 0.5-5,
 -- rt_critics/rt_audience 0-100, mc_critics 0-100, mc_user 0-10); NULL value = looked up, nothing found (cached).
--- user_films.rating is on a 10-point scale (Letterboxd stars x2). external_ids.source: wikidata | letterboxd | tmdb | none.
+-- user_films.rating is on a 10-point scale (Letterboxd stars x2, IMDb as-is); user_films.source: letterboxd | imdb_ratings | imdb_watchlist. external_ids.source: wikidata | letterboxd | tmdb | none.
 CREATE TABLE IF NOT EXISTS external_ids (
   tconst TEXT PRIMARY KEY, tmdb_id INTEGER, letterboxd_slug TEXT, rt_slug TEXT, mc_slug TEXT, source TEXT NOT NULL, fetched_at TEXT NOT NULL
 );

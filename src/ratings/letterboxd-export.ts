@@ -31,8 +31,8 @@ export function readZip(buf: Uint8Array): Map<string, string> {
   return out;
 }
 
-/** RFC 4180 CSV: quoted fields, doubled quotes, CRLF. Returns rows of header-keyed records. */
-export function parseCsv(text: string): Record<string, string>[] {
+/** RFC 4180 CSV: quoted fields, doubled quotes, CRLF, leading BOM. Returns raw rows, header first, blank lines dropped. */
+export function parseCsvRows(text: string): string[][] {
   const rows: string[][] = [];
   let row: string[] = [], field = "", quoted = false;
   const s = text.replace(/^﻿/, "");
@@ -53,7 +53,12 @@ export function parseCsv(text: string): Record<string, string>[] {
   }
   row.push(field);
   if (row.some((f) => f !== "")) rows.push(row);
-  const [header, ...body] = rows;
+  return rows;
+}
+
+/** CSV as header-keyed records (see parseCsvRows). */
+export function parseCsv(text: string): Record<string, string>[] {
+  const [header, ...body] = parseCsvRows(text);
   if (!header) return [];
   return body.map((r) => Object.fromEntries(header.map((h, i) => [h.trim(), r[i] ?? ""])));
 }
@@ -89,15 +94,17 @@ export function parseExport(files: Map<string, string>): ExportFilm[] {
 
 export const LETTERBOXD_DIR = "data/letterboxd";
 
+/** The newest zip in data/letterboxd/, else the folder itself when it holds unzipped csvs. */
+export function findLetterboxdExport(): string | undefined {
+  const entries = existsSync(LETTERBOXD_DIR) ? readdirSync(LETTERBOXD_DIR).map((n) => `${LETTERBOXD_DIR}/${n}`) : [];
+  const zips = entries.filter((e) => e.endsWith(".zip")).sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs);
+  return zips[0] ?? (entries.some((e) => e.endsWith(".csv")) ? LETTERBOXD_DIR : undefined);
+}
+
 /** Read an export zip or an unzipped export folder. With no path, the newest zip (or folder) in data/letterboxd/. */
 export async function loadExport(path?: string): Promise<{ path: string; files: Map<string, string> }> {
-  let p = path;
-  if (!p) {
-    const entries = existsSync(LETTERBOXD_DIR) ? readdirSync(LETTERBOXD_DIR).map((n) => `${LETTERBOXD_DIR}/${n}`) : [];
-    const zips = entries.filter((e) => e.endsWith(".zip")).sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs);
-    p = zips[0] ?? (entries.some((e) => e.endsWith(".csv")) ? LETTERBOXD_DIR : undefined);
-    if (!p) throw new Error(`no Letterboxd export found: drop the zip (Settings > Data > Export your data) into ${LETTERBOXD_DIR}/`);
-  }
+  const p = path ?? findLetterboxdExport();
+  if (!p) throw new Error(`no Letterboxd export found: drop the zip (Settings > Data > Export your data) into ${LETTERBOXD_DIR}/`);
   if (!existsSync(p)) throw new Error(`${p} not found`);
   if (statSync(p).isDirectory()) {
     const files = new Map<string, string>();

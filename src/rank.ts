@@ -68,11 +68,11 @@ export function learnAffinities(films: RatedFilm[]): Omit<TasteModel, "watched" 
   return { mean, rated: films.length, genres: acc((f) => f.genres.map((g) => g.toLowerCase())), directors: acc((f) => f.directors) };
 }
 
-/** The user's Letterboxd films (matched ones) as a taste model; null when nothing was imported. */
+/** The user's IMDb and Letterboxd films (one row per tconst, ratings averaged across sources) as a taste model; null when nothing was imported. */
 export function loadTasteModel(db: Database): TasteModel | null {
   const rows = db.query<{ tconst: string; rating: number | null; watched: number; watchlist: number; genres: string | null; directors: string | null }, []>(`
-    SELECT u.tconst, u.rating, u.watched, u.watchlist, t.genres, t.directors FROM user_films u
-    LEFT JOIN imdb_titles t USING (tconst) WHERE u.tconst IS NOT NULL`).all();
+    SELECT u.tconst, AVG(u.rating) AS rating, MAX(u.watched) AS watched, MAX(u.watchlist) AS watchlist, t.genres, t.directors
+    FROM user_films u LEFT JOIN imdb_titles t USING (tconst) WHERE u.tconst IS NOT NULL GROUP BY u.tconst`).all();
   if (!rows.length) return null;
   const rated = rows.filter((r): r is typeof r & { rating: number } => r.rating !== null)
     .map((r) => ({ rating: r.rating, genres: r.genres?.split(",") ?? [], directors: r.directors?.split(",") ?? [] }));

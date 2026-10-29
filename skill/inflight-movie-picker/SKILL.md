@@ -35,7 +35,9 @@ month isn't published yet, use the latest one and say the line-up may change.
 
 ## 2. Find out what they like (30 seconds, skip what you already know)
 
-If the person has shared a Letterboxd export, ratings or a watch history, use that. Don't ask again. Otherwise
+If the person has shared a Letterboxd export, ratings or a watch history, use that. Don't ask again.
+The simplest taste input is an IMDb ratings export (imdb.com > Your Ratings > three-dot menu > Export, a CSV whose `Const`
+column is the IMDb id and `Your Rating` is 1-10), so suggest it to anyone with an IMDb account. Otherwise
 ask at most three short questions in one message, then recommend straight away:
 
 1. Two or three films they loved recently (better than asking for genres).

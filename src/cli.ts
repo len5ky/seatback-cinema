@@ -9,7 +9,8 @@ import { loadTaste, picks } from "./rank.ts";
 import { PUBLIC_DIR, exportAll } from "./export.ts";
 import { syncIds } from "./ratings/ids.ts";
 import { SOURCES, syncRatings, type Source } from "./ratings/sync.ts";
-import { importExport, loadExport, parseExport } from "./ratings/letterboxd-export.ts";
+import { findLetterboxdExport, importExport, loadExport, parseExport } from "./ratings/letterboxd-export.ts";
+import { IMDB_RATINGS_DIR, defaultImdbExports, importImdbExport, isImdbCsv, parseImdbExport } from "./ratings/imdb-export.ts";
 
 const USAGE = `usage: bun run cli <command>
   fetch <airline|all> [--month YYYY-MM] [--refresh]  fetch (or reuse cached) monthly catalogue
@@ -19,7 +20,8 @@ const USAGE = `usage: bun run cli <command>
   search <title> [--airline X]                       find a film in the latest catalogue of each airline
   stats [--airline X] [--month YYYY-MM]
   export [--month YYYY-MM] [--airline X]             write public/data/<airline>/<month>.json, ids.json, index.json
-  taste import [export.zip|dir]                      import a Letterboxd export (default: newest zip in data/letterboxd/)
+  taste import [file ...]                            import IMDb ratings/watchlist CSVs and/or a Letterboxd export zip|dir
+                                                     (default: newest of each in data/imdb-ratings/ and data/letterboxd/)
   ids sync [--airline X] [--limit N]                 Wikidata crosswalk (TMDB/Letterboxd/RT/MC ids) for new matched films;
                                                      seeds from public/data/ids.json first
   ratings sync [--source tmdb|letterboxd|rt|mc|all] [--airline X] [--limit N]
@@ -149,8 +151,8 @@ async function main(): Promise<void> {
       const r = picks(db, taste, { airline, month: m, top, genre: opt.genre, language: opt.language, minRating });
       console.log(`${adapters[airline]?.name} ${m}: top ${r.picks.length} picks (excluded: ${r.excludedLow} low-confidence, ${r.unmatched} unmatched, ${r.watched} already watched)`);
       console.log(r.model
-        ? `taste: ${r.model.rated} Letterboxd ratings (mean ${r.model.mean.toFixed(1)}/10), ${r.model.watched.size} watched, ${r.model.watchlist.size} on watchlist; taste.json as overrides\n`
-        : "taste: taste.json only (no Letterboxd export imported: `bun run cli taste import`)\n");
+        ? `taste: ${r.model.rated} ratings (mean ${r.model.mean.toFixed(1)}/10), ${r.model.watched.size} watched, ${r.model.watchlist.size} on watchlist; taste.json as overrides\n`
+        : "taste: taste.json only (no IMDb or Letterboxd export imported: `bun run cli taste import`)\n");
       r.picks.forEach((p, i) => {
         const x = p.row;
         console.log(`${String(i + 1).padStart(2)}. ${x.title} (${x.start_year ?? x.year ?? "?"})  score ${p.score.toFixed(2)}  ${x.runtime ?? "?"} min  ${x.genres ?? ""}`);
@@ -197,13 +199,27 @@ async function main(): Promise<void> {
       return;
     }
     case "taste": {
-      if (arg !== "import") throw new Error("usage: taste import [letterboxd-export.zip]");
-      const { path, files } = await loadExport(pos[2]);
-      const r = importExport(db, parseExport(files));
-      const ok = r.matched.high + r.matched.medium;
-      console.log(`${path}: ${r.films} films (${r.rated} rated, ${r.watched} watched, ${r.watchlist} on watchlist)`);
-      console.log(`matched to IMDb: ${ok} (${pct(ok, r.films)}; high ${r.matched.high}, medium ${r.matched.medium}), unmatched ${r.unmatched.length}`);
-      if (r.unmatched.length) console.log(`unmatched (ignored for taste): ${r.unmatched.slice(0, 20).join("; ")}${r.unmatched.length > 20 ? "; ..." : ""}`);
+      if (arg !== "import") throw new Error("usage: taste import [imdb-ratings.csv|imdb-watchlist.csv|letterboxd-export.zip|dir ...]");
+      let paths = pos.slice(2);
+      if (!paths.length) {
+        const lb = findLetterboxdExport();
+        paths = [...(await defaultImdbExports()), ...(lb ? [lb] : [])];
+        if (!paths.length) throw new Error(`no taste export found: drop IMDb's Your Ratings / Watchlist CSV into ${IMDB_RATINGS_DIR}/ or a Letterboxd zip into data/letterboxd/`);
+      }
+      for (const p of paths) {
+        if (await isImdbCsv(p)) {
+          const r = importImdbExport(db, parseImdbExport(await Bun.file(p).text()));
+          const what = r.kind === "ratings" ? `${r.rated} rated` : `${r.watchlist} on watchlist`;
+          console.log(`${p}: IMDb ${r.kind}, ${r.films} titles (${what}); ${r.inImdb} in local IMDb data, ${r.otherTypes} not films (series, episodes, shorts...)${r.skipped ? `, ${r.skipped} rows without a tt id skipped` : ""}`);
+          continue;
+        }
+        const { path, files } = await loadExport(p);
+        const r = importExport(db, parseExport(files));
+        const ok = r.matched.high + r.matched.medium;
+        console.log(`${path}: ${r.films} films (${r.rated} rated, ${r.watched} watched, ${r.watchlist} on watchlist)`);
+        console.log(`matched to IMDb: ${ok} (${pct(ok, r.films)}; high ${r.matched.high}, medium ${r.matched.medium}), unmatched ${r.unmatched.length}`);
+        if (r.unmatched.length) console.log(`unmatched (ignored for taste): ${r.unmatched.slice(0, 20).join("; ")}${r.unmatched.length > 20 ? "; ..." : ""}`);
+      }
       return;
     }
     case "ratings": {

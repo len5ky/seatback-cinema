@@ -27,7 +27,7 @@ bun run cli stats [--airline X]    # film count and match rate by confidence, pe
 bun run cli picks [--airline emirates] [--top 30] [--genre Thriller] [--min-rating 7] [--language English]
 bun run cli search "toy story" [--airline X]   # which airlines carry it this month
 bun run cli export [--month 2026-10]           # public/data/<airline>/<month>.json + public/data/index.json
-bun run cli taste import [export.zip]          # your Letterboxd export (default: newest zip in data/letterboxd/)
+bun run cli taste import [file ...]            # IMDb ratings/watchlist CSVs, Letterboxd zip (default: data/imdb-ratings/, data/letterboxd/)
 bun run cli ids sync [--airline X] [--limit N] # Wikidata: TMDB / Letterboxd / RT / Metacritic ids for matched films
 bun run cli ratings sync [--source tmdb|letterboxd|rt|mc|all] [--airline X] [--limit N]
 ```
@@ -127,7 +127,7 @@ log10 of their vote counts (0.2 at a handful of votes, full weight from 100k). A
 and the remaining weights re-normalise, so a film with only an IMDb rating scores exactly as it did before the blend. `picks` prints the
 sources behind each score.
 
-**2. Your taste.** With a Letterboxd export imported, every rated film adds its deviation from your average
+**2. Your taste.** With an IMDb or Letterboxd export imported, every rated film adds its deviation from your average
 rating to each of its IMDb genres and directors. An affinity is the sum of those deviations divided by
 (films + 3), so one film moves it a little and ten move it a lot. A pick gets the mean affinity of its genres plus
 the mean affinity of its directors, and the strongest three show up as reasons ("you rate Denis Villeneuve +0.7
@@ -137,8 +137,14 @@ the mean affinity of its directors, and the strongest three show up as reasons (
 
 Setup:
 
-1. **Letterboxd export**: letterboxd.com > Settings > Data > Export your data. Drop the zip into
-   `data/letterboxd/` (git-ignored) and run `bun run cli taste import`. It reads `ratings.csv`, `watched.csv` and
+1. **IMDb export** (simplest): on imdb.com open Your Ratings (and your Watchlist), then the three-dot menu >
+   Export. Drop the CSVs into `data/imdb-ratings/` (git-ignored; create it) and run `bun run cli taste import`.
+   The format is detected by its `Const` column and joined straight on the tconst, no title matching. Ratings stay
+   on IMDb's 1-10 scale and mark the film watched; the watchlist file sets the watchlist flag. With no argument it
+   takes the newest ratings file and the newest watchlist file in that folder. Series, episodes and other non-film
+   titles are imported anyway (they never show up in a catalogue) and counted in the summary.
+   **Letterboxd export**: letterboxd.com > Settings > Data > Export your data. Drop the zip into
+   `data/letterboxd/` (git-ignored) and run `bun run cli taste import` (IMDb and Letterboxd can both be imported; a film rated in both counts once, with the ratings averaged). It reads `ratings.csv`, `watched.csv` and
    `watchlist.csv`, matches name + year to IMDb with the catalogue matcher, and replaces the previous import.
    It prints the films it could not match; those are ignored for taste.
 2. **TMDB key** (optional): a free key from themoviedb.org > Settings > API, in `.env` as `TMDB_API_KEY=...`

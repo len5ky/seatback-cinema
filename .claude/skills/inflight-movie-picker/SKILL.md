@@ -29,7 +29,8 @@ when `stats` shows 0 IMDb titles or the user asks for fresher ratings.
 
 ## Taste and ratings
 
-The best taste signal is the user's Letterboxd export. If `picks` prints "taste: taste.json only", offer this:
+The simplest taste input is the user's IMDb export: imdb.com > Your Ratings (and Watchlist) > three-dot menu > Export, CSVs dropped into `data/imdb-ratings/`, then `bun run cli taste import` (joined on tconst, no title matching).
+A Letterboxd export works too. If `picks` prints "taste: taste.json only", offer this:
 
 1. Letterboxd > Settings > Data > Export your data; drop the zip into `data/letterboxd/`.
 2. `bun run cli taste import` (re-run after each new export; it replaces the previous import and lists unmatched
