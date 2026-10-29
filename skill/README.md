@@ -6,14 +6,15 @@ catalogue for the month, with IMDb links. The skill is two files: `SKILL.md` (in
 needs only one of Bun, Node 22.6+ or Deno.
 
 Airlines: Emirates, United, KLM, British Airways, Singapore Airlines, Lufthansa, Japan Airlines, Cathay Pacific,
-Qantas, ANA. The data is refreshed on the 1st and 15th of each month.
+Qantas, ANA, American Airlines. The data is refreshed on the 1st and 15th of each month.
 
-<!-- TODO: replace OWNER/REPO below and DEFAULT_BASE_URL in scripts/catalogue.ts once the repo is public. -->
+The dataset is read from `https://raw.githubusercontent.com/len5ky/seatback/main/public`. Set `DATASET_BASE_URL`
+to point the script at a mirror or a local copy (for example `http://localhost:3000` serving `public/`).
 
 ## Get the files
 
 ```bash
-git clone --depth 1 https://github.com/OWNER/REPO /tmp/plane-movies-src
+git clone --depth 1 https://github.com/len5ky/seatback /tmp/plane-movies-src
 # the skill is the skill/plane-movies directory; copy it to where your agent looks (below)
 ```
 

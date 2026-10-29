@@ -1,6 +1,6 @@
 ---
 name: plane-movies
-description: Recommend what to watch on a flight from the airline's actual in-flight film catalogue for that month. Use when someone asks what to watch on their flight or plane, what movies are on Emirates, United, KLM, British Airways, Singapore Airlines, Lufthansa, JAL, Cathay Pacific, Qantas or ANA this month, wants plane movie picks for themselves or their kids, or asks whether a specific film is on a given airline.
+description: Recommend what to watch on a flight from the airline's actual in-flight film catalogue for that month. Use when someone asks what to watch on their flight or plane, what movies are on Emirates, United, KLM, British Airways, Singapore Airlines, Lufthansa, JAL, Cathay Pacific, Qantas, ANA or American Airlines this month, wants plane movie picks for themselves or their kids, or asks whether a specific film is on a given airline.
 ---
 
 # Plane movies

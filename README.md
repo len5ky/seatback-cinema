@@ -5,7 +5,7 @@ movie catalogue, matches every film to IMDb using the public bulk datasets, rank
 `taste.json`, and exports an open monthly dataset to `public/data/`.
 
 Airlines: Emirates, United, KLM, British Airways, Singapore Airlines, Lufthansa, Japan Airlines, Cathay Pacific,
-Qantas and ANA (`bun run cli` lists the registered ids).
+Qantas, ANA and American (`bun run cli` lists the registered ids).
 
 ## Setup
 
@@ -24,7 +24,8 @@ bun run cli ids sync [--airline X] [--limit N] # Wikidata: TMDB / Letterboxd / R
 bun run cli ratings sync [--source tmdb|letterboxd|rt|mc|all] [--airline X] [--limit N]
 ```
 
-`bun test` runs the unit tests (fixtures in `tests/fixtures/` are trimmed from real responses);
+`bun test` runs the unit tests (fixtures in `tests/fixtures/` are real responses with synopses, cast names and image
+URLs stripped);
 `bunx tsc --noEmit` typechecks.
 
 ## Sources
@@ -45,10 +46,47 @@ Every adapter implements `AirlineAdapter` (`src/airlines/types.ts`): `fetchMonth
 | Cathay Pacific | Anuvu AirTime (`afg.anuvu.cloud/api/v1`, same parser as United): section list + one call per section | ~38 | `flight_date=` |
 | Qantas | `qantas.com/api/entertainment/metadata` POST per route (`large_international_seatback`) | 1 | none (current month only) |
 | ANA | CineSend search (Origin/Referer required, month tag) + one detail call per title | ~235 | month tag |
+| American | `entertainment.aa.com` Next.js RSC pages fetched inside headless Chromium (plain HTTP is blocked on TLS fingerprint) | 25 pages | none (current cycle only) |
 
 The Airtime client (`src/airlines/platforms/geemedia.ts`) takes a configurable base URL so Anuvu's variant
 (Cathay Pacific) can reuse it. Airlines without a month selector refuse to fetch any month but the current one.
 For the current month the date sent is today, otherwise the 5th.
+
+## Coverage (October 2026)
+
+Numbers from `bun run cli stats` and `bun run cli export` on 2026-10-29. "Rows" is what the airline lists; "published"
+is after folding repeat listings of the same film (Emirates lists a film once per audio track list). "IMDb id" is the
+share of rows matched with high or medium confidence, the only ones that get an `imdbId` in the export. The grade
+rates the source itself: A is a structured JSON API with year and director, B needs a browser or has gaps.
+
+| airline | rows | published | IMDb id | source | grade |
+|---|---:|---:|---:|---|---|
+| Emirates | 2,158 | 2,055 | 93.0% | own JSON; year on only 28% of rows | A |
+| Cathay Pacific | 1,552 | 1,551 | 92.1% | Anuvu AirTime API | A- |
+| American | 682 | 682 | 95.3% | entertainment.aa.com via headless Chromium; airline supplies IMDb ids | B |
+| British Airways | 658 | 658 | 95.7% | entertainment.ba.com proxy (Akamai) | A- |
+| United | 508 | 508 | 95.9% | Gee Media Airtime API | A |
+| KLM | 474 | 474 | 97.0% | Gee Media Airtime API | A- |
+| Lufthansa | 405 | 405 | 97.0% | Spafax API | A |
+| Singapore | 384 | 384 | 94.5% | KrisWorld JSON | A |
+| Qantas | 259 | 257 | 86.5% | Qantas entertainment API | A |
+| ANA | 233 | 233 | 92.7% | CineSend API | A- |
+| JAL | 124 | 124 | 88.7% | Spafax API | A |
+
+Non-English films match less often (78-93% against 86-100% for English ones); the rest are flagged low or unmatched
+and left out of rankings, never guessed.
+
+Not covered: Delta (its public pages show about 80 of roughly 300 films, title and poster only), Turkish (10
+highlights behind PerimeterX), Air France (no public catalogue) and Qatar (the catalogue sits behind Akamai and
+only loads in a real browser profile; not built yet).
+
+### Data licence
+
+`public/data/` holds catalogue metadata only: title, year, runtime, directors, genres, age rating, audio
+languages, the airline's own categories and our IMDb/TMDB ids. No synopses, posters, cast lists or ratings are
+published; ratings stay in the local database and links go out to IMDb and TMDB. Our files in `public/data/` are
+released under CC0 1.0. The titles and listings come from the airlines' public sites, and IMDb ids come from IMDb's
+non-commercial datasets, whose terms still apply to anything you build from them.
 
 ## How it works
 
@@ -100,7 +138,7 @@ Setup:
    film. Letterboxd, RT and Metacritic pages are fetched at 1 request per second per site and cached for 30 days
    in the `ratings` table (a page that 404s is cached as "no score"). RT and Metacritic are only tried where
    Wikidata has a slug. Network errors and 403/429/5xx are not cached; three in a row stop that source for the
-   run. A first run over all ten airlines covers about 3,500 films, so about an hour per
+   run. A first run over all eleven airlines covers about 3,500 films, so about an hour per
    scraped source; later months only fetch new or expired films. Use `--limit N` to try it on a few.
 
 Letterboxd's terms forbid automated access and RT and Metacritic have no public API: this is personal,
@@ -140,5 +178,4 @@ Preview with `bunx serve public` or `python3 -m http.server -d public`.
 - `skill/plane-movies/` is the installable thin client for everyone else. It downloads one airline-month from
   the published dataset, caches it and prints a table for the model, so nobody needs to clone the pipeline. It
   runs on Bun, Node 22.6+ or Deno and works in Claude Code, Codex and Cursor. Install steps: `skill/README.md`.
-  The dataset URL stays a placeholder (`DEFAULT_BASE_URL` in `skill/plane-movies/scripts/catalogue.ts`) until the
-  repo is public.
+  It reads `https://raw.githubusercontent.com/len5ky/seatback/main/public` (override with `DATASET_BASE_URL`).

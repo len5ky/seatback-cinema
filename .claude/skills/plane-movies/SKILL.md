@@ -1,12 +1,12 @@
 ---
 name: plane-movies
-description: Recommend what to watch on a flight from the airline's in-flight catalogue, ranked by IMDb rating and the user's taste. Use when the user asks what to watch on their flight or plane, what movies are on Emirates / ice, United, KLM, British Airways, Singapore Airlines, Lufthansa, JAL, Cathay Pacific, Qantas or ANA this month, for plane movie picks, or whether a specific film is available on a given airline.
+description: Recommend what to watch on a flight from the airline's in-flight catalogue, ranked by IMDb rating and the user's taste. Use when the user asks what to watch on their flight or plane, what movies are on Emirates / ice, United, KLM, British Airways, Singapore Airlines, Lufthansa, JAL, Cathay Pacific, Qantas, ANA or American Airlines this month, for plane movie picks, or whether a specific film is available on a given airline.
 ---
 
 # Plane movies
 
 Local monthly catalogues for Emirates, United, KLM, British Airways (`ba`), Singapore Airlines (`singapore`),
-Lufthansa, Japan Airlines (`jal`), Cathay Pacific (`cathay`), Qantas and ANA,
+Lufthansa, Japan Airlines (`jal`), Cathay Pacific (`cathay`), Qantas, ANA and American (`american`),
 matched to IMDb and ranked by a blend of IMDb, Letterboxd, RT and Metacritic plus the user's Letterboxd taste and `taste.json`. Run everything from the project root `/home/lensky/Dev/plane_movie`
 with bun (`~/.bun/bin` on PATH). `bun run cli` with no arguments lists the registered airline ids.
 

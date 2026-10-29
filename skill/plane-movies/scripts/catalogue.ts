@@ -15,7 +15,7 @@ import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
 // TODO: set to the published repo, e.g. https://raw.githubusercontent.com/<owner>/<repo>/main/public
-const DEFAULT_BASE_URL = "https://raw.githubusercontent.com/OWNER/REPO/main/public";
+const DEFAULT_BASE_URL = "https://raw.githubusercontent.com/len5ky/seatback/main/public";
 const BASE_URL = (process.env.DATASET_BASE_URL ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
 const CACHE_DIR = join(process.env.XDG_CACHE_HOME ?? join(homedir(), ".cache"), "plane-movies");
 const INDEX_TTL_MS = 12 * 3600 * 1000;
