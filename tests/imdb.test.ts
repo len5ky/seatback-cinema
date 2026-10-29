@@ -31,3 +31,26 @@ test("imdb load: full rebuild, then a failing reload leaves the previous data un
   expect(db.query("SELECT name FROM sqlite_master WHERE name LIKE '%_new'").all()).toEqual([]);
   rmSync(DIR, { recursive: true, force: true });
 });
+
+test("imdb load: European retitles (NL, FR, DE, IT, ES) become title keys; other regions do not", async () => {
+  const db = openDb(":memory:");
+  rmSync(DIR, { recursive: true, force: true });
+  mkdirSync(DIR, { recursive: true });
+  await gz("title.basics", ["h", "tt3521164\tmovie\tMoana\tMoana\t0\t2016\t\\N\t107\tAnimation"]);
+  await gz("title.akas", ["h",
+    "tt3521164\t1\tVaiana\tNL\t\\N\t\\N\t\\N\t0",
+    "tt3521164\t2\tOceania\tIT\t\\N\t\\N\t\\N\t0",
+    "tt3521164\t3\tVaiana: Das Paradies hat einen Haken\tDE\t\\N\t\\N\t\\N\t0",
+    "tt3521164\t4\tMoana Japan\tJP\t\\N\t\\N\t\\N\t0",
+  ]);
+  await gz("title.ratings", ["h", "tt3521164\t7.6\t400000"]);
+  await gz("title.crew", ["h", "tt3521164\tnm1\t\\N"]);
+  await gz("name.basics", ["h", "nm1\tRon Clements\t1953"]);
+  await loadImdb(db, quiet, 1, DIR);
+  const keys = (db.query("SELECT norm FROM imdb_keys ORDER BY norm").all() as { norm: string }[]).map((k) => k.norm);
+  expect(keys).toContain("vaiana");
+  expect(keys).toContain("oceania");
+  expect(keys.some((k) => k.includes("japan"))).toBe(false); // JP is not a filtered region
+  expect(keys).toHaveLength(4); // moana + the three European titles
+  rmSync(DIR, { recursive: true, force: true });
+});

@@ -8,8 +8,11 @@ const FILES = ["title.basics", "title.akas", "title.ratings", "title.crew", "nam
 const MAX_AGE_MS = 7 * 24 * 3600 * 1000;
 // tvSpecial/video cover the concert films and documentaries airlines carry
 const KEEP_TYPES = new Set(["movie", "tvMovie", "tvSpecial", "video"]);
-// English-market and UAE release titles: "Zootropolis", "Philosopher's Stone", "Escape to Victory"
-const AKA_REGIONS = new Set(["GB", "US", "XWW", "AU", "CA", "IE", "IN", "AE"]);
+// English-market and UAE release titles ("Zootropolis", "Philosopher's Stone", "Escape to Victory"), plus the European
+// markets whose retitles show up in English-language catalogues ("Vaiana" for Moana). The five European regions add
+// ~538k aka rows over the ~2.46M already scanned (Oct 2026 dump, kept title types); keys are deduped, so the table
+// grows by less than that. Takes effect on the next `imdb sync --force`.
+export const AKA_REGIONS = new Set(["GB", "US", "XWW", "AU", "CA", "IE", "IN", "AE", "NL", "FR", "DE", "IT", "ES"]);
 const BATCH = 50_000;
 
 const IMDB_DIR = `${DATA_DIR}/imdb`;
