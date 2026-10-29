@@ -10,7 +10,7 @@ const KEYS: Record<Source, string[]> = { tmdb: ["tmdb"], letterboxd: ["letterbox
 export const CACHE_DAYS = 30;
 const PAGE_HEADERS = { "User-Agent": BROWSER_UA, Accept: "text/html,application/xhtml+xml", "Accept-Language": "en-US,en;q=0.9" };
 
-/** A failure worth caching as "nothing there" (404) versus one to retry next run (network, 403/429, 5xx). */
+/** A failure to retry next run (network, 403/429, 5xx, a 200 that is not a film page) versus "nothing there" (404, or a film page with no score), which is cached. */
 class Transient extends Error {}
 
 async function getPage(url: string): Promise<{ html: string; url: string } | null> {
@@ -32,7 +32,8 @@ async function fetchOne(db: Database, source: Source, tconst: string, slugs: Slu
   switch (source) {
     case "letterboxd": {
       const page = await getPage(`https://letterboxd.com/imdb/${tconst}/`);
-      const p = page && /letterboxd\.com\/film\//.test(page.url) ? parseLetterboxd(page.html, page.url) : null;
+      const p = page ? parseLetterboxd(page.html, page.url) : null;
+      if (page && !(p!.recognised && /letterboxd\.com\/film\//.test(page.url))) throw new Transient(`${page.url}: not a Letterboxd film page (challenge?)`);
       storeScore(db, tconst, "letterboxd", p?.rating ?? EMPTY);
       if (p && (p.slug || p.tmdbId)) mergeIds(db, tconst, { tmdbId: p.tmdbId, letterboxdSlug: p.slug }, "letterboxd");
       return "stored";
@@ -40,7 +41,8 @@ async function fetchOne(db: Database, source: Source, tconst: string, slugs: Slu
     case "rt": {
       if (!slugs?.rt_slug) return "skipped";
       const page = await getPage(`https://www.rottentomatoes.com/m/${slugs.rt_slug}`);
-      const p = page ? parseRt(page.html) : { critics: EMPTY, audience: EMPTY };
+      const p = page ? parseRt(page.html) : { critics: EMPTY, audience: EMPTY, recognised: true };
+      if (!p.recognised) throw new Transient(`RT ${slugs.rt_slug}: no scorecard on the page (challenge?)`);
       storeScore(db, tconst, "rt_critics", p.critics);
       storeScore(db, tconst, "rt_audience", p.audience);
       return "stored";
@@ -48,7 +50,8 @@ async function fetchOne(db: Database, source: Source, tconst: string, slugs: Slu
     case "mc": {
       if (!slugs?.mc_slug) return "skipped";
       const page = await getPage(`https://www.metacritic.com/movie/${slugs.mc_slug}/`);
-      const p = page ? parseMc(page.html) : { critics: EMPTY, user: EMPTY };
+      const p = page ? parseMc(page.html) : { critics: EMPTY, user: EMPTY, recognised: true };
+      if (!p.recognised) throw new Transient(`Metacritic ${slugs.mc_slug}: no film data on the page (challenge?)`);
       storeScore(db, tconst, "mc_critics", p.critics);
       storeScore(db, tconst, "mc_user", p.user);
       return "stored";

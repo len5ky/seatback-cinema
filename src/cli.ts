@@ -214,6 +214,9 @@ async function main(): Promise<void> {
       const r = await syncRatings(db, { sources, airline: airlineOpt(opt.airline), limit: limitOpt(), tmdbKey: process.env.TMDB_API_KEY || undefined, log: console.log });
       for (const [s, x] of Object.entries(r)) {
         console.log(`${s}: ${x.checked} films, ${x.cached} cached, ${x.noSlug} without a slug, ${x.fetched} fetched (${x.found} with a score), ${x.failed} failed${x.aborted ? ` [${x.aborted}]` : ""}`);
+        // an aborted crawl is incomplete; a missing TMDB key under --source all is a deliberate skip
+        const keySkip = s === "tmdb" && src === "all" && !process.env.TMDB_API_KEY;
+        if (x.aborted && !keySkip) process.exitCode = 1;
       }
       return;
     }

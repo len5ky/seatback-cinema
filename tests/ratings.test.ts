@@ -3,12 +3,15 @@ import { jsonLd, parseLetterboxd, parseMc, parseRt, parseTmdbFind } from "../src
 import { syncRatings } from "../src/ratings/sync.ts";
 import { openDb } from "../src/db.ts";
 
+const NEW_FILM = '<script type="application/ld+json">{"@type":"Movie","name":"X"}</script>';
+const CHALLENGE = "<html><title>Just a moment...</title></html>";
 const fx = (n: string) => Bun.file(`${import.meta.dir}/fixtures/ratings/${n}`);
 
 test("Letterboxd film page: JSON-LD inside CDATA, slug, TMDB id", async () => {
   const p = parseLetterboxd(await fx("letterboxd-shawshank.html").text());
-  expect(p).toEqual({ rating: { value: 4.6, votes: 3211559, extra: { reviews: 359097 } }, slug: "the-shawshank-redemption", tmdbId: 278 });
-  expect(parseLetterboxd("<html>new film, no ratings</html>", "https://letterboxd.com/film/x/")).toEqual({ rating: { value: null, votes: null, extra: undefined }, slug: "x", tmdbId: null });
+  expect(p).toEqual({ rating: { value: 4.6, votes: 3211559, extra: { reviews: 359097 } }, slug: "the-shawshank-redemption", tmdbId: 278, recognised: true });
+  expect(parseLetterboxd(NEW_FILM, "https://letterboxd.com/film/x/")).toEqual({ rating: { value: null, votes: null, extra: undefined }, slug: "x", tmdbId: null, recognised: true });
+  expect(parseLetterboxd(CHALLENGE, "https://letterboxd.com/imdb/tt1/").recognised).toBe(false);
 });
 
 test("Rotten Tomatoes scorecard JSON", async () => {
@@ -16,13 +19,16 @@ test("Rotten Tomatoes scorecard JSON", async () => {
   expect(p.critics).toEqual({ value: 89, votes: 147, extra: { certified: true, average: 8.4 } });
   expect(p.audience.value).toBe(98);
   expect(p.audience.votes).toBe(53485);
-  expect(parseRt("<html></html>").audience.value).toBeNull();
+  expect(p.recognised).toBe(true);
+  expect(parseRt("<html></html>")).toMatchObject({ audience: { value: null }, recognised: false });
 });
 
 test("Metacritic: Metascore from JSON-LD, user score from the badge", async () => {
   const p = parseMc(await fx("mc-shawshank.html").text());
   expect(p.critics).toEqual({ value: 82, votes: 22 });
   expect(p.user).toEqual({ value: 9.2, votes: 2256 });
+  expect(p.recognised).toBe(true);
+  expect(parseMc(CHALLENGE).recognised).toBe(false);
   expect(parseMc('<div aria-label="User score tbd out of 10" data-testid="global-score-value-wrapper"></div>').user.value).toBeNull();
 });
 
@@ -80,3 +86,21 @@ test("Letterboxd 404 is cached as null; RT/MC skip films without a slug; 3 trans
   expect(mc.mc?.aborted).toMatch(/3 failures in a row/);
   expect(db.query("SELECT COUNT(*) AS n FROM ratings WHERE source LIKE 'mc%'").get()).toEqual({ n: 0 });
 }, 15_000);
+
+test("a 200 challenge page is retried, not cached; a film page with no score is cached as null", async () => {
+  const db = dbWith(["tt1", "tt2"]);
+  db.run("INSERT INTO external_ids VALUES ('tt1',NULL,NULL,'r1','m1','wikidata','x'), ('tt2',NULL,NULL,'r2','m2','wikidata','x')");
+  stub(() => new Response(CHALLENGE));
+  const r = await syncRatings(db, { sources: ["letterboxd", "rt", "mc"] });
+  for (const s of ["letterboxd", "rt", "mc"] as const) expect(r[s]).toMatchObject({ failed: 2, fetched: 0 });
+  expect(db.query("SELECT COUNT(*) AS n FROM ratings").get()).toEqual({ n: 0 });
+  globalThis.fetch = (async (input: string | URL | Request) => {
+    const res = new Response(NEW_FILM);
+    Object.defineProperty(res, "url", { value: String(input).replace("/imdb/", "/film/") });
+    return res;
+  }) as typeof fetch;
+  const ok = await syncRatings(db, { sources: ["letterboxd", "mc"] });
+  expect(ok.letterboxd).toMatchObject({ fetched: 2, found: 0, failed: 0 });
+  expect(ok.mc).toMatchObject({ fetched: 2, found: 0, failed: 0 });
+  expect(db.query("SELECT COUNT(*) AS n FROM ratings WHERE value IS NULL").get()).toEqual({ n: 6 });
+}, 30_000);

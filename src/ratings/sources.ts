@@ -1,4 +1,8 @@
-/** Pure parsers for the rating sources. Every parser returns nulls instead of throwing on a page it does not understand. */
+/**
+ * Pure parsers for the rating sources. Every parser returns nulls instead of throwing on a page it does not understand,
+ * and says through `recognised` whether the page was a film page at all (a 200 challenge page is not), so the caller can
+ * cache "film page, no score yet" but retry "not a film page".
+ */
 
 export interface Score { value: number | null; votes: number | null; extra?: Record<string, unknown> }
 
@@ -17,10 +21,12 @@ export function jsonLd(html: string): Record<string, unknown>[] {
   return out;
 }
 
+const isMovie = (blocks: Record<string, unknown>[]) => blocks.some((b) => b["@type"] === "Movie");
+
 const aggregate = (blocks: Record<string, unknown>[]) =>
   blocks.map((b) => b.aggregateRating).find((a): a is Record<string, unknown> => !!a && typeof a === "object");
 
-export interface LetterboxdPage { rating: Score; slug: string | null; tmdbId: number | null }
+export interface LetterboxdPage { rating: Score; slug: string | null; tmdbId: number | null; recognised: boolean }
 
 /** letterboxd.com/film/{slug}/: JSON-LD aggregateRating (0.5-5), canonical url, data-tmdb-id. New films have no rating yet. */
 export function parseLetterboxd(html: string, finalUrl?: string): LetterboxdPage {
@@ -32,35 +38,40 @@ export function parseLetterboxd(html: string, finalUrl?: string): LetterboxdPage
     rating: { value: num(agg?.ratingValue), votes: num(agg?.ratingCount), extra: agg ? { reviews: num(agg.reviewCount) } : undefined },
     slug: url.match(/letterboxd\.com\/film\/([^/]+)\//)?.[1] ?? null,
     tmdbId: tmdb && tmdb > 0 ? tmdb : null,
+    recognised: isMovie(blocks),
   };
 }
 
-export interface RtPage { critics: Score; audience: Score }
+export interface RtPage { critics: Score; audience: Score; recognised: boolean }
 
 /** rottentomatoes.com/m/{slug}: the media-scorecard JSON (tomatometer and Popcornmeter, 0-100). */
 export function parseRt(html: string): RtPage {
-  const none = { critics: { value: null, votes: null }, audience: { value: null, votes: null } };
+  const none = { critics: { value: null, votes: null }, audience: { value: null, votes: null }, recognised: false };
   const m = html.match(/<script[^>]*id="media-scorecard-json"[^>]*>([\s\S]*?)<\/script>/);
   if (!m) return none;
   let card: { criticsScore?: Record<string, unknown>; audienceScore?: Record<string, unknown> };
   try { card = JSON.parse(m[1]!) as typeof card; } catch { return none; }
+  if (!card || typeof card !== "object") return none;
   const c = card.criticsScore ?? {}, a = card.audienceScore ?? {};
   return {
     critics: { value: num(c.score), votes: num(c.reviewCount ?? c.ratingCount), extra: { certified: c.certified === true, average: num(c.averageRating) } },
     audience: { value: num(a.score), votes: num(a.reviewCount), extra: { banded: a.bandedRatingCount ?? null, average: num(a.averageRating) } },
+    recognised: true,
   };
 }
 
-export interface McPage { critics: Score; user: Score }
+export interface McPage { critics: Score; user: Score; recognised: boolean }
 
 /** metacritic.com/movie/{slug}/: Metascore from JSON-LD (0-100), user score from the score badge (0-10, "tbd" -> null). */
 export function parseMc(html: string): McPage {
-  const agg = aggregate(jsonLd(html));
+  const blocks = jsonLd(html);
+  const agg = aggregate(blocks);
   const metascore = num(agg?.ratingValue) ?? num(html.match(/aria-label="Metascore (\d+) out of 100"/)?.[1]);
   const user = num(html.match(/aria-label="User score ([\d.]+) out of 10" data-testid="global-score-value-wrapper"/)?.[1]);
   return {
     critics: { value: metascore, votes: num(agg?.reviewCount) ?? num(html.match(/Based on ([\d,]+) Critic Reviews/)?.[1]) },
     user: { value: user, votes: user === null ? null : num(html.match(/Based on ([\d,]+) User Ratings/)?.[1]) },
+    recognised: isMovie(blocks),
   };
 }
 
