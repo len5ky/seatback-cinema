@@ -41,6 +41,14 @@ test("jal: splits packed cast, cleans zero-width genres, reads rating from the s
   expect(sg.synopsis).not.toContain("|");
 });
 
+test("jal: a film with genres but no categories gets its genres as categories", () => {
+  const raw = structuredClone(jalRaw);
+  raw.details["9025"].data.categories = [];
+  const sg = jal.parse(raw).find((f) => f.sourceId === "9025")!;
+  expect(sg.categories).toEqual(["Action / Adventure", "Hollywood", "New"]);
+  expect(jal.parse(jalRaw).find((f) => f.sourceId === "9016")!.categories).toContain("Featured"); // real categories win
+});
+
 test("fetchMonth: key from /api/config, flightSystem, detail calls cached under cacheDir/<id>/<month>/", async () => {
   const cacheDir = mkdtempSync(`${tmpRoot()}/spafax-`);
   const urls: string[] = [];

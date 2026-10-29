@@ -44,6 +44,7 @@ export function parseAna(raw: unknown): CatalogueFilm[] {
     const runtime = Number(d?.subheader?.match(/(\d+)\s*mins?\b/)?.[1]) || undefined;
     const rating = field("Rating") ?? d?.rating ?? undefined;
     const poster = d?.poster_image_url ?? v.thumbnail_url;
+    const genres = cleanList((v.genres ?? "").split(","));
     films.set(v._id, {
       sourceId: v._id,
       title: v.title.trim(),
@@ -51,13 +52,13 @@ export function parseAna(raw: unknown): CatalogueFilm[] {
       ...(runtime ? { runtime } : {}),
       directors: nameList(field("Director")),
       cast: nameList(field("Cast")),
-      genres: cleanList((v.genres ?? "").split(",")),
+      genres,
       ...(rating ? { rating } : {}),
       languages: languages(field("Language(s)")),
       subtitles: languages(field("Subtitle(s)")),
       ...(v.short_summary ? { synopsis: v.short_summary } : {}),
       ...(poster ? { poster } : {}),
-      categories: [],
+      categories: [...genres], // CineSend has no shelves; genre is the only grouping
     });
   }
   return [...films.values()];
