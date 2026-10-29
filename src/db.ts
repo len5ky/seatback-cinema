@@ -27,6 +27,21 @@ CREATE TABLE IF NOT EXISTS matches (
   score REAL NOT NULL, reasons TEXT NOT NULL, matched_at TEXT NOT NULL,
   PRIMARY KEY (airline, source_id)
 );
+-- ratings and taste (v2). ratings.value keeps each source's native scale (tmdb 0-10, letterboxd 0.5-5,
+-- rt_critics/rt_audience 0-100, mc_critics 0-100, mc_user 0-10); NULL value = looked up, nothing found (cached).
+-- user_films.rating is on a 10-point scale (Letterboxd stars x2). external_ids.source: wikidata | letterboxd | tmdb | none.
+CREATE TABLE IF NOT EXISTS external_ids (
+  tconst TEXT PRIMARY KEY, tmdb_id INTEGER, letterboxd_slug TEXT, rt_slug TEXT, mc_slug TEXT, source TEXT NOT NULL, fetched_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS ratings (
+  tconst TEXT NOT NULL, source TEXT NOT NULL, value REAL, votes INTEGER, extra TEXT, fetched_at TEXT NOT NULL,
+  PRIMARY KEY (tconst, source)
+);
+CREATE TABLE IF NOT EXISTS user_films (
+  tconst TEXT, title TEXT NOT NULL, year INTEGER, rating REAL, watched INTEGER NOT NULL DEFAULT 0, watchlist INTEGER NOT NULL DEFAULT 0,
+  source TEXT NOT NULL, updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS user_films_tconst ON user_films (tconst);
 `;
 /** v1 catalogue tables (Emirates-only, keyed by track_list); catalogue data is rebuilt from the cached raw files. */
 const V1_TABLES = ["movies", "movie_categories", "matches", "snapshots"];
