@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { normalizeTitle, splitNames, splitYearSuffix, surname, titleVariants, truncatedPrefix } from "../src/text.ts";
-import { directorsMatch, findCandidates, pickMatch, type Candidate } from "../src/match.ts";
+import { directorAgreement, directorsMatch, findCandidates, pickMatch, type Candidate } from "../src/match.ts";
 import { openDb } from "../src/db.ts";
 
 test("normalises titles", () => {
@@ -78,7 +78,10 @@ test("director typos still match", () => {
   expect(directorsMatch(["Jon Turtletaub"], ["Jon Turteltaub"])).toBe(true);
   expect(directorsMatch(["Phil Alden Robison"], ["Phil Alden Robinson"])).toBe(true);
   expect(directorsMatch(["Toby L."], ["Toby L."])).toBe(true);
-  expect(directorsMatch(["Kevin Lee"], ["Ang Lee"])).toBe(true); // surname-only by design; runtime/year break ties
+  expect(directorsMatch(["Kevin Lee"], ["Ang Lee"])).toBe(false); // a shared surname is not the same person
+  expect(directorAgreement(["Kevin Lee"], ["Ang Lee"])).toBe("surname");
+  expect(directorsMatch(["Steve McQueen"], ["Steven McQueen"])).toBe(true);
+  expect(directorsMatch(["J. Cameron"], ["James Cameron"])).toBe(true);
   expect(directorsMatch(["Andrew Stanton"], ["Andrew Stone"])).toBe(false);
   // a surname that is the other director's first name is not a match
   expect(directorsMatch(["James Cameron"], ["Cameron Crowe"])).toBe(false);
@@ -123,8 +126,43 @@ test("parenthetical translations and truncated titles", () => {
 test("findCandidates expands a truncated title by prefix", () => {
   const db = openDb(":memory:");
   db.run("INSERT INTO imdb_titles VALUES ('tt1170358','movie','The Hobbit: The Desolation of Smaug',NULL,2013,161,'Adventure',7.8,700000,NULL)");
-  db.run("INSERT INTO imdb_keys VALUES ('hobbit the desolation of smaug','tt1170358'), ('desolation of smaug','tt1170358')");
+  db.run("INSERT INTO imdb_titles VALUES ('tt2','movie','Desolation Row',NULL,1999,90,'Drama',5.0,100,NULL)");
+  // only the keys loadImdb writes: the fragment is the middle of the full title, not its start
+  db.run("INSERT INTO imdb_keys VALUES ('hobbit the desolation of smaug','tt1170358'), ('desolation row','tt2')");
   const r = findCandidates(db, "The Desolation Of ...");
   expect(r.candidates.map((c) => c.tconst)).toEqual(["tt1170358"]);
   expect(r.viaVariant).toBe(true);
+});
+
+test("a year gap over one caps the match at low, whatever else agrees", () => {
+  // Cathay's 1994 "Miracle on 34th Street" must not take the 1947 title
+  const m = pickMatch({ cleanTitle: "Miracle on 34th Street", year: 2000, duration: 114, director: "Les Mayfield" },
+    [cand("tt1", 2003, 114, ["Les Mayfield"], 50000)], 2026);
+  expect(m.confidence).toBe("low");
+  const decades = pickMatch({ cleanTitle: "Miracle on 34th Street", year: 1994, duration: 114, director: "Les Mayfield" },
+    [cand("tt0039628", 1947, 96, ["George Seaton"], 50000)], 2026);
+  expect(decades.confidence).toBe("low");
+});
+
+test("one year off scores below the exact year", () => {
+  const film = { cleanTitle: "Drive", year: 2011, duration: 100, director: "Nicolas Winding Refn" };
+  const exact = pickMatch(film, [cand("tt1", 2011, 100, ["Nicolas Winding Refn"])], 2026);
+  const near = pickMatch(film, [cand("tt1", 2012, 100, ["Nicolas Winding Refn"])], 2026);
+  expect(exact.score).toBeGreaterThan(near.score);
+  expect(exact.confidence).toBe("high");
+  expect(near.confidence).toBe("high"); // runtime + director still confirm a festival-year gap
+});
+
+test("Hero: a surname namesake a year off does not beat the exact year and runtime", () => {
+  const film = { cleanTitle: "Hero", year: 2002, duration: 99, director: "Ang Lee" };
+  const zhang = cand("tt0299977", 2002, 99, ["Zhang Yimou"], 190000);
+  const spike = cand("tt_false", 2003, 99, ["Spike Lee"], 190000);
+  expect(pickMatch(film, [spike, zhang], 2026).tconst).toBe("tt0299977");
+  // grok's case: only the namesake has the runtime; it may win but never at high
+  const m = pickMatch(film, [cand("tt0299977", 2002, 120, ["Zhang Yimou"], 190000), spike], 2026);
+  expect(m.confidence).not.toBe("high");
+  // without a director, a one-year-off namesake loses its grade to an exact-year rival
+  const noDir = pickMatch({ cleanTitle: "Hero", year: 2021, duration: 120, director: null },
+    [cand("tt_true", 2021, 155, ["X"], 5000), cand("tt_namesake", 2020, 120, ["Y"], 5000)], 2026);
+  expect(noDir.confidence).toBe("low");
 });

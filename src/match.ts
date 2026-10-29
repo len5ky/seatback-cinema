@@ -8,26 +8,50 @@ export interface Candidate {
   votes: number | null; directorNames: string[];
 }
 /** strong = confirming signals; hard = director or year disagreement (runtime disagreement only costs score: airlines edit films). */
-export interface Scored { candidate: Candidate; score: number; strong: number; hard: number; reasons: string[] }
+export interface Scored { candidate: Candidate; score: number; strong: number; hard: number; yearGap: number | null; reasons: string[] }
 export interface MatchResult { tconst: string | null; confidence: Confidence; score: number; reasons: string[] }
 
 const tokens = (name: string) => new Set(normalizeTitle(name).split(" ").filter((t) => t.length >= 2));
 
 /** Surnames close (typo-tolerant: "Turtletaub"/"Turteltaub"), or the same name in another order ("Gam-sung Pil"/"Pil Gam-sung"). */
-function sameDirector(x: string, y: string): boolean {
+function sameSurname(x: string, y: string): boolean {
   const a = surname(x), b = surname(y);
   const tol = Math.min(a.length, b.length) >= 6 ? 2 : Math.min(a.length, b.length) >= 4 ? 1 : 0;
-  if (a && (a === b || (tol > 0 && editDistance(a, b, tol) <= tol))) return true;
+  return !!a && (a === b || (tol > 0 && editDistance(a, b, tol) <= tol));
+}
+const sameTokens = (x: string, y: string) => {
   const tx = [...tokens(x)].sort().join(" ");
   return tx !== "" && tx === [...tokens(y)].sort().join(" ");
+};
+/** Given names agree when either is missing or an initial, one extends the other ("Steve"/"Steven"), or they differ by a typo. */
+function sameGivenName(x: string, y: string): boolean {
+  const a = normalizeTitle(x).split(" "), b = normalizeTitle(y).split(" ");
+  if (a.length < 2 || b.length < 2) return true;
+  const fa = a[0]!, fb = b[0]!;
+  if (fa.length === 1 || fb.length === 1) return fa[0] === fb[0];
+  return fa.startsWith(fb) || fb.startsWith(fa) || editDistance(fa, fb, 1) <= 1;
 }
 
-export function directorsMatch(a: string[], b: string[]): boolean {
-  return a.some((x) => b.some((y) => normalizeTitle(x) === normalizeTitle(y) || sameDirector(x, y)));
+export type DirectorAgreement = "full" | "surname" | "none";
+
+/** "full": the same person; "surname": only the family name agrees ("Kevin Lee"/"Ang Lee"), which is no evidence either way. */
+export function directorAgreement(a: string[], b: string[]): DirectorAgreement {
+  let best: DirectorAgreement = "none";
+  for (const x of a) for (const y of b) {
+    if (normalizeTitle(x) === normalizeTitle(y) || sameTokens(x, y)) return "full";
+    if (sameSurname(x, y)) {
+      if (sameGivenName(x, y)) return "full";
+      best = "surname";
+    }
+  }
+  return best;
 }
+
+export const directorsMatch = (a: string[], b: string[]): boolean => directorAgreement(a, b) === "full";
 
 export function scoreCandidate(film: FilmInfo, c: Candidate, nowYear: number): Scored {
   let score = 0, strong = 0, hard = 0;
+  let yearGap: number | null = null;
   const reasons: string[] = [];
   if (film.duration && c.runtime) {
     const d = Math.abs(film.duration - c.runtime);
@@ -37,18 +61,21 @@ export function scoreCandidate(film: FilmInfo, c: Candidate, nowYear: number): S
   }
   const ours = splitNames(film.director);
   if (ours.length && c.directorNames.length) {
-    if (directorsMatch(ours, c.directorNames)) { score += 4; strong++; reasons.push(`director ${c.directorNames.join(", ")}`); }
+    const agree = directorAgreement(ours, c.directorNames);
+    if (agree === "full") { score += 4; strong++; reasons.push(`director ${c.directorNames.join(", ")}`); }
+    else if (agree === "surname") reasons.push(`director ${c.directorNames.join(", ")} shares only a surname with ${film.director}`);
     else { score -= 2; hard++; reasons.push(`director ${c.directorNames.join(", ")} != ${film.director}`); }
   }
   if (film.year && c.startYear) {
-    const d = Math.abs(film.year - c.startYear);
-    if (d === 0) { score += 4; strong++; reasons.push(`year ${c.startYear}`); }
-    else if (d === 1) { score += 2; strong++; reasons.push(`year ${c.startYear}~${film.year}`); }
+    yearGap = Math.abs(film.year - c.startYear);
+    // an exact year confirms; one year off (festival vs release) only hints; more is a different film
+    if (yearGap === 0) { score += 4; strong++; reasons.push(`year ${c.startYear}`); }
+    else if (yearGap === 1) { score += 1; reasons.push(`year ${c.startYear}~${film.year}`); }
     else { score -= 4; hard++; reasons.push(`year ${c.startYear} vs ${film.year}`); }
   }
   if (strong === 0 && c.startYear && c.startYear >= nowYear - 3) { score += 1; reasons.push(`recent ${c.startYear}`); }
   score += 0.25 * Math.log10((c.votes ?? 0) + 1);
-  return { candidate: c, score, strong, hard, reasons };
+  return { candidate: c, score, strong, hard, yearGap, reasons };
 }
 
 const DOWNGRADE: Record<Confidence, Confidence> = { high: "medium", medium: "low", low: "low", none: "none" };
@@ -62,9 +89,18 @@ export function pickMatch(film: FilmInfo, candidates: Candidate[], nowYear = new
   const net = best.strong - best.hard;
   let confidence: Confidence = best.hard === 0 && net >= 2 ? "high" : net >= 1 ? "medium" : "low";
   const reasons = [...best.reasons];
-  if (runner && runner.strong >= best.strong && best.score - runner.score < 1) {
+  if (best.yearGap !== null && best.yearGap > 1) {
+    // a release year more than a year away is a different film however well the rest agrees
+    confidence = "low";
+  } else if (runner && runner.strong >= best.strong && best.score - runner.score < 1) {
     confidence = DOWNGRADE[confidence];
     reasons.push(`ambiguous with ${runner.candidate.tconst}`);
+  } else if (best.yearGap === 1) {
+    const exact = ranked.find((r) => r.yearGap === 0);
+    if (exact) {
+      confidence = DOWNGRADE[confidence];
+      reasons.push(`${exact.candidate.tconst} has the exact year`);
+    }
   }
   if (viaVariant) {
     // a title fragment ("Kantara" for "Kantara: Chapter 1") often names the franchise, not the film
@@ -84,12 +120,16 @@ export function findCandidates(db: Database, title: string): { candidates: Candi
   if (viaVariant) {
     const seen = new Set<string>();
     rows = titleVariants(title).flatMap((v) => q.all(v)).filter((r) => !seen.has(r.tconst) && !!seen.add(r.tconst));
-    const prefix = truncatedPrefix(title);
-    if (prefix) {
-      // index range scan over normalised titles starting with the prefix; year/director must then confirm
-      rows.push(...db.query<CandRow, [string, string]>(
-        `SELECT DISTINCT t.tconst, t.primary_title, t.start_year, t.runtime, t.votes, t.directors FROM imdb_keys k JOIN imdb_titles t USING (tconst)
-         WHERE k.norm >= ? AND k.norm < ? LIMIT 200`).all(prefix, `${prefix}\uffff`).filter((r) => !seen.has(r.tconst) && !!seen.add(r.tconst)));
+    const frag = truncatedPrefix(title);
+    if (frag) {
+      // a chopped title may have lost its head too ("The Desolation Of ..." for "The Hobbit: The Desolation of Smaug"),
+      // so match the fragment at any word start; short fragments only as a prefix. Year/director must then confirm.
+      const cols = "SELECT DISTINCT t.tconst, t.primary_title, t.start_year, t.runtime, t.votes, t.directors FROM imdb_keys k JOIN imdb_titles t USING (tconst)";
+      const found = frag.length >= 8
+        ? db.query<CandRow, [string]>(`${cols} WHERE (' ' || k.norm) LIKE ? ORDER BY t.votes DESC LIMIT 200`).all(`% ${frag}%`) // full scan; rare
+        : db.query<CandRow, [string, string]>(`${cols} WHERE k.norm >= ? AND k.norm < ? ORDER BY t.votes DESC LIMIT 200`).all(frag, `${frag}\uffff`);
+      rows.push(...found
+        .filter((r) => !seen.has(r.tconst) && !!seen.add(r.tconst)));
     }
   }
   const nameQ = db.query<{ name: string }, [string]>("SELECT name FROM imdb_names WHERE nconst = ?");
