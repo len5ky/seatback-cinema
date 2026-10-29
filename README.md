@@ -73,4 +73,33 @@ All sources are undocumented endpoints behind the airlines' own sites, several w
 This is a low-volume tool: one fetch per airline and month per day at most, no retries, raw responses cached in
 `data/raw/`. IMDb data is used under its non-commercial dataset licence.
 
-A Claude Code skill (`.claude/skills/plane-movies/`) wraps the CLI for "what should I watch on my flight?".
+## Publishing pipeline
+
+`.github/workflows/monthly.yml` runs on the 1st and 15th of each month (some airlines switch cycles mid-month) and
+on manual dispatch (optional `month` input). Steps: `bun run cli imdb sync` (downloads ~1.2 GB of IMDb `.gz`
+files, free inbound traffic on GitHub-hosted runners, cached per month), `scripts/fetch-all.sh` (each airline in
+turn with a 20 min timeout; a failure is recorded and the rest continue), `match`, `export`, then
+`scripts/build-index.ts` rebuilds `public/data/index.json` from the files on disk so an airline that failed this
+run keeps its last published month. Changed `public/data` is committed to main by the Actions bot with `[skip ci]`.
+Fetch logs are uploaded as a workflow artifact. Expect 10-20 minutes per run.
+
+`public/data/health.json` records each airline's last attempt: `status` (`ok`, `failed`, `timeout`), film count,
+duration, error tail and `lastSuccess`. The Playwright install step only runs once `src/airlines/american.ts` exists.
+
+Locally: `scripts/fetch-all.sh [YYYY-MM]` runs the same fetch loop.
+
+## Leaderboard page
+
+`public/index.html` is a static page (no build step) that reads `data/index.json` and each airline's latest file
+in the browser: film count, IMDb match rate, how many of the ten most widely carried films each airline has, last
+update and fetch health. The median and mean IMDb rating columns fill in once the export carries a rating field.
+Preview with `bunx serve public` or `python3 -m http.server -d public`.
+
+## Skills
+
+- `.claude/skills/plane-movies/` is the local skill for this checkout. It drives the CLI and the SQLite database.
+- `skill/plane-movies/` is the installable thin client for everyone else. It downloads one airline-month from
+  the published dataset, caches it and prints a table for the model, so nobody needs to clone the pipeline. It
+  runs on Bun, Node 22.6+ or Deno and works in Claude Code, Codex and Cursor. Install steps: `skill/README.md`.
+  The dataset URL stays a placeholder (`DEFAULT_BASE_URL` in `skill/plane-movies/scripts/catalogue.ts`) until the
+  repo is public.
