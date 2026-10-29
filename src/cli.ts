@@ -8,6 +8,7 @@ import { matchAll } from "./match.ts";
 import { loadTaste, picks } from "./rank.ts";
 import { exportAll } from "./export.ts";
 import { syncIds } from "./ratings/ids.ts";
+import { importExport, loadExport, parseExport } from "./ratings/letterboxd-export.ts";
 
 const USAGE = `usage: bun run cli <command>
   fetch <airline|all> [--month YYYY-MM] [--refresh]  fetch (or reuse cached) monthly catalogue
@@ -17,6 +18,7 @@ const USAGE = `usage: bun run cli <command>
   search <title> [--airline X]                       find a film in the latest catalogue of each airline
   stats [--airline X] [--month YYYY-MM]
   export [--month YYYY-MM]                           write public/data/<airline>/<month>.json + index.json
+  taste import [export.zip|dir]                      import a Letterboxd export (default: newest zip in data/letterboxd/)
   ids sync [--airline X] [--limit N]                 Wikidata crosswalk (TMDB/Letterboxd/RT/MC ids) for new matched films
 airlines: ${Object.keys(adapters).join(", ")}`;
 
@@ -183,6 +185,16 @@ async function main(): Promise<void> {
       const r = exportAll(db, { month: opt.month ? validMonth(opt.month) : undefined });
       for (const f of r.files) console.log(`wrote ${f.path} (${f.films} films)`);
       console.log(`wrote ${r.index}`);
+      return;
+    }
+    case "taste": {
+      if (arg !== "import") throw new Error("usage: taste import [letterboxd-export.zip]");
+      const { path, files } = await loadExport(pos[2]);
+      const r = importExport(db, parseExport(files));
+      const ok = r.matched.high + r.matched.medium;
+      console.log(`${path}: ${r.films} films (${r.rated} rated, ${r.watched} watched, ${r.watchlist} on watchlist)`);
+      console.log(`matched to IMDb: ${ok} (${pct(ok, r.films)}; high ${r.matched.high}, medium ${r.matched.medium}), unmatched ${r.unmatched.length}`);
+      if (r.unmatched.length) console.log(`unmatched (ignored for taste): ${r.unmatched.slice(0, 20).join("; ")}${r.unmatched.length > 20 ? "; ..." : ""}`);
       return;
     }
     case "ids": {
