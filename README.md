@@ -19,6 +19,9 @@ bun run cli stats [--airline X]    # film count and match rate by confidence, pe
 bun run cli picks [--airline emirates] [--top 30] [--genre Thriller] [--min-rating 7] [--language English]
 bun run cli search "toy story" [--airline X]   # which airlines carry it this month
 bun run cli export [--month 2026-10]           # public/data/<airline>/<month>.json + public/data/index.json
+bun run cli taste import [export.zip]          # your Letterboxd export (default: newest zip in data/letterboxd/)
+bun run cli ids sync [--airline X] [--limit N] # Wikidata: TMDB / Letterboxd / RT / Metacritic ids for matched films
+bun run cli ratings sync [--source tmdb|letterboxd|rt|mc|all] [--airline X] [--limit N]
 ```
 
 `bun test` runs the unit tests (fixtures in `tests/fixtures/` are trimmed from real responses);
@@ -61,11 +64,47 @@ For the current month the date sent is today, otherwise the 5th.
   Confidence: `high` (two confirming signals, no conflict), `medium` (one net signal), `low` (plausible but
   unconfirmed or conflicting, never ranked), `none` (no candidate). Emirates has no year field, so it leans on
   director and runtime; the other airlines all send a year.
-- **Ranking**: Bayesian-weighted IMDb rating (pulled toward 6.5 by `min_votes`), +0.4 per liked genre (max 2),
-  −1 per disliked genre, +0.5 when the director made one of your `favourites`; `seen` titles are skipped.
+- **Ranking**: see [Ratings and taste](#ratings-and-taste).
 - **Export**: one JSON per airline and month with `sourceId, title, year, runtime, directors, genres, rating,
   languages, categories, imdbId, imdbConfidence, tmdbId` (`imdbId` only for high/medium matches; `tmdbId` is a
   placeholder). No synopsis, poster or cast. `index.json` lists airlines, months, counts and fetch times.
+
+## Ratings and taste
+
+Picks are scored on a 10-point scale in two steps.
+
+**1. Blend of public ratings.** IMDb 0.4, Letterboxd average 0.3 (stars x2), RT audience score 0.15 (/10) and
+Metascore 0.15 (/10). IMDb is first pulled toward 6.5 by `min_votes`, and IMDb and Letterboxd weights scale with
+log10 of their vote counts (0.2 at a handful of votes, full weight from 100k). A source with no score drops out
+and the remaining weights re-normalise, so a film with IMDb alone scores exactly as before. `picks` prints the
+sources behind each score.
+
+**2. Your taste.** With a Letterboxd export imported, every rated film adds its deviation from your average
+rating to each of its IMDb genres and directors. An affinity is the sum of those deviations divided by
+(films + 3), so one film moves it a little and ten move it a lot. A pick gets the mean affinity of its genres plus
+the mean affinity of its directors, and the strongest three show up as reasons ("you rate Denis Villeneuve +0.7
+(3 films)"). Films you have watched or rated are left out. Watchlist films get +1.5 ("on your watchlist").
+`taste.json` still applies on top as manual overrides: liked/disliked genres, `favourites`, `seen`, `min_rating`,
+`min_votes`.
+
+Setup:
+
+1. **Letterboxd export**: letterboxd.com > Settings > Data > Export your data. Drop the zip into
+   `data/letterboxd/` (git-ignored) and run `bun run cli taste import`. It reads `ratings.csv`, `watched.csv` and
+   `watchlist.csv`, matches name + year to IMDb with the catalogue matcher, and replaces the previous import.
+   It prints the films it could not match; those are ignored for taste.
+2. **TMDB key** (optional): a free key from themoviedb.org > Settings > API, in `.env` as `TMDB_API_KEY=...`
+   (a v3 key or a v4 read token both work). Without it `ratings sync` skips TMDB with a message. TMDB ratings
+   and ids are stored but not yet part of the blend.
+3. `bun run cli ids sync`, then `bun run cli ratings sync`. Ids come from Wikidata in batches of 200, once per
+   film. Letterboxd, RT and Metacritic pages are fetched at 1 request per second per site and cached for 30 days
+   in the `ratings` table (a page that 404s is cached as "no score"). RT and Metacritic are only tried where
+   Wikidata has a slug. Network errors and 403/429/5xx are not cached; three in a row stop that source for the
+   run. A first run over all ten airlines covers about 3,500 films, so about an hour per
+   scraped source; later months only fetch new or expired films. Use `--limit N` to try it on a few.
+
+Letterboxd's terms forbid automated access and RT and Metacritic have no public API: this is personal,
+low-volume use only, and scraped scores are never exported to `public/data/`.
 
 ## Data source caveats
 

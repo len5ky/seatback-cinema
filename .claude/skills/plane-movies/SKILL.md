@@ -7,7 +7,7 @@ description: Recommend what to watch on a flight from the airline's in-flight ca
 
 Local monthly catalogues for Emirates, United, KLM, British Airways (`ba`), Singapore Airlines (`singapore`),
 Lufthansa, Japan Airlines (`jal`), Cathay Pacific (`cathay`), Qantas and ANA,
-matched to IMDb and ranked with `taste.json`. Run everything from the project root `/home/lensky/Dev/plane_movie`
+matched to IMDb and ranked by a blend of IMDb, Letterboxd, RT and Metacritic plus the user's Letterboxd taste and `taste.json`. Run everything from the project root `/home/lensky/Dev/plane_movie`
 with bun (`~/.bun/bin` on PATH). `bun run cli` with no arguments lists the registered airline ids.
 
 ## Answering "what should I watch on my flight?"
@@ -27,11 +27,24 @@ with bun (`~/.bun/bin` on PATH). `bun run cli` with no arguments lists the regis
 `bun run cli imdb sync` reloads IMDb (downloads ~1.2 GB if files are older than 7 days, ~3 min load). Only run it
 when `stats` shows 0 IMDb titles or the user asks for fresher ratings.
 
-## Taste
+## Taste and ratings
 
-Edit `taste.json`: `liked_genres`, `disliked_genres` (IMDb names such as Sci-Fi, Thriller, Horror), `min_rating`,
-`min_votes`, `seen` (titles or tt ids, excluded from picks), `favourites` (titles; their directors get a small
-boost). When the user says they have seen a film, add it to `seen`.
+The best taste signal is the user's Letterboxd export. If `picks` prints "taste: taste.json only", offer this:
+
+1. Letterboxd > Settings > Data > Export your data; drop the zip into `data/letterboxd/`.
+2. `bun run cli taste import` (re-run after each new export; it replaces the previous import and lists unmatched
+   films). Watched and rated films are then excluded, watchlist films are boosted, and genre/director affinities
+   learned from the ratings show up as "you rate X +0.7 (3 films)" reasons.
+
+Extra rating sources (optional, slow the first time): `bun run cli ids sync`, then
+`bun run cli ratings sync [--source letterboxd|rt|mc|tmdb] [--airline X]`. Scraped sites go at 1 request/s with a
+30-day cache, so a first full run is about an hour per source; scope it with `--airline` or `--limit N`. TMDB needs
+`TMDB_API_KEY` in `.env` (free key from themoviedb.org > Settings > API) and is skipped otherwise. Picks then blend
+IMDb, Letterboxd, RT audience and Metacritic; each pick lists its `sources:`.
+
+`taste.json` stays as manual overrides: `liked_genres`, `disliked_genres` (IMDb names such as Sci-Fi, Thriller,
+Horror), `min_rating`, `min_votes`, `seen` (titles or tt ids, excluded from picks), `favourites` (titles; their
+directors get a small boost). When the user says they have seen a film, add it to `seen`.
 
 ## Caveats to tell the user when relevant
 
