@@ -1,3 +1,4 @@
 data/
 tmp/
 node_modules/
+.claude/worktrees/
