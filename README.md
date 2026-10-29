@@ -166,11 +166,14 @@ Fetch logs are uploaded as a workflow artifact. Expect 10-20 minutes per run.
 `public/data/health.json` records each airline's last attempt: `status` (`ok`, `failed`, `timeout`), film count,
 duration, error tail and `lastSuccess`.
 
-American answers HTTP 429 to GitHub runner IPs, so CI skips it (`status: "skipped"`, `reason: "fetched locally"`).
+American answers HTTP 429 to GitHub runner IPs, so CI skips it and keeps whatever entry the local job last wrote
+(`status: "skipped"`, `reason: "fetched locally"` only if there is none; the leaderboard shows that as a neutral badge,
+not a failure).
 `scripts/american-local.sh` runs from a user crontab on the dev machine at 03:00 UTC on the 1st and 15th: it fetches
 American with `--refresh`, matches, exports that airline only, rebuilds `index.json` and pushes the American file,
-`index.json`, `ids.json` and `health.json` to main with `[skip ci]`. `--dry-run` reuses cached raw files and stops
-before the commit.
+`index.json`, `ids.json` and `health.json` to main with `[skip ci]`, rebasing right before the push and regenerating
+its files on top of CI's if they conflict. `--dry-run` reuses cached raw files, works on copies under
+`tmp/american-dry/` (database snapshot, raw cache, `public/data`) and stops before the commit.
 
 Locally: `scripts/fetch-all.sh [YYYY-MM]` runs the same fetch loop.
 
