@@ -1,6 +1,8 @@
 // Qantas "What's on this month": one POST per route returns every shelf (movies and TV) for the current month.
 import type { AirlineAdapter, CatalogueFilm } from "./types.ts";
-import { UA, cachedJson, cleanList, splitNames } from "./platforms/cached-fetch.ts";
+import { rmSync } from "node:fs";
+import { BROWSER_UA, cachedJson, monthDir } from "./http.ts";
+import { cleanList, nameList } from "./platforms/batch.ts";
 
 const API = "https://www.qantas.com/api/entertainment/metadata";
 
@@ -36,8 +38,8 @@ export function parseQantas(raw: unknown): CatalogueFilm[] {
         title: m.title.trim(),
         ...(year ? { year } : {}),
         ...(runtime ? { runtime } : {}),
-        directors: splitNames(m.director),
-        cast: splitNames(m.cast),
+        directors: nameList(m.director),
+        cast: nameList(m.cast),
         genres: cleanList([m.genre]),
         ...(m.rating ? { rating: m.rating } : {}),
         languages: cleanList(m.audio_data),
@@ -61,16 +63,17 @@ export function qantasAdapter(route = "large_international_seatback"): AirlineAd
   return {
     id: "qantas",
     name: "Qantas",
-    async fetchMonth(month, opts) {
-      const raw = (await cachedJson(`${opts.cacheDir}/qantas/${month}/${route}.json`, opts.refresh, () =>
-        fetch(`${API}?route=${encodeURIComponent(route)}`, {
-          method: "POST",
-          headers: { "User-Agent": UA, "Content-Type": "application/json", Accept: "application/json" },
-          body: "{}",
-        }), (parsed) => {
-          const served = servedMonth(parsed as QantasRaw);
-          if (served !== month) throw new Error(`qantas serves ${served} only, not ${month}`);
-        })) as QantasRaw;
+    async fetchMonth(month, { cacheDir, refresh }) {
+      const path = `${monthDir(cacheDir, "qantas", month)}/${route}.json`;
+      const raw = await cachedJson<QantasRaw>({
+        url: `${API}?route=${encodeURIComponent(route)}`, path, refresh,
+        init: { method: "POST", headers: { "User-Agent": BROWSER_UA, "Content-Type": "application/json", Accept: "application/json" }, body: "{}" },
+      });
+      const served = servedMonth(raw);
+      if (served !== month) {
+        rmSync(path, { force: true });
+        throw new Error(`qantas serves ${served} only, not ${month}`);
+      }
       return raw;
     },
     parse: parseQantas,

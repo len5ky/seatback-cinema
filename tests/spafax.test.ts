@@ -50,23 +50,26 @@ test("fetchMonth: key from /api/config, flightSystem, detail calls cached under 
     urls.push(url);
     const headers = new Headers(init?.headers);
     let body: unknown;
-    if (url.endsWith("/api/config")) body = { apiGateway: { key: "k123" }, filmService: { apiUrl: "https://api.test/film" } };
+    if (url.endsWith("/api/config")) body = { apiGateway: { key: "k123" }, filmService: { apiUrl: "https://api.test/film" }, brand: { code: "JL", enableSwitch: false } };
     else {
       expect(headers.get("Ocp-Apim-Subscription-Key")).toBe("k123");
       expect(url).toContain("flightSystem=NEXT-INT");
       expect(url).toContain("flightDate=2026-11-05T00");
       if (url.includes("/buckets/15/films")) body = list;
-      else body = jalRaw.details[url.match(/films\/(\d+)/)![1] as keyof typeof jalRaw.details] ?? { data: null };
+      else {
+        body = jalRaw.details[url.match(/films\/(\d+)/)![1] as keyof typeof jalRaw.details];
+        if (!body) return new Response("not found", { status: 404 });
+      }
     }
     return new Response(JSON.stringify(body), { status: 200 });
   }) as typeof fetch;
   try {
     const raw = await jal.fetchMonth("2026-11", { cacheDir });
-    expect(urls.length).toBe(2 + 4); // config, list, 4 details
+    expect(urls.length).toBe(2 + 3); // config, list, details for all but the 2-minute promo
     expect(await Bun.file(`${cacheDir}/jal/2026-11/films/9016.json`).exists()).toBe(true);
     expect(jal.parse(raw).find((f) => f.sourceId === "9016")?.directors).toEqual(["Steven Spielberg"]);
     await jal.fetchMonth("2026-11", { cacheDir });
-    expect(urls.length).toBe(6); // second run is fully cached
+    expect(urls.length).toBe(6); // second run: only the failed detail (9125) is retried
   } finally {
     rmSync(cacheDir, { recursive: true, force: true });
   }

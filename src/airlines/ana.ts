@@ -1,7 +1,8 @@
 // ANA on CineSend: one search call per month (month-name tag) plus a detail call per title for
 // director, cast, languages, rating and runtime. The API answers 403 without the portal's Origin/Referer.
 import type { AirlineAdapter, CatalogueFilm } from "./types.ts";
-import { UA, cachedJson, cleanList, mapLimit, monthDate, splitNames } from "./platforms/cached-fetch.ts";
+import { BROWSER_UA, cachedJson, monthDir } from "./http.ts";
+import { cleanList, loadDetails, nameList } from "./platforms/batch.ts";
 
 const API = "https://api.cinesend.com/api/ondemand";
 const ORG = "6510d9293f9f8bc7a4030aff";
@@ -48,8 +49,8 @@ export function parseAna(raw: unknown): CatalogueFilm[] {
       title: v.title.trim(),
       year,
       ...(runtime ? { runtime } : {}),
-      directors: splitNames(field("Director")),
-      cast: splitNames(field("Cast")),
+      directors: nameList(field("Director")),
+      cast: nameList(field("Cast")),
       genres: cleanList((v.genres ?? "").split(",")),
       ...(rating ? { rating } : {}),
       languages: languages(field("Language(s)")),
@@ -63,31 +64,24 @@ export function parseAna(raw: unknown): CatalogueFilm[] {
 }
 
 async function fetchAna(month: string, opts: { cacheDir: string; refresh?: boolean }): Promise<AnaRaw> {
-  const dir = `${opts.cacheDir}/ana/${month}`;
-  const get = (url: string) => () =>
-    fetch(url, { headers: { "User-Agent": UA, Accept: "application/json", Origin: PORTAL, Referer: `${PORTAL}/` } });
-  const monthName = MONTHS[Number(monthDate(month).slice(5, 7)) - 1]!;
-  const params = new URLSearchParams({
+  const dir = monthDir(opts.cacheDir, "ana", month);
+  const { refresh } = opts;
+  const init = { headers: { "User-Agent": BROWSER_UA, Accept: "application/json", Origin: PORTAL, Referer: `${PORTAL}/` } };
+  const monthName = MONTHS[Number(month.slice(5, 7)) - 1];
+  if (!/^\d{4}-\d{2}$/.test(month) || !monthName) throw new Error(`bad month ${month}, expected YYYY-MM`);
+  const query = new URLSearchParams({
     organizationID: ORG, term: "", countries: "", durStart: "0", durEnd: "240", custom: "{}",
     tagIDs: `international,${monthName}`, lang: "en_US",
   });
-  const search = (await cachedJson(`${dir}/search.json`, opts.refresh, get(`${API}/dashboard/videos/search?${params}`),
-    (parsed) => {
-      if (!videos({ search: parsed, details: {} } as AnaRaw).length) throw new Error(`ana: no videos tagged ${monthName}`);
-    })) as AnaRaw["search"];
+  const search = await cachedJson<AnaRaw["search"]>({ url: `${API}/dashboard/videos/search?${query}`, path: `${dir}/search.json`, refresh, init });
   const raw: AnaRaw = { search, details: {} };
-  const wanted = videos(raw).filter((v) => Number(v.release_year) > 0);
-  let failed = 0;
-  await mapLimit(wanted, DETAIL_CONCURRENCY, async (v) => {
-    try {
-      raw.details[v._id] = (await cachedJson(`${dir}/videos/${v._id}.json`, opts.refresh,
-        get(`${API}/dashboard/videos/${v._id}?lang=en_US`))) as AnaRaw["details"][string];
-    } catch (e) {
-      failed++;
-      console.warn(`ana: detail ${v._id} failed: ${(e as Error).message}`);
-    }
+  const dated = videos(raw).filter((v) => Number(v.release_year) > 0);
+  if (!dated.length) throw new Error(`ana: no dated videos tagged ${monthName}`);
+  await loadDetails("ana", dated, DETAIL_CONCURRENCY, async (v) => {
+    raw.details[v._id] = await cachedJson<AnaRaw["details"][string]>({
+      url: `${API}/dashboard/videos/${v._id}?lang=en_US`, path: `${dir}/videos/${v._id}.json`, refresh, init,
+    });
   });
-  if (failed > Math.max(2, wanted.length / 10)) throw new Error(`ana: ${failed}/${wanted.length} detail calls failed`);
   return raw;
 }
 

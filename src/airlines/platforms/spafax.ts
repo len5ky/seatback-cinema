@@ -1,7 +1,8 @@
 // Spafax "profile" portals (Lufthansa, JAL). The list call gives title/year/runtime; directors, cast,
 // genres, shelves and languages are only on the per-film detail call.
 import type { AirlineAdapter, CatalogueFilm } from "../types.ts";
-import { UA, cachedJson, cleanList, mapLimit, monthDate, splitNames } from "./cached-fetch.ts";
+import { BROWSER_UA, cachedJson, fetchDate, monthDir } from "../http.ts";
+import { cleanList, loadDetails, nameList } from "./batch.ts";
 
 export interface SpafaxSite {
   id: string;
@@ -51,8 +52,8 @@ export function parseSpafax(raw: unknown): CatalogueFilm[] {
       title: item.title.trim(),
       ...(year ? { year } : {}),
       ...(runtime !== undefined ? { runtime } : {}),
-      directors: splitNames(d?.directors),
-      cast: splitNames(d?.cast),
+      directors: nameList(d?.directors),
+      cast: nameList(d?.cast),
       genres: cleanList(d?.genres),
       ...(rating ? { rating } : {}),
       languages: cleanList(d?.dubbings).filter((l) => !/audio description/i.test(l)),
@@ -66,40 +67,33 @@ export function parseSpafax(raw: unknown): CatalogueFilm[] {
 }
 
 export async function fetchSpafax(site: SpafaxSite, month: string, opts: { cacheDir: string; refresh?: boolean }): Promise<SpafaxRaw> {
-  const dir = `${opts.cacheDir}/${site.id}/${month}`;
-  const get = (url: string, headers: Record<string, string> = {}) => () =>
-    fetch(url, { headers: { "User-Agent": UA, Accept: "application/json", Referer: `${site.portal}/`, ...headers } });
-  const config = (await cachedJson(`${dir}/config.json`, opts.refresh, get(`${site.portal}/api/config`))) as {
-    apiGateway?: { key?: string }; filmService?: { apiUrl?: string };
-  };
+  const dir = monthDir(opts.cacheDir, site.id, month);
+  const { refresh } = opts;
+  const browser = { "User-Agent": BROWSER_UA, Accept: "application/json", Referer: `${site.portal}/` };
+  const config = await cachedJson<{ apiGateway?: { key?: string }; filmService?: { apiUrl?: string } }>({
+    url: `${site.portal}/api/config`, path: `${dir}/config.json`, refresh, init: { headers: browser },
+  });
   const key = config.apiGateway?.key;
   if (!key) throw new Error(`${site.id}: no apiGateway.key in ${site.portal}/api/config`);
-  const api = config.filmService?.apiUrl ?? "https://prod-api.profile-spafax.com/film";
-  const auth = { "Ocp-Apim-Subscription-Key": key };
-  const common = new URLSearchParams({ flightDate: `${monthDate(month)}T00:00:00.000Z`, lang: "en" });
+  const api = `${config.filmService?.apiUrl ?? "https://prod-api.profile-spafax.com/film"}/v3/${site.code}`;
+  const init = { headers: { ...browser, "Ocp-Apim-Subscription-Key": key } };
+  const common = new URLSearchParams({ flightDate: `${fetchDate(month)}T00:00:00.000Z`, lang: "en" });
   if (site.flightSystem) common.set("flightSystem", site.flightSystem);
 
-  const listParams = new URLSearchParams(common);
-  for (const [k, v] of [["page", "1"], ["pageSize", "1000"], ["type", "movie"]]) listParams.set(k!, v!);
-  const list = (await cachedJson(`${dir}/list.json`, opts.refresh,
-    get(`${api}/v3/${site.code}/buckets/${site.bucket}/films?${listParams}`, auth))) as SpafaxRaw["list"] & {
-    paging?: { totalCount?: number; pageCount?: number };
-  };
+  const listQuery = new URLSearchParams([...common, ["page", "1"], ["pageSize", "1000"], ["type", "movie"]]);
+  const list = await cachedJson<SpafaxRaw["list"] & { paging?: { pageCount?: number } }>({
+    url: `${api}/buckets/${site.bucket}/films?${listQuery}`, path: `${dir}/list.json`, refresh, init,
+  });
   if ((list.paging?.pageCount ?? 1) > 1) throw new Error(`${site.id}: list has ${list.paging?.pageCount} pages, expected 1`);
   if (!list.data.length) throw new Error(`${site.id}: empty list for ${month} (flightSystem ${site.flightSystem ?? "unset"})`);
 
   const details: SpafaxRaw["details"] = {};
-  let failed = 0;
-  await mapLimit(list.data, DETAIL_CONCURRENCY, async (item) => {
-    try {
-      details[String(item.id)] = (await cachedJson(`${dir}/films/${item.id}.json`, opts.refresh,
-        get(`${api}/v3/${site.code}/films/${item.id}?${common}`, auth))) as { data: SpafaxDetail };
-    } catch (e) {
-      failed++;
-      console.warn(`${site.id}: detail ${item.id} failed: ${(e as Error).message}`);
-    }
+  const wanted = list.data.filter((i) => i.type.toLowerCase() === "movie" && !((i.runtime ?? MIN_RUNTIME) < MIN_RUNTIME));
+  await loadDetails(site.id, wanted, DETAIL_CONCURRENCY, async (item) => {
+    details[String(item.id)] = await cachedJson<{ data: SpafaxDetail }>({
+      url: `${api}/films/${item.id}?${common}`, path: `${dir}/films/${item.id}.json`, refresh, init,
+    });
   });
-  if (failed > Math.max(2, list.data.length / 10)) throw new Error(`${site.id}: ${failed}/${list.data.length} detail calls failed`);
   return { list, details };
 }
 
