@@ -18,7 +18,7 @@ with bun (`~/.bun/bin` on PATH). `bun run cli` with no arguments lists the regis
    bun run cli stats --airline united                  # snapshot for this month? match rate?
    bun run cli fetch united [--month YYYY-MM]          # only if the month is missing (cached per month)
    bun run cli match --airline united                  # after any fetch or imdb sync
-   bun run cli picks --airline united --top 15 [--genre Thriller] [--min-rating 7] [--language English]
+   bun run cli picks --airline united --top 15 [--genre Thriller] [--min-rating 7] [--language English] [--min-year N] [--max-year N] [--year N]
    ```
    `picks` defaults to Emirates when `--airline` is omitted.
 3. Present 5-10 picks with one line each: why it fits (genre, rating), runtime (fits the flight?), IMDb link.

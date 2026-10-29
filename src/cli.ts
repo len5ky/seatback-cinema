@@ -17,6 +17,7 @@ const USAGE = `usage: bun run cli <command>
   imdb sync [--force]                                download IMDb datasets (if >7 days old) and load them
   match [--airline X]                                match catalogue films to IMDb titles
   picks [--airline emirates] [--top 30] [--genre X] [--min-rating 7] [--language English] [--month YYYY-MM]
+                                                     [--min-year N] [--max-year N] [--year N] (--year sets both)
   search <title> [--airline X]                       find a film in the latest catalogue of each airline
   stats [--airline X] [--month YYYY-MM]
   export [--month YYYY-MM] [--airline X]             write public/data/<airline>/<month>.json, ids.json, index.json
@@ -33,6 +34,7 @@ const { values: opt, positionals: pos } = parseArgs({
   options: {
     month: { type: "string" }, refresh: { type: "boolean" }, force: { type: "boolean" }, airline: { type: "string" },
     top: { type: "string" }, genre: { type: "string" }, "min-rating": { type: "string" }, language: { type: "string" },
+    "min-year": { type: "string" }, "max-year": { type: "string" }, year: { type: "string" },
     limit: { type: "string" }, source: { type: "string" },
   },
 });
@@ -146,9 +148,14 @@ async function main(): Promise<void> {
       const airline = airlineOpt(opt.airline) ?? "emirates";
       const top = numberOpt("top", opt.top, 30, (n) => Number.isInteger(n) && n > 0, "a positive integer") ?? 30;
       const minRating = numberOpt("min-rating", opt["min-rating"], undefined, (n) => n >= 0 && n <= 10, "a number from 0 to 10");
+      const isYear = (n: number) => Number.isInteger(n) && n >= 1880 && n <= 2100;
+      const yearRule = "a positive integer from 1880 to 2100";
+      const year = numberOpt("year", opt.year, undefined, isYear, yearRule);
+      const minYear = numberOpt("min-year", opt["min-year"], year, isYear, yearRule);
+      const maxYear = numberOpt("max-year", opt["max-year"], year, isYear, yearRule);
       const m = month(airline);
       const taste = await loadTaste();
-      const r = picks(db, taste, { airline, month: m, top, genre: opt.genre, language: opt.language, minRating });
+      const r = picks(db, taste, { airline, month: m, top, genre: opt.genre, language: opt.language, minRating, minYear, maxYear });
       console.log(`${adapters[airline]?.name} ${m}: top ${r.picks.length} picks (excluded: ${r.excludedLow} low-confidence, ${r.unmatched} unmatched, ${r.watched} already watched)`);
       console.log(r.model
         ? `taste: ${r.model.rated} ratings (mean ${r.model.mean.toFixed(1)}/10), ${r.model.watched.size} watched, ${r.model.watchlist.size} on watchlist; taste.json as overrides\n`

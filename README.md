@@ -24,7 +24,7 @@ bun run cli fetch <airline|all> [--month 2026-11] [--refresh]  # monthly catalog
 bun run cli imdb sync [--force]    # download IMDb datasets (refreshed when >7 days old) and load them
 bun run cli match [--airline X]    # match catalogue films to IMDb titles
 bun run cli stats [--airline X]    # film count and match rate by confidence, per airline
-bun run cli picks [--airline emirates] [--top 30] [--genre Thriller] [--min-rating 7] [--language English]
+bun run cli picks [--airline emirates] [--top 30] [--genre Thriller] [--min-rating 7] [--language English] [--min-year 2020] [--max-year 2025] [--year 2025]
 bun run cli search "toy story" [--airline X]   # which airlines carry it this month
 bun run cli export [--month 2026-10]           # public/data/<airline>/<month>.json + public/data/index.json
 bun run cli taste import [file ...]            # IMDb ratings/watchlist CSVs, Letterboxd zip (default: data/imdb-ratings/, data/letterboxd/)

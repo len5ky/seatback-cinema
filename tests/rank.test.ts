@@ -95,3 +95,37 @@ test("picks: watched films are excluded, watchlist boosted, stored ratings blend
   expect(r.picks[0]!.score).toBeCloseTo((200000 / 205000) * 7 + (5000 / 205000) * 6.5 + WATCHLIST_BOOST, 2);
   expect(r.picks[1]!.sources).toEqual(["imdb", "letterboxd"]);
 });
+
+test("picks: min-year, max-year and year use the catalogue year, else IMDb startYear, and drop undated films", () => {
+  const db = openDb(":memory:");
+  db.run("INSERT INTO snapshots VALUES ('ek','2026-10','x','d',4)");
+  const film = (id: string, year: number | null, startYear: number | null) => {
+    db.run("INSERT INTO movies (airline, month, source_id, title, year) VALUES ('ek','2026-10',?,?,?)", [id, id, year]);
+    db.run("INSERT INTO matches VALUES ('ek',?,?,'high',1,'','x')", [id, `tt-${id}`]);
+    db.run("INSERT INTO imdb_titles VALUES (?, 'movie', ?, NULL, ?, 100, 'Drama', 7, 200000, 'nm1')", [`tt-${id}`, id, startYear]);
+  };
+  film("Catalogue2024", 2024, 2020); // catalogue year wins over startYear
+  film("ImdbOnly2010", null, 2010); // no catalogue year: falls back to startYear
+  film("Undated", null, null); // no year at all
+  film("Catalogue2019", 2019, null); // catalogue year, no startYear
+  const base = { airline: "ek", month: "2026-10", top: 10 };
+  const t = { ...taste, seen: [], liked_genres: [], disliked_genres: [] };
+  const tconsts = (o: Partial<Parameters<typeof picks>[2]>) => picks(db, t, { ...base, ...o }).picks.map((p) => p.row.source_id).sort();
+
+  expect(tconsts({})).toEqual(["Catalogue2019", "Catalogue2024", "ImdbOnly2010", "Undated"]);
+  expect(tconsts({ minYear: 2020 })).toEqual(["Catalogue2024"]);
+  expect(tconsts({ maxYear: 2019 })).toEqual(["Catalogue2019", "ImdbOnly2010"]);
+  expect(tconsts({ minYear: 2010, maxYear: 2020 })).toEqual(["Catalogue2019", "ImdbOnly2010"]);
+  // --year N is min and max together
+  expect(tconsts({ minYear: 2024, maxYear: 2024 })).toEqual(["Catalogue2024"]);
+});
+
+test("cli: --min-year, --max-year and --year outside 1880-2100 or not an integer exit 1 with a message", () => {
+  const cli = `${import.meta.dir}/../src/cli.ts`;
+  for (const args of [["--min-year", "1879"], ["--max-year", "2101"], ["--year", "2025.5"], ["--min-year", "abc"], ["--year", ""]]) {
+    const p = Bun.spawnSync([process.execPath, cli, "picks", ...args], { stdout: "pipe", stderr: "pipe" });
+    const flag = `--${args[0]!.replace(/^--/, "")}`;
+    expect(p.exitCode).toBe(1);
+    expect(new TextDecoder().decode(p.stderr)).toContain(`${flag} must be a positive integer from 1880 to 2100`);
+  }
+});

@@ -151,7 +151,7 @@ export function isSeen(r: PickRow, taste: Taste): boolean {
   return keys.has(r.tconst) || keys.has(normalizeTitle(r.title)) || keys.has(normalizeTitle(r.imdb_title));
 }
 
-export interface PickOptions { airline: string; month: string; top: number; genre?: string; minRating?: number; language?: string }
+export interface PickOptions { airline: string; month: string; top: number; genre?: string; minRating?: number; language?: string; minYear?: number; maxYear?: number }
 
 export function picks(db: Database, taste: Taste, o: PickOptions): { picks: Pick[]; excludedLow: number; unmatched: number; watched: number; model: TasteModel | null } {
   const rows = db.query<PickRow, [string, string]>(`
@@ -176,11 +176,18 @@ export function picks(db: Database, taste: Taste, o: PickOptions): { picks: Pick
     .filter((r) => r.rating >= minRating && r.votes >= taste.min_votes && !isSeen(r, taste) && !model?.watched.has(r.tconst))
     .filter((r) => !o.genre || genreSet(r).has(o.genre.toLowerCase()))
     .filter((r) => !o.language || (r.primary_language ?? "").toLowerCase() === o.language.toLowerCase())
+    .filter((r) => (o.minYear === undefined && o.maxYear === undefined) || inYears(r, o.minYear, o.maxYear))
     .map((r) => scorePick(r, taste, favDirs, { ratings: ratings.get(r.tconst), model, nameOf }))
     .sort((a, b) => b.score - a.score)
     .filter((p) => !seenTconst.has(p.row.tconst) && !!seenTconst.add(p.row.tconst)) // two source ids, one film
     .slice(0, o.top);
   return { picks: out, excludedLow: counts?.low ?? 0, unmatched: counts?.none ?? 0, watched, model };
+}
+
+/** Catalogue year, falling back to the IMDb start year. Films with neither are outside any year range. */
+function inYears(r: PickRow, minYear: number | undefined, maxYear: number | undefined): boolean {
+  const y = r.year ?? r.start_year;
+  return y !== null && (minYear === undefined || y >= minYear) && (maxYear === undefined || y <= maxYear);
 }
 
 /** Stored scores for every matched film of an airline-month. */
