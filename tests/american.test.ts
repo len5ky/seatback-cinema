@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
-import { type AaRecord, american, extractRscRecords, fetchAmerican, servedMonth } from "../src/airlines/american.ts";
+import { type AaRecord, AmericanPageError, american, extractRscRecords, fetchAmerican, servedMonth } from "../src/airlines/american.ts";
 import records from "./fixtures/american-records.json";
 
 const page1 = records as unknown as AaRecord[];
@@ -64,6 +64,28 @@ test("fetchAmerican: walks pages until empty, caches them, then serves from cach
     expect(again.pages.flat()).toHaveLength(28);
     await expect(fetchAmerican("2026-11", cacheDir, false, open)).rejects.toThrow("serves 2026-10 only");
     expect(await Bun.file(`${cacheDir}/american/2026-11/page-1.json`).exists()).toBe(false);
+  } finally {
+    rmSync(cacheDir, { recursive: true, force: true });
+  }
+});
+
+test("fetchAmerican: one back-off retry on 429, then a clear error", async () => {
+  const cacheDir = mkdtempSync(`${tmpRoot()}/american-`);
+  const rsc = (rs: AaRecord[]) => `0:${JSON.stringify(["$", "div", null, { items: rs }])}`;
+  let calls = 0;
+  const flaky = async () => ({
+    fetchPage: async (n: number) => {
+      calls++;
+      if (calls === 1) throw new AmericanPageError(n, 429, "checkpoint");
+      return rsc(n === 1 ? page1 : []);
+    },
+    close: async () => {},
+  });
+  const blocked = async () => ({ fetchPage: async (n: number): Promise<string> => { throw new AmericanPageError(n, 429, "checkpoint"); }, close: async () => {} });
+  try {
+    expect((await fetchAmerican("2026-10", cacheDir, false, flaky, 1)).pages.flat()).toHaveLength(28);
+    expect(calls).toBe(3); // 429, retry ok, empty page 2
+    await expect(fetchAmerican("2026-10", cacheDir, true, blocked, 1)).rejects.toThrow("still 429 after");
   } finally {
     rmSync(cacheDir, { recursive: true, force: true });
   }

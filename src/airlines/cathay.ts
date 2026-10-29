@@ -2,7 +2,7 @@
 // one call is 38 MB, so this fetches the section list once and then each of the ~36 sections on its own.
 import { BROWSER_UA, cachedJson, fetchDate, monthDir } from "./http.ts";
 import { parseAirtime, type AirtimeNode, type AirtimeTree } from "./platforms/geemedia.ts";
-import { loadDetails } from "./platforms/batch.ts";
+import { mapLimit } from "./platforms/batch.ts";
 import type { AirlineAdapter, CatalogueFilm } from "./types.ts";
 
 const BASE = "https://afg.anuvu.cloud/api/v1";
@@ -44,8 +44,13 @@ async function fetchCathay(month: string, { cacheDir, refresh }: { cacheDir: str
   const sectionIds = root.child_id_list ?? [];
   if (!sectionIds.length) throw new Error(`cathay: Movies section ${MOVIES_SECTION} lists no child sections`);
   const sections = new Map<string, AirtimeNode>();
-  await loadDetails("cathay", sectionIds, CONCURRENCY, async (id) => {
-    sections.set(id, await item(id, 1, `${dir}/sections/${id}.json`));
+  // each call is a whole section (dozens of films), so unlike per-film detail calls any failure fails the fetch
+  await mapLimit(sectionIds, CONCURRENCY, async (id) => {
+    try {
+      sections.set(id, await item(id, 1, `${dir}/sections/${id}.json`));
+    } catch (e) {
+      throw new Error(`cathay: section ${id} failed, refusing a partial catalogue: ${(e as Error).message}`);
+    }
   });
   // reassemble the shape of the one-call tree so parseAirtime (shared with United/KLM) reads it unchanged
   const child_items = sectionIds.flatMap((id) => sections.get(id) ?? []);

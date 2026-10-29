@@ -92,6 +92,13 @@ export function parseAmerican(raw: unknown): CatalogueFilm[] {
 /** Fetch one gallery page's RSC payload from inside the browser page (same origin, browser TLS). */
 export type PageFetcher = (n: number) => Promise<string>;
 
+/** A non-200 gallery page; 429 is the site's rate limit / bot checkpoint. */
+export class AmericanPageError extends Error {
+  constructor(readonly page: number, readonly status: number, body: string) {
+    super(`american page ${page} -> ${status}: ${body.slice(0, 200)}`);
+  }
+}
+
 /**
  * Playwright's pinned Chromium, or else (a Playwright upgrade without `playwright install`) the newest headless shell
  * or Chromium already under ~/.cache/ms-playwright. PLAYWRIGHT_CHROMIUM_PATH overrides both.
@@ -129,7 +136,7 @@ async function openBrowser(): Promise<{ fetchPage: PageFetcher; close: () => Pro
         const res = await fetch(url, { headers: { RSC: "1" } });
         return { status: res.status, body: await res.text() };
       }, `/en/movies?page=${n}`);
-      if (r.status !== 200) throw new Error(`american page ${n} -> ${r.status}: ${r.body.slice(0, 200)}`);
+      if (r.status !== 200) throw new AmericanPageError(n, r.status, r.body);
       return r.body;
     };
     return { fetchPage, close: () => browser.close() };
@@ -139,11 +146,29 @@ async function openBrowser(): Promise<{ fetchPage: PageFetcher; close: () => Pro
   }
 }
 
+/** One back-off retry on 429; a second 429 means this IP is blocked (CI runners are), so say where to run it instead. */
+async function fetchPatiently(fetchPage: PageFetcher, n: number, retryMs: number): Promise<string> {
+  try {
+    return await fetchPage(n);
+  } catch (e) {
+    if (!(e instanceof AmericanPageError) || e.status !== 429) throw e;
+    console.warn(`american: page ${n} rate-limited (429); retrying once in ${retryMs / 1000}s`);
+    await Bun.sleep(retryMs);
+    try {
+      return await fetchPage(n);
+    } catch (e2) {
+      if (e2 instanceof AmericanPageError && e2.status === 429)
+        throw new Error(`american: page ${n} still 429 after a ${retryMs / 1000}s back-off; the site blocks this IP (run scripts/american-local.sh from a residential connection)`);
+      throw e2;
+    }
+  }
+}
+
 /**
  * Walk the gallery pages until one has no new records. Each page's extracted records are cached as
  * page-N.json; complete.json marks a finished walk so later runs need no browser.
  */
-export async function fetchAmerican(month: string, cacheDir: string, refresh = false, open = openBrowser): Promise<AmericanRaw> {
+export async function fetchAmerican(month: string, cacheDir: string, refresh = false, open = openBrowser, retryMs = 30_000): Promise<AmericanRaw> {
   const dir = monthDir(cacheDir, "american", month);
   const donePath = `${dir}/complete.json`;
   const pagePath = (n: number) => `${dir}/page-${n}.json`;
@@ -160,7 +185,7 @@ export async function fetchAmerican(month: string, cacheDir: string, refresh = f
     for (let n = 1; n <= MAX_PAGES; n++) {
       const records = existsSync(pagePath(n))
         ? ((await Bun.file(pagePath(n)).json()) as AaRecord[])
-        : extractRscRecords(await browser.fetchPage(n));
+        : extractRscRecords(await fetchPatiently(browser.fetchPage, n, retryMs));
       const fresh = records.filter((r) => !seen.has(r.id));
       if (!fresh.length) break;
       if (n === 1) {

@@ -54,3 +54,21 @@ test("fetchMonth: one guest session, section list, one call per section, all cac
     rmSync(cacheDir, { recursive: true, force: true });
   }
 });
+
+test("fetchMonth: one failed section fails the whole fetch", async () => {
+  const cacheDir = mkdtempSync(`${tmpRoot()}/cathay-`);
+  const broken = root.child_id_list[1];
+  globalThis.fetch = (async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.endsWith("/account/session")) return new Response(JSON.stringify({ auth_token: "tok" }));
+    const id = url.match(/items\/(\d+)\?/)![1];
+    if (id === root.id) return new Response(JSON.stringify({ items: [{ ...root, child_items: [] }] }));
+    if (id === broken) return new Response("boom", { status: 500 });
+    return new Response(JSON.stringify({ items: [root.child_items.find((s) => s.id === id)] }));
+  }) as typeof fetch;
+  try {
+    await expect(cathay.fetchMonth("2026-11", { cacheDir })).rejects.toThrow(`section ${broken} failed`);
+  } finally {
+    rmSync(cacheDir, { recursive: true, force: true });
+  }
+});
