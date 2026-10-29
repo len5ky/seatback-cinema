@@ -122,6 +122,7 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
 tbody tr:last-child td { border-bottom: 0; }
 .muted { color: var(--text-muted); }
 .badge { font-size: 11px; padding: 1px 6px; border-radius: 999px; background: var(--warn-bg); color: var(--warn-ink); margin-left: 6px; }
+.badge.neutral { background: var(--grid); color: var(--text-muted); }
 ol.top { margin: 0; padding-left: 22px; columns: 2 260px; column-gap: 32px; }
 ol.top li { break-inside: avoid; margin-bottom: 6px; }
 ol.top .who { display: block; font-size: 12px; color: var(--text-muted); }
@@ -286,7 +287,9 @@ ol.top .who { display: block; font-size: 12px; color: var(--text-muted); }
     for (const a of airlines) {
       const tr = el("tr");
       const name = el("td", "", a.name);
-      if (a.health && a.health.status !== "ok") name.append(el("span", "badge", `last fetch ${a.health.status}`));
+      // "skipped" = fetched outside CI (American, from a local cron): not a failure
+      if (a.health?.status === "skipped") name.append(el("span", "badge neutral", a.health.reason || "fetched elsewhere"));
+      else if (a.health && a.health.status !== "ok") name.append(el("span", "badge", `last fetch ${a.health.status}`));
       tr.append(
         name,
         el("td", "n", fmt.format(a.count)),

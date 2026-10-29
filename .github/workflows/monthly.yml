@@ -61,6 +61,7 @@ jobs:
       # American answers 429 to GitHub runner IPs, so it is fetched and published from a local cron
       # (scripts/american-local.sh) and recorded here as "skipped".
       - name: Fetch all airlines
+        id: fetch
         env:
           SKIP_AIRLINES: american
         run: scripts/fetch-all.sh "${{ steps.month.outputs.month }}"
@@ -75,6 +76,7 @@ jobs:
         run: bun run cli ids sync
 
       - name: Export
+        id: export
         run: |
           bun run cli export --month "${{ steps.month.outputs.month }}"
           bun scripts/build-index.ts public/data
@@ -83,16 +85,32 @@ jobs:
         continue-on-error: true
         run: bun run cli stats --month "${{ steps.month.outputs.month }}"
 
+      # Runs even when the fetch failed for every airline, so health.json still records this run; the job stays
+      # failed. Only a fully successful export publishes catalogue files; otherwise just health.json goes out.
       - name: Commit dataset
+        if: always() && steps.month.outcome == 'success'
         run: |
-          git add public/data
+          msg="Publish ${{ steps.month.outputs.month }} catalogue data [skip ci]"
+          if [[ "${{ steps.export.outcome }}" == success ]]; then
+            git add public/data
+          elif jq -e .airlines public/data/health.json >/dev/null 2>&1; then
+            # keep this run's health.json, drop any half-written catalogue files
+            cp public/data/health.json "$RUNNER_TEMP/health.json"
+            git checkout -- public/data && git clean -fdq public/data
+            cp "$RUNNER_TEMP/health.json" public/data/health.json
+            git add public/data/health.json
+            msg="Record ${{ steps.month.outputs.month }} fetch health (export did not run) [skip ci]"
+          else
+            echo "export did not run and there is no health.json to publish"
+            exit 0
+          fi
           if git diff --cached --quiet; then
             echo "no dataset changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Publish ${{ steps.month.outputs.month }} catalogue data [skip ci]"
+          git commit -m "$msg"
           git pull --rebase origin main
           git push origin HEAD:main
 

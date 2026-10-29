@@ -5,8 +5,9 @@
 #
 # usage: scripts/fetch-all.sh [YYYY-MM]   (default: current UTC month)
 # env:   FETCH_TIMEOUT (per airline, default 20m), HEALTH (default public/data/health.json),
-#        LOG_DIR (default data/logs), SKIP_AIRLINES (space-separated ids fetched elsewhere, recorded as
-#        "skipped" with reason "fetched locally" and their previous lastSuccess kept)
+#        LOG_DIR (default data/logs), SKIP_AIRLINES (space-separated ids fetched elsewhere: their previous
+#        health entry is kept as is, e.g. American's "ok" from scripts/american-local.sh; with no previous
+#        entry they are recorded as "skipped" with reason "fetched locally")
 # exit:  0 if at least one airline succeeded, 1 if every airline failed.
 set -uo pipefail
 
@@ -30,10 +31,10 @@ failed=0
 
 for id in $IDS; do
   if [[ "$SKIP" == *" $id "* ]]; then
-    echo "$id: skipped (fetched locally)"
+    echo "$id: skipped (fetched locally; previous health entry kept)"
     RESULTS=$(jq -c --arg id "$id" --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --argjson prev "$PREV" '
-      . + {($id): {status: "skipped", reason: "fetched locally", exitCode: null, films: null, seconds: 0, checkedAt: $now,
-        lastSuccess: ($prev.airlines[$id].lastSuccess // null), error: null}}' <<<"$RESULTS")
+      . + {($id): ($prev.airlines[$id] // {status: "skipped", reason: "fetched locally", exitCode: null, films: null, seconds: 0,
+        checkedAt: $now, lastSuccess: null, error: null})}' <<<"$RESULTS")
     continue
   fi
   log="$LOG_DIR/fetch-$id.log"
