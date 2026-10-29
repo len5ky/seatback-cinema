@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seatback Film Leaderboard</title>
+<meta name="description" content="Monthly in-flight film catalogues for ten airlines, matched to IMDb. Open data, refreshed twice a month.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='1' y='3' width='14' height='10' rx='2' fill='%231c5cab'/%3E%3Cpath d='M6 6v4l4-2z' fill='white'/%3E%3C/svg%3E">
+<style>
+:root {
+  color-scheme: light;
+  --surface-0: #f4f4f2;
+  --surface-1: #fcfcfb;
+  --border: #e3e2de;
+  --grid: #ecebe7;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #6f6e69;
+  --link: #1c5cab;
+  --matched: #1c5cab;      /* blue 550 */
+  --unmatched: #86b6ef;    /* blue 250: same ramp, lighter step */
+  --warn-bg: #fff4dc;
+  --warn-ink: #6b4a00;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-0: #121211;
+    --surface-1: #1a1a19;
+    --border: #2e2e2c;
+    --grid: #262624;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7;
+    --text-muted: #9a998f;
+    --link: #86b6ef;
+    --matched: #5598e7;    /* blue 350 */
+    --unmatched: #184f95;  /* blue 600 */
+    --warn-bg: #3a2c08;
+    --warn-ink: #f3d58a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0: #121211;
+  --surface-1: #1a1a19;
+  --border: #2e2e2c;
+  --grid: #262624;
+  --text-primary: #f0efec;
+  --text-secondary: #c3c2b7;
+  --text-muted: #9a998f;
+  --link: #86b6ef;
+  --matched: #5598e7;
+  --unmatched: #184f95;
+  --warn-bg: #3a2c08;
+  --warn-ink: #f3d58a;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 980px; margin: 0 auto; padding: 32px 16px 48px; }
+h1 { font-size: 26px; line-height: 1.2; margin: 0 0 6px; font-weight: 650; letter-spacing: -0.01em; }
+h2 { font-size: 17px; margin: 0 0 4px; font-weight: 600; }
+.lede { color: var(--text-secondary); margin: 0 0 24px; max-width: 62ch; }
+a { color: var(--link); }
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.sub { color: var(--text-secondary); font-size: 13px; margin: 0 0 16px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.tile .label { color: var(--text-secondary); font-size: 13px; }
+.tile .value { font-size: 26px; font-weight: 600; line-height: 1.25; }
+
+/* chart */
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.chart { position: relative; }
+.row { display: grid; grid-template-columns: 128px 1fr; align-items: center; gap: 12px; height: 32px; }
+.row .name { font-size: 13px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
+.track { position: relative; height: 100%; display: flex; align-items: center; }
+.bar { display: flex; height: 20px; gap: 2px; cursor: default; outline: none; }
+.bar .seg { height: 100%; }
+.bar .m { background: var(--matched); border-radius: 0; }
+.bar .u { background: var(--unmatched); border-radius: 0 4px 4px 0; }
+.bar.full .m { border-radius: 0 4px 4px 0; }
+.bar:hover .seg, .bar:focus-visible .seg { filter: brightness(1.12); }
+.bar:focus-visible { box-shadow: 0 0 0 2px var(--link); border-radius: 2px; }
+.val { font-size: 12px; color: var(--text-secondary); margin-left: 8px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.axis { display: grid; grid-template-columns: 128px 1fr; gap: 12px; margin-top: 4px; }
+.ticks { position: relative; height: 18px; border-top: 1px solid var(--grid); font-size: 11px; color: var(--text-muted); }
+.ticks span { position: absolute; top: 2px; transform: translateX(-50%); }
+.ticks span:first-child { transform: none; }
+.gridlines { position: absolute; inset: 0 0 0 140px; pointer-events: none; }
+.gridlines i { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--grid); }
+.tip {
+  position: fixed; pointer-events: none; z-index: 10; display: none;
+  background: var(--surface-1); color: var(--text-primary); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 4px 16px rgb(0 0 0 / 0.15); min-width: 180px;
+}
+.tip .t { font-weight: 600; margin-bottom: 4px; }
+.tip .r { display: flex; align-items: center; gap: 8px; }
+.tip .r b { font-variant-numeric: tabular-nums; min-width: 44px; }
+.tip .r i { width: 12px; height: 2px; display: inline-block; }
+.tip .r span { color: var(--text-secondary); }
+
+/* table */
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th { color: var(--text-secondary); font-weight: 500; font-size: 12px; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+tbody tr:last-child td { border-bottom: 0; }
+.muted { color: var(--text-muted); }
+.badge { font-size: 11px; padding: 1px 6px; border-radius: 999px; background: var(--warn-bg); color: var(--warn-ink); margin-left: 6px; }
+ol.top { margin: 0; padding-left: 22px; columns: 2 260px; column-gap: 32px; }
+ol.top li { break-inside: avoid; margin-bottom: 6px; }
+ol.top .who { display: block; font-size: 12px; color: var(--text-muted); }
+.notes { color: var(--text-secondary); font-size: 13px; }
+.notes li { margin-bottom: 6px; }
+#error { display: none; background: var(--warn-bg); color: var(--warn-ink); padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; }
+@media (max-width: 560px) {
+  h1 { font-size: 22px; }
+  .card { padding: 16px 12px; }
+  .row, .axis { grid-template-columns: 108px 1fr; gap: 8px; }
+  .row .name { font-size: 12px; }
+  .gridlines { left: 116px; }
+  th, td { padding: 6px 8px; }
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>What's on the plane this month</h1>
+  <p class="lede">In-flight film catalogues from ten airlines, fetched from their public entertainment sites and matched to IMDb.
+    The data is open: one JSON file per airline and month under <a href="data/index.json"><code>data/</code></a>.</p>
+
+  <div id="error"></div>
+
+  <section class="tiles" aria-label="Totals">
+    <div class="tile"><div class="label">Airlines</div><div class="value" id="t-airlines">–</div></div>
+    <div class="tile"><div class="label">Catalogue entries</div><div class="value" id="t-films">–</div></div>
+    <div class="tile"><div class="label">Distinct IMDb titles</div><div class="value" id="t-distinct">–</div></div>
+    <div class="tile"><div class="label">Matched to IMDb</div><div class="value" id="t-matched">–</div></div>
+  </section>
+
+  <section class="card">
+    <h2>Catalogue size and IMDb coverage</h2>
+    <p class="sub" id="chart-sub">Films per airline in its latest month, split by whether the film was matched to an IMDb title.</p>
+    <div class="legend" aria-hidden="true">
+      <span><i style="background:var(--matched)"></i>Matched to IMDb</span>
+      <span><i style="background:var(--unmatched)"></i>Not matched</span>
+    </div>
+    <div class="chart" id="chart" role="img" aria-label="Bar chart of films per airline; the table below has the same values"></div>
+  </section>
+
+  <section class="card">
+    <h2>Leaderboard</h2>
+    <p class="sub">Sorted by catalogue size. "Shared top 10" counts how many of the ten most widely carried films (below) the airline has.</p>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Airline</th>
+            <th class="n">Films</th>
+            <th class="n">IMDb matched</th>
+            <th class="n">Median IMDb</th>
+            <th class="n">Mean IMDb</th>
+            <th class="n">Shared top 10</th>
+            <th>Month</th>
+            <th>Last updated</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Most widely carried films</h2>
+    <p class="sub">The ten IMDb titles found on the most airlines this cycle.</p>
+    <ol class="top" id="top"></ol>
+  </section>
+
+  <section class="card notes">
+    <h2>Notes</h2>
+    <ul>
+      <li>Delta, Turkish Airlines and Air France do not publish a full catalogue: Delta shows a few dozen titles on
+        marketing pages, Turkish ten highlights, Air France nothing. American Airlines and Qatar Airways are being added.</li>
+      <li>"Matched" means a high- or medium-confidence match on title, year, director and runtime. Low-confidence
+        guesses are left out. Emirates sends no release year, so its regional-language films match least often.</li>
+      <li>A catalogue can differ by route, aircraft and cabin. Qantas is the large international seatback catalogue
+        and lists audio-described versions as separate entries.</li>
+      <li>Median and mean IMDb rating are blank until the export carries ratings.</li>
+      <li>Films are counted per catalogue entry as the airline lists them. Data is refreshed on the 1st and 15th of each month.
+        IMDb data is used under its non-commercial licence.</li>
+    </ul>
+  </section>
+</main>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script>
+(() => {
+  const DATA = "data/";
+  const fmt = new Intl.NumberFormat("en");
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  };
+  const pct = (n, d) => (d ? `${((100 * n) / d).toFixed(1)}%` : "–");
+  const median = (xs) => {
+    if (!xs.length) return null;
+    const s = [...xs].sort((a, b) => a - b), m = s.length >> 1;
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  };
+  const mean = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
+  const day = (iso) => (iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "–");
+
+  // TODO(ratings): the export has no rating field yet. When it gains one (e.g. film.imdbRating), this picks it up
+  // and the Median/Mean columns fill in with no other change.
+  const ratingOf = (f) => (typeof f.imdbRating === "number" ? f.imdbRating : null);
+
+  async function getJSON(path) {
+    const r = await fetch(DATA + path, { cache: "no-cache" });
+    if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`);
+    return r.json();
+  }
+
+  async function load() {
+    const index = await getJSON("index.json");
+    const health = await getJSON("health.json").catch(() => null);
+    const airlines = await Promise.all(index.airlines.map(async (a) => {
+      const latest = [...a.months].sort((x, y) => x.month.localeCompare(y.month)).at(-1);
+      const file = await getJSON(latest.path);
+      const films = file.films;
+      const matched = films.filter((f) => f.imdbId);
+      const ratings = films.map(ratingOf).filter((x) => x !== null);
+      return {
+        id: a.id, name: a.name, month: latest.month, fetchedAt: file.fetchedAt,
+        count: films.length, matched: matched.length,
+        ids: new Set(matched.map((f) => f.imdbId)),
+        titles: new Map(matched.map((f) => [f.imdbId, `${f.title}${f.year ? ` (${f.year})` : ""}`])),
+        median: median(ratings), mean: mean(ratings),
+        health: health?.airlines?.[a.id] ?? null,
+      };
+    }));
+    airlines.sort((a, b) => b.count - a.count);
+    render(airlines);
+  }
+
+  function render(airlines) {
+    // most widely carried: IMDb ids by number of airlines
+    const carriers = new Map();
+    for (const a of airlines) for (const id of a.ids) {
+      if (!carriers.has(id)) carriers.set(id, { id, title: a.titles.get(id), airlines: [] });
+      carriers.get(id).airlines.push(a.name);
+    }
+    const top = [...carriers.values()]
+      .sort((x, y) => y.airlines.length - x.airlines.length || x.title.localeCompare(y.title))
+      .slice(0, 10);
+    const topIds = new Set(top.map((t) => t.id));
+
+    const total = airlines.reduce((s, a) => s + a.count, 0);
+    const matched = airlines.reduce((s, a) => s + a.matched, 0);
+    $("t-airlines").textContent = airlines.length;
+    $("t-films").textContent = fmt.format(total);
+    $("t-distinct").textContent = fmt.format(carriers.size);
+    $("t-matched").textContent = pct(matched, total);
+
+    renderChart(airlines);
+
+    const tbody = $("rows");
+    tbody.replaceChildren();
+    for (const a of airlines) {
+      const tr = el("tr");
+      const name = el("td", "", a.name);
+      if (a.health && a.health.status !== "ok") name.append(el("span", "badge", `last fetch ${a.health.status}`));
+      tr.append(
+        name,
+        el("td", "n", fmt.format(a.count)),
+        el("td", "n", pct(a.matched, a.count)),
+        el("td", "n" + (a.median === null ? " muted" : ""), a.median === null ? "–" : a.median.toFixed(1)),
+        el("td", "n" + (a.mean === null ? " muted" : ""), a.mean === null ? "–" : a.mean.toFixed(2)),
+        el("td", "n", `${[...topIds].filter((id) => a.ids.has(id)).length} / ${top.length}`),
+        el("td", "", a.month),
+        el("td", "", day(a.health?.lastSuccess ?? a.fetchedAt)),
+      );
+      tbody.append(tr);
+    }
+
+    const ol = $("top");
+    ol.replaceChildren();
+    for (const t of top) {
+      const li = el("li");
+      const link = el("a", "", t.title);
+      link.href = `https://www.imdb.com/title/${t.id}/`;
+      link.rel = "noopener";
+      li.append(link, el("span", "who", `${t.airlines.length} of ${airlines.length} airlines`));
+      li.title = t.airlines.join(", ");
+      ol.append(li);
+    }
+  }
+
+  function niceMax(v) {
+    const step = 10 ** Math.floor(Math.log10(v));
+    for (const m of [1, 2, 5, 10]) if (m * step >= v) return m * step;
+    return v;
+  }
+
+  function renderChart(airlines) {
+    const chart = $("chart");
+    chart.replaceChildren();
+    // headroom so the longest bar keeps room for its value label; ~5 clean ticks
+    const raw = 1.1 * Math.max(...airlines.map((a) => a.count));
+    const step = niceMax(raw / 5);
+    const max = Math.ceil(raw / step) * step;
+    const ticks = Array.from({ length: Math.round(max / step) + 1 }, (_, i) => i * step);
+
+    const grid = el("div", "gridlines");
+    for (const t of ticks.slice(1)) {
+      const g = el("i");
+      g.style.left = `${(100 * t) / max}%`;
+      grid.append(g);
+    }
+    chart.append(grid);
+
+    const tip = $("tip");
+    const showTip = (a, x, y) => {
+      tip.replaceChildren(el("div", "t", `${a.name} · ${a.month}`));
+      for (const [label, n, color] of [["matched to IMDb", a.matched, "var(--matched)"], ["not matched", a.count - a.matched, "var(--unmatched)"]]) {
+        const r = el("div", "r");
+        const key = el("i");
+        key.style.background = color;
+        r.append(key, el("b", "", fmt.format(n)), el("span", "", label));
+        tip.append(r);
+      }
+      const r = el("div", "r");
+      r.append(el("i"), el("b", "", fmt.format(a.count)), el("span", "", `films, ${pct(a.matched, a.count)} matched`));
+      tip.append(r);
+      tip.style.display = "block";
+      const w = tip.offsetWidth, h = tip.offsetHeight;
+      tip.style.left = `${Math.min(x + 12, innerWidth - w - 8)}px`;
+      tip.style.top = `${Math.max(8, y - h - 12)}px`;
+    };
+    const hideTip = () => { tip.style.display = "none"; };
+
+    for (const a of airlines) {
+      const row = el("div", "row");
+      row.append(el("div", "name", a.name));
+      const track = el("div", "track");
+      const bar = el("div", "bar" + (a.matched === a.count ? " full" : ""));
+      bar.tabIndex = 0;
+      bar.setAttribute("aria-label", `${a.name}: ${a.count} films, ${a.matched} matched to IMDb`);
+      bar.style.width = `${(100 * a.count) / max}%`;
+      const m = el("div", "seg m");
+      m.style.flex = `${a.matched} 1 0`;
+      bar.append(m);
+      if (a.count > a.matched) {
+        const u = el("div", "seg u");
+        u.style.flex = `${a.count - a.matched} 1 0`;
+        bar.append(u);
+      }
+      bar.addEventListener("pointermove", (e) => showTip(a, e.clientX, e.clientY));
+      bar.addEventListener("pointerleave", hideTip);
+      bar.addEventListener("focus", () => { const b = bar.getBoundingClientRect(); showTip(a, b.right, b.top); });
+      bar.addEventListener("blur", hideTip);
+      track.append(bar, el("span", "val", fmt.format(a.count)));
+      row.append(track);
+      chart.append(row);
+    }
+
+    const axis = el("div", "axis");
+    axis.append(el("div"));
+    const tk = el("div", "ticks");
+    for (const t of ticks) {
+      const s = el("span", "", t >= 1000 ? `${t / 1000}K` : String(t));
+      s.style.left = `${(100 * t) / max}%`;
+      tk.append(s);
+    }
+    axis.append(tk);
+    chart.append(axis);
+    $("chart-sub").textContent = `Films per airline in its latest month (${[...new Set(airlines.map((a) => a.month))].join(", ")}), split by whether the film was matched to an IMDb title.`;
+  }
+
+  load().catch((e) => {
+    const box = $("error");
+    box.textContent = `Could not load the dataset: ${e.message}`;
+    box.style.display = "block";
+  });
+})();
+</script>
+</body>
+</html>
