@@ -68,13 +68,31 @@ export function dedupe(films: ExportFilm[]): ExportFilm[] {
   return [...byKey.values()];
 }
 
-/** Write one JSON per (airline, month) snapshot (or only `month`), then an index of every exported file on disk. */
-export function exportAll(db: Database, o: { month?: string; dir?: string } = {}): { files: { path: string; films: number }[]; index: string } {
+/** Published crosswalk entry; CC0 because only Wikidata-sourced rows are written. */
+export interface IdsEntry { tmdb: number | null; letterboxd: string | null; rt: string | null; mc: string | null }
+export type IdsFile = Record<string, IdsEntry>;
+
+/** Write `ids.json` ({tconst: {tmdb, letterboxd, rt, mc}}): the existing file overlaid with every Wikidata row in the DB,
+ *  so an export from a partial DB (CI, one airline) never drops published ids. Sorted, one entry per line. */
+export function writeIdsFile(db: Database, dir: string = PUBLIC_DIR): { path: string; count: number } {
+  const path = `${dir}/ids.json`;
+  const ids: IdsFile = existsSync(path) ? (JSON.parse(readFileSync(path, "utf8")) as IdsFile) : {};
+  const rows = db.query<{ tconst: string; tmdb_id: number | null; letterboxd_slug: string | null; rt_slug: string | null; mc_slug: string | null }, []>(
+    "SELECT tconst, tmdb_id, letterboxd_slug, rt_slug, mc_slug FROM external_ids WHERE source = 'wikidata'").all();
+  for (const r of rows) ids[r.tconst] = { tmdb: r.tmdb_id, letterboxd: r.letterboxd_slug, rt: r.rt_slug, mc: r.mc_slug };
+  const keys = Object.keys(ids).sort();
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(path, `{\n${keys.map((k) => `${JSON.stringify(k)}: ${JSON.stringify(ids[k])}`).join(",\n")}\n}\n`);
+  return { path, count: keys.length };
+}
+
+/** Write one JSON per (airline, month) snapshot (or only `month` / `airline`), the ids crosswalk, then an index of every exported file on disk. */
+export function exportAll(db: Database, o: { month?: string; airline?: string; dir?: string } = {}): { files: { path: string; films: number }[]; index: string; ids: { path: string; count: number } } {
   const dir = o.dir ?? PUBLIC_DIR;
   const snaps = db.query<{ airline: string; name: string; month: string; films: number; fetched_at: string }, []>(
     "SELECT s.airline, a.name, s.month, s.films, s.fetched_at FROM snapshots s JOIN airlines a ON a.code = s.airline ORDER BY s.airline, s.month").all();
   const files: { path: string; films: number }[] = [];
-  for (const s of snaps.filter((x) => !o.month || x.month === o.month)) {
+  for (const s of snaps.filter((x) => (!o.month || x.month === o.month) && (!o.airline || x.airline === o.airline))) {
     const data = exportSnapshot(db, s.airline, s.month);
     mkdirSync(`${dir}/${s.airline}`, { recursive: true });
     const path = `${dir}/${s.airline}/${s.month}.json`;
@@ -93,5 +111,5 @@ export function exportAll(db: Database, o: { month?: string; dir?: string } = {}
   mkdirSync(dir, { recursive: true });
   const indexPath = `${dir}/index.json`;
   writeFileSync(indexPath, `${JSON.stringify(index, null, 1)}\n`);
-  return { files, index: indexPath };
+  return { files, index: indexPath, ids: writeIdsFile(db, dir) };
 }

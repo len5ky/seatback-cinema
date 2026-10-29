@@ -1,4 +1,6 @@
 import type { Database } from "bun:sqlite";
+import { existsSync, readFileSync } from "node:fs";
+import type { IdsFile } from "../export.ts";
 import { BOT_UA, politeFetch } from "./http.ts";
 
 export interface ExternalIds { tconst: string; tmdbId: number | null; letterboxdSlug: string | null; rtSlug: string | null; mcSlug: string | null }
@@ -74,14 +76,31 @@ export function rankedTconsts(db: Database, airline?: string): string[] {
     ORDER BY x.tconst`).all(airline ?? null, airline ?? null).map((r) => r.tconst);
 }
 
-export interface IdsSyncResult { queried: number; known: number; batches: number; failedBatches: number }
+/** Seed external_ids from a published ids.json (see writeIdsFile) without touching existing rows. Returns rows added. */
+export function seedIds(db: Database, path: string, now = new Date().toISOString()): number {
+  if (!existsSync(path)) return 0;
+  const ids = JSON.parse(readFileSync(path, "utf8")) as IdsFile;
+  const ins = db.prepare("INSERT OR IGNORE INTO external_ids VALUES (?,?,?,?,?,'wikidata',?)");
+  let added = 0;
+  db.transaction(() => {
+    for (const [t, e] of Object.entries(ids)) {
+      if (!/^tt\d+$/.test(t)) continue;
+      added += ins.run(t, e.tmdb ?? null, e.letterboxd ?? null, e.rt ?? null, e.mc ?? null, now).changes;
+    }
+  })();
+  return added;
+}
 
-/** Query Wikidata for tconsts that have no external_ids row yet, 200 per POST, 1 req/s. */
-export async function syncIds(db: Database, o: { airline?: string; limit?: number; log?: (s: string) => void } = {}): Promise<IdsSyncResult> {
+export interface IdsSyncResult { seeded: number; queried: number; known: number; batches: number; failedBatches: number }
+
+/** Seed from `seedFile` if given, then query Wikidata for tconsts that still have no external_ids row, 200 per POST, 1 req/s. */
+export async function syncIds(db: Database, o: { airline?: string; limit?: number; seedFile?: string; log?: (s: string) => void } = {}): Promise<IdsSyncResult> {
+  const seeded = o.seedFile ? seedIds(db, o.seedFile) : 0;
+  if (seeded) o.log?.(`seeded ${seeded} ids from ${o.seedFile}`);
   const has = db.query<{ n: number }, [string]>("SELECT 1 AS n FROM external_ids WHERE tconst = ?");
   let todo = rankedTconsts(db, o.airline).filter((t) => !has.get(t));
   if (o.limit !== undefined) todo = todo.slice(0, o.limit);
-  const r: IdsSyncResult = { queried: 0, known: 0, batches: 0, failedBatches: 0 };
+  const r: IdsSyncResult = { seeded, queried: 0, known: 0, batches: 0, failedBatches: 0 };
   for (let i = 0; i < todo.length; i += WIKIDATA_BATCH) {
     const batch = todo.slice(i, i + WIKIDATA_BATCH);
     r.batches++;

@@ -6,7 +6,7 @@ import { monthDir } from "./airlines/http.ts";
 import { downloadImdb, loadImdb } from "./imdb.ts";
 import { matchAll } from "./match.ts";
 import { loadTaste, picks } from "./rank.ts";
-import { exportAll } from "./export.ts";
+import { PUBLIC_DIR, exportAll } from "./export.ts";
 import { syncIds } from "./ratings/ids.ts";
 import { SOURCES, syncRatings, type Source } from "./ratings/sync.ts";
 import { importExport, loadExport, parseExport } from "./ratings/letterboxd-export.ts";
@@ -18,9 +18,10 @@ const USAGE = `usage: bun run cli <command>
   picks [--airline emirates] [--top 30] [--genre X] [--min-rating 7] [--language English] [--month YYYY-MM]
   search <title> [--airline X]                       find a film in the latest catalogue of each airline
   stats [--airline X] [--month YYYY-MM]
-  export [--month YYYY-MM]                           write public/data/<airline>/<month>.json + index.json
+  export [--month YYYY-MM] [--airline X]             write public/data/<airline>/<month>.json, ids.json, index.json
   taste import [export.zip|dir]                      import a Letterboxd export (default: newest zip in data/letterboxd/)
-  ids sync [--airline X] [--limit N]                 Wikidata crosswalk (TMDB/Letterboxd/RT/MC ids) for new matched films
+  ids sync [--airline X] [--limit N]                 Wikidata crosswalk (TMDB/Letterboxd/RT/MC ids) for new matched films;
+                                                     seeds from public/data/ids.json first
   ratings sync [--source tmdb|letterboxd|rt|mc|all] [--airline X] [--limit N]
                                                      fetch ratings for matched films (30-day cache; RT/MC need ids sync)
 airlines: ${Object.keys(adapters).join(", ")}`;
@@ -189,8 +190,9 @@ async function main(): Promise<void> {
       return;
     }
     case "export": {
-      const r = exportAll(db, { month: opt.month ? validMonth(opt.month) : undefined });
+      const r = exportAll(db, { month: opt.month ? validMonth(opt.month) : undefined, airline: airlineOpt(opt.airline) });
       for (const f of r.files) console.log(`wrote ${f.path} (${f.films} films)`);
+      console.log(`wrote ${r.ids.path} (${r.ids.count} ids)`);
       console.log(`wrote ${r.index}`);
       return;
     }
@@ -217,8 +219,8 @@ async function main(): Promise<void> {
     }
     case "ids": {
       if (arg !== "sync") throw new Error("usage: ids sync [--airline X] [--limit N]");
-      const r = await syncIds(db, { airline: airlineOpt(opt.airline), limit: limitOpt(), log: console.log });
-      console.log(`ids sync: ${r.queried} tconsts queried, ${r.known} known to Wikidata (${pct(r.known, r.queried)}), ${r.failedBatches} failed batches`);
+      const r = await syncIds(db, { airline: airlineOpt(opt.airline), limit: limitOpt(), seedFile: `${PUBLIC_DIR}/ids.json`, log: console.log });
+      console.log(`ids sync: ${r.seeded} seeded from ids.json, ${r.queried} tconsts queried, ${r.known} known to Wikidata (${pct(r.known, r.queried)}), ${r.failedBatches} failed batches`);
       if (r.failedBatches) process.exitCode = 1;
       return;
     }

@@ -86,7 +86,8 @@ only loads in a real browser profile; not built yet).
 languages, the airline's own categories and our IMDb/TMDB ids. No synopses, posters, cast lists or ratings are
 published; ratings stay in the local database and links go out to IMDb and TMDB. Our files in `public/data/` are
 released under CC0 1.0. The titles and listings come from the airlines' public sites, and IMDb ids come from IMDb's
-non-commercial datasets, whose terms still apply to anything you build from them.
+non-commercial datasets, whose terms still apply to anything you build from them. `ids.json` (IMDb id to TMDB,
+Letterboxd, Rotten Tomatoes and Metacritic ids) is copied from Wikidata, which is CC0 too.
 
 ## How it works
 
@@ -105,7 +106,9 @@ non-commercial datasets, whose terms still apply to anything you build from them
 - **Ranking**: see [Ratings and taste](#ratings-and-taste).
 - **Export**: one JSON per airline and month with `sourceId, title, year, runtime, directors, genres, rating,
   languages, categories, imdbId, imdbConfidence, tmdbId` (`imdbId` only for high/medium matches; `tmdbId` is a
-  placeholder). No synopsis, poster or cast. `index.json` lists airlines, months, counts and fetch times.
+  from Wikidata via `ids sync`). No synopsis, poster or cast. `index.json` lists airlines, months, counts and fetch
+  times. `ids.json` maps `{tconst: {tmdb, letterboxd, rt, mc}}`; `ids sync` loads it before asking Wikidata, so a
+  fresh database (CI) only queries films that are not in it yet.
 
 ## Ratings and taste
 

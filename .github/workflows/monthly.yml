@@ -69,6 +69,12 @@ jobs:
       - name: Match
         run: bun run cli match
 
+      # Seeds external_ids from public/data/ids.json, then asks Wikidata only for tconsts still missing (200 per POST, 1 req/s).
+      # Not fatal: a failed batch only leaves tmdbId null until the next run.
+      - name: IDs sync
+        continue-on-error: true
+        run: bun run cli ids sync
+
       - name: Export
         run: |
           bun run cli export --month "${{ steps.month.outputs.month }}"

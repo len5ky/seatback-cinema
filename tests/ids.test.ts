@@ -1,6 +1,8 @@
 import { expect, test } from "bun:test";
-import { mergeIds, parseSparql, rankedTconsts, sparqlQuery, storeIds, type SparqlResponse } from "../src/ratings/ids.ts";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mergeIds, parseSparql, rankedTconsts, seedIds, sparqlQuery, storeIds, syncIds, type SparqlResponse } from "../src/ratings/ids.ts";
 import { openDb } from "../src/db.ts";
+import { exportAll, writeIdsFile, type IdsFile } from "../src/export.ts";
 
 const saved = (await Bun.file(`${import.meta.dir}/fixtures/ratings/wikidata-sparql.json`).json()) as SparqlResponse;
 
@@ -46,4 +48,38 @@ test("ranked tconsts: high/medium in each airline's latest month", () => {
   db.run("INSERT INTO movies (airline, month, source_id, title) VALUES ('ek','2026-09','old','Old'), ('ek','2026-10','a','A'), ('ek','2026-10','b','B')");
   db.run("INSERT INTO matches VALUES ('ek','old','tt3','high',1,'','x'), ('ek','a','tt1','medium',1,'','x'), ('ek','b','tt2','low',1,'','x')");
   expect(rankedTconsts(db)).toEqual(["tt1"]);
+});
+
+test("ids.json: export writes Wikidata rows merged over the existing file; 'none' and non-Wikidata rows stay out", () => {
+  const db = openDb(":memory:");
+  storeIds(db, ["tt1182345", "tt9"], parseSparql(saved).filter((e) => e.tconst === "tt1182345"), "2026-10-29");
+  mergeIds(db, "tt8", { tmdbId: 8 }, "letterboxd");
+  const dir = mkdtempSync(`${import.meta.dir}/../tmp/ids-test-`);
+  writeFileSync(`${dir}/ids.json`, JSON.stringify({ tt7: { tmdb: 7, letterboxd: null, rt: null, mc: null } }));
+  const r = exportAll(db, { dir });
+  expect(r.ids.count).toBe(2);
+  const ids = JSON.parse(readFileSync(`${dir}/ids.json`, "utf8")) as IdsFile;
+  expect(ids).toEqual({ tt1182345: { tmdb: 17431, letterboxd: "moon", rt: "moon", mc: "moon" }, tt7: { tmdb: 7, letterboxd: null, rt: null, mc: null } });
+  expect(Object.keys(ids)).toEqual(["tt1182345", "tt7"]);
+});
+
+test("ids sync seeds from ids.json and queries nothing when every ranked tconst is covered", async () => {
+  const src = openDb(":memory:");
+  storeIds(src, ["tt1182345"], parseSparql(saved).filter((e) => e.tconst === "tt1182345"), "2026-10-29");
+  const dir = mkdtempSync(`${import.meta.dir}/../tmp/ids-test-`);
+  writeIdsFile(src, dir);
+
+  const db = openDb(":memory:"); // CI: empty DB
+  db.run("INSERT INTO snapshots VALUES ('ek','2026-10','x','d',1)");
+  db.run("INSERT INTO movies (airline, month, source_id, title) VALUES ('ek','2026-10','a','Moon')");
+  db.run("INSERT INTO matches VALUES ('ek','a','tt1182345','high',1,'','x')");
+  const r = await syncIds(db, { seedFile: `${dir}/ids.json` });
+  expect(r).toEqual({ seeded: 1, queried: 0, known: 0, batches: 0, failedBatches: 0 });
+  expect(db.query("SELECT tmdb_id, source FROM external_ids WHERE tconst = 'tt1182345'").get()).toEqual({ tmdb_id: 17431, source: "wikidata" });
+  expect(seedIds(db, `${dir}/ids.json`)).toBe(0); // existing rows are left alone
+  expect(seedIds(db, `${dir}/missing.json`)).toBe(0);
+});
+
+test("ids sync on an empty table with nothing ranked makes no requests", async () => {
+  expect(await syncIds(openDb(":memory:"))).toEqual({ seeded: 0, queried: 0, known: 0, batches: 0, failedBatches: 0 });
 });
