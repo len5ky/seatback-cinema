@@ -1,4 +1,4 @@
-# Seatback Cinema — inflight movie picker
+# Seatback Cinema: inflight movie picker
 
 Seatback Cinema collects the in-flight entertainment (IFE) catalogue of 11 airlines every month, among them
 Emirates ice, United and British Airways, matches each film to IMDb, ranks the airline movie list by IMDb and
