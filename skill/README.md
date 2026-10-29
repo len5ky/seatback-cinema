@@ -8,8 +8,9 @@ any one of Bun, Node 22.6+ or Deno will run it.
 Airlines: Emirates, United, KLM, British Airways, Singapore Airlines, Lufthansa, Japan Airlines, Cathay Pacific,
 Qantas, ANA, American Airlines. The data is refreshed on the 1st and 15th of each month.
 
-The dataset is read from `https://raw.githubusercontent.com/len5ky/seatback-cinema/main/public`. Set `DATASET_BASE_URL`
-to point the script at a mirror or a local copy (for example `http://localhost:3000` serving `public/`).
+The dataset is read from `https://raw.githubusercontent.com/len5ky/seatback-cinema/main/public`. `--base` or
+`SEATBACK_DATASET_URL` points the script at a mirror or a local copy: `http://localhost:4173` from `bun run serve`
+in a checkout, a `public/` folder, or a `file://` URL.
 
 ## Get the files
 
@@ -51,13 +52,13 @@ For questions about what to watch on a flight, follow .cursor/inflight-movie-pic
 
 ## Any other agent
 
-Point the agent at `SKILL.md` (paste it, or reference it from `AGENTS.md`). All it has to be able to do is run a shell command.
+Point the agent at `SKILL.md` (paste it, or reference it from `AGENTS.md`). It only needs to be able to run a shell command.
 
 ## Options
 
 | variable | what it does |
 |---|---|
-| `DATASET_BASE_URL` | where to fetch the data from (defaults to this repo's published `public/` directory) |
+| `SEATBACK_DATASET_URL` | where to read the data: a URL, a local `public/` folder or `file://` URL (default: this repo's published `public/`). `--base` does the same per call; `DATASET_BASE_URL` still works as the old name |
 | `TMDB_API_KEY` | optional; `--tmdb` adds TMDB score and vote count per film (free key at themoviedb.org) |
 | `XDG_CACHE_HOME` | cache root; files go in `$XDG_CACHE_HOME/inflight-movie-picker/` (default `~/.cache/inflight-movie-picker/`) |
 
@@ -67,7 +68,10 @@ Try it by hand:
 cd ~/.claude/skills/inflight-movie-picker   # or wherever you put it
 bun scripts/catalogue.ts --list
 bun scripts/catalogue.ts singapore --genre comedy --max-runtime 110
+bun scripts/catalogue.ts emirates --taste ~/Downloads/imdb-ratings    # hides films you rated, flags your watchlist
 ```
+
+`--taste` takes an IMDb ratings or watchlist CSV, an unzipped Letterboxd export, or a folder holding either.
 
 The dataset holds catalogue facts and IDs only (title, year, runtime, directors, genres, classification,
 languages, airline categories, IMDb id). It has no synopses, posters or review scores. IMDb ids come from

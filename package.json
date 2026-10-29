@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "cli": "bun src/cli.ts",
+    "serve": "bun scripts/serve.ts",
     "test": "bun test",
     "typecheck": "tsc --noEmit"
   },

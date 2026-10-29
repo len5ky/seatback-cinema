@@ -1,81 +1,132 @@
 ---
 name: inflight-movie-picker
-description: Recommend what to watch on a flight from the airline's actual in-flight film catalogue for that month. Use when someone asks what to watch on their flight or plane, what movies are on Emirates, United, KLM, British Airways, Singapore Airlines, Lufthansa, JAL, Cathay Pacific, Qantas, ANA or American Airlines this month, wants plane movie picks for themselves or their kids, or asks whether a specific film is on a given airline. Also triggers on "inflight movie picker", "seatback cinema", "what's on the plane" and "in-flight entertainment" questions.
+description: Recommend what to watch on a flight from the airline's actual in-flight film catalogue for that month, ranked against the person's taste. Use when someone asks what to watch on their flight or plane, what movies are on Emirates (ice), United, KLM, British Airways, Singapore Airlines, Lufthansa, JAL, Cathay Pacific, Qantas, ANA or American Airlines this month, wants plane movie picks for themselves or their kids, or asks whether a specific film is on a given airline. Also triggers on "inflight movie picker", "seatback cinema", "what's on the plane" and "in-flight entertainment" questions.
 ---
 
 # Inflight movie picker
 
-An open dataset lists every film in each airline's seatback catalogue, month by month, with an IMDb id for
-~93% of them. `scripts/catalogue.ts` (next to this file) downloads one catalogue, caches it and prints a
-compact table. Your job is to pick from that table. Never recommend a film that is not in it.
+Seatback Cinema publishes every film in eleven airlines' seatback catalogues, month by month, and matches about
+94% of them to an IMDb id. `scripts/catalogue.ts` in this skill's folder downloads one airline-month, caches it
+and prints it as a table. You pick from that table and nothing else: if a film isn't in it, it isn't on the plane
+as far as you know.
 
-## 1. Get the catalogue
+Use it when someone asks what to watch on a flight, whether a film is on an airline, or what an airline is showing
+this month. Don't use it for streaming or cinema recommendations.
 
-Run from this skill's directory. Use whichever runtime is installed:
+## 1. Get the facts about the flight
+
+You need four things. Take whatever the person already said and ask for the rest in one short message; if they
+just want picks, guess sensibly and say what you assumed.
+
+- **Airline**, and the month if the flight is in a later month than today (catalogues change around the 1st).
+- **Flight length.** Long-haul is 6 hours or more, short-haul under 3.
+- **Who is watching.** Alone, with a partner, or with children (ages matter).
+- **Mood.** Something easy, something to cry at, a film they've been meaning to see.
+
+Airline ids: `emirates`, `united`, `klm`, `ba`, `singapore`, `lufthansa`, `jal`, `cathay`, `qantas`, `ana`,
+`american`. Delta, Turkish, Air France and Qatar aren't covered (they don't publish a full catalogue, or hide it
+behind bot protection). Say so plainly and offer general picks they can check against the seatback screen.
+
+## 2. Read the catalogue
+
+Run the script by its full path from the person's working directory, so relative paths to their exports work.
+Any of Bun, Node 22.6+ or Deno will run it:
 
 ```bash
-bun scripts/catalogue.ts --list                                   # airline ids and available months
-bun scripts/catalogue.ts united                                   # latest month
-bun scripts/catalogue.ts united 2026-11 --genre thriller --max-runtime 120
-bun scripts/catalogue.ts emirates --search "toy story"           # "is X on the plane?"
-node --experimental-strip-types scripts/catalogue.ts klm         # Node 22.6+ (flag optional from 23.6)
-deno run -A scripts/catalogue.ts ba                               # Deno
+S=<this skill's folder>/scripts/catalogue.ts
+bun $S --list                                     # airline ids and published months
+bun $S emirates                                   # latest month
+bun $S united 2026-11 --max-runtime 110           # a given month, films up to 110 minutes
+bun $S united --family --max-runtime 100         # kids: family, kids and animation genres
+bun $S ba --search "wicked"                       # "is X on the plane?"
+node --experimental-strip-types $S klm            # Node; deno run -A $S klm for Deno
 ```
 
-Options: `--search <text>`, `--genre <name>`, `--max-runtime <min>`, `--matched` (only films with an IMDb id),
-`--tmdb` (adds TMDB score and vote count; needs `TMDB_API_KEY`), `--json`, `--refresh`.
-Output is `title | year | min | genres | imdb`. Large catalogues (Emirates ~2,000, Cathay ~1,500) are long:
-filter by genre or runtime, or read the whole list once and shortlist from it.
+The table is `title | year | min | genres | cert | imdb`. `cert` is the airline's own age rating (PG13, 12, M,
+TV-G and so on; formats vary by airline). `imdb` is the matched IMDb id; `(medium)` after it means the match rests
+on one signal, such as runtime alone, so treat it as probably right. `-` means no confident match: the film is on
+the plane, but you can't vouch for which film it is.
 
-Airline ids: `emirates`, `united`, `klm`, `ba`, `singapore`, `lufthansa`, `jal`, `cathay`, `qantas`, `ana`, `american`.
-Delta, Turkish and Air France do not publish their catalogues, so say you can't see theirs. Don't guess.
+Other options: `--matched` (only films with an IMDb id), `--tmdb` (adds TMDB score and vote count; needs
+`TMDB_API_KEY`), `--taste <path>` (below), `--json`, `--refresh`. Emirates lists about 2,000 films and Cathay
+about 1,500, so filter by genre or runtime, or read the full list once and shortlist from it.
 
-Month: catalogues change monthly, usually on the 1st (some mid-month). Use the month of the flight. If that
-month isn't published yet, use the latest one and say the line-up may change.
+If the flight month isn't published yet, use the latest month and tell the person the line-up may change.
 
-## 2. Find out what they like (30 seconds, skip what you already know)
+## 3. Learn their taste
 
-If the person has shared a Letterboxd export, ratings or a watch history, use that. Don't ask again.
-The simplest taste input is an IMDb ratings export (imdb.com > Your Ratings > three-dot menu > Export, a CSV whose `Const`
-column is the IMDb id and `Your Rating` is 1-10), so suggest it to anyone with an IMDb account. Otherwise
-ask at most three short questions in one message, then recommend straight away:
+Look in the working directory first. An IMDb export (`data/imdb-ratings/*.csv`, or any CSV with a `Const` column)
+or an unzipped Letterboxd export (`ratings.csv`, `watched.csv`, `watchlist.csv`) is better than any interview.
+Pass the file or folder to the script:
 
-1. Two or three films they loved recently (better than asking for genres).
-2. Anything they never want: horror, subtitles, sad endings, musicals, superhero fatigue.
-3. The flight: route or length, and who is watching (alone, partner, kids and ages).
+```bash
+bun $S emirates --taste data/imdb-ratings
+bun $S united --taste ~/Downloads/letterboxd-export     # unzip the Letterboxd zip first
+```
 
-If they just want picks and skip the questions, recommend a balanced list and invite a correction.
-Note the films they say they have seen and don't recommend those.
+The script then hides every film they've rated or logged, adds a `you` column that says `watchlist` for films on
+their watchlist, and prints their 9-10/10 films and their 1-4/10 films above the table. The join: IMDb rows match on
+the IMDb id (`Const`), exactly. Letterboxd rows have no IMDb id, so they match on title (lowercased, accents,
+punctuation and a leading "The" dropped) with the year within one; a catalogue row with no year (most of
+Emirates) matches on title alone. Letterboxd half-stars are doubled to the 10-point scale.
 
-## 3. Choose
+No export? Ask, in one message:
 
-Fit the picks to the flight:
-- **Long-haul (6h+)**: build a two-to-four film running order. Lead with the one they most want before the
-  meal service and sleep. Put long epics (150+ min) early and lighter or familiar films late, when they're tired.
-  Total runtime should leave room for sleep on overnight flights.
-- **Short-haul (under 3h)**: one film that fits the gate-to-gate time, minus about 40 minutes for taxi, climb
-  and descent. Use `--max-runtime`. Offer a shorter backup.
-- **Kids mode** (anyone under 13 watching): use the airline's own classification and genres (Animation, Family),
-  check the content against your own knowledge before suggesting anything rated above PG, and say why each pick
-  suits the age. Prefer films under ~100 minutes for young children.
+1. Five films they loved.
+2. Two they hated.
+3. Anything to avoid (horror, subtitles, sad endings, musicals, superheroes).
 
-Quality: the dataset has no review scores. Rank by what you know of each film's reception, and back it with
-`--tmdb` scores when a key is set. Don't invent numbers. Prefer new releases (current and previous year)
-when they're good, because those are the films people can't easily watch at home.
+That takes thirty seconds. Note every film they mention as seen and don't recommend it. Tell IMDb users about the
+export for next time: imdb.com, Your Ratings, the three-dot menu, Export.
 
-## 4. Answer
+## 4. Rank
 
-Give 5-8 picks (fewer for short-haul), each on one line: title (year), runtime, why it fits *this person*, and
-the IMDb link built from the id: `https://www.imdb.com/title/<imdbId>/`. Every pick must come from the table.
-Cite the IMDb id so the person can check it. If a film has no IMDb id (`-`), say it's unverified.
+The dataset carries no review scores. Rank with what you know about each film: its reception, who it suits, how
+close it sits to the films they loved and how far from the ones they hated. If `TMDB_API_KEY` is set, run with
+`--tmdb` and use the score and vote count as a check on your memory; a 7.8 from 40 votes means little. Never
+invent a score.
 
-Mention once, briefly, when relevant: catalogues vary by route, aircraft and cabin (Qantas data is the large
-international seatback set), and the airline may swap titles mid-month.
+Watchlist films go near the top unless they clash with the flight (a three-hour epic on a 90-minute hop). Prefer
+this year's and last year's releases when they're good: those are the films people can't easily watch at home.
+Leave out anything they've seen.
+
+## 5. Present picks
+
+Match the flight:
+
+- **Long-haul (6h+):** three films and one backup. Put the one they most want first, before the meal and sleep;
+  long films early, lighter ones late. On an overnight flight leave room to sleep.
+- **Short-haul (under 3h):** one or two films under 110 minutes. Allow about 40 minutes for taxi, climb and descent.
+- **Kids:** family titles only (`--family` catches each airline's own name for them: Family, Kids, Animation,
+  Childrens), checked against the `cert`
+  column and your own knowledge of the content. Say why each one suits the child's age.
+
+Give each pick as a card, in the same shape as the project's CLI:
+
+```
+1. Obsession (2025)  Horror, Thriller  109 min  IMDb 7.8 (414k)
+   A hopeless romantic's wish for true love spirals into a nightmare.
+   why: on your watchlist; you rated Get Out 9/10; under two hours, so it ends before the first meal
+   https://www.imdb.com/title/tt37287335/
+```
+
+Line one is title, year, genres and runtime from the table, then ratings: the IMDb rating as you remember it
+(write "IMDb ~7.8" if you're not sure of the figure) and TMDB only when `--tmdb` gave you one. Line two is a
+one-line synopsis in your own words. Line three says why it fits this person on this flight. Line four is the IMDb
+link built from the id. If the id carries `(medium)`, add "IMDb match is medium confidence, check the link" to the
+card. For a film with no id, say you can't confirm which film it is.
+
+Close with one line when it applies: catalogues vary by route, aircraft and cabin (Qantas data is the large
+international seatback set), and airlines swap some titles mid-month.
 
 ## Setup and troubleshooting
 
-- `DATASET_BASE_URL` overrides where the data comes from (default in the script). Downloads are cached under
-  `~/.cache/inflight-movie-picker/` (`$XDG_CACHE_HOME` respected). The index is refreshed every 12h, finished months never.
-- `HTTP 404` on the index usually means the base URL is wrong. A missing month means it isn't published yet.
-- `TMDB_API_KEY` is optional (free at themoviedb.org > Settings > API; v3 key or v4 read token). The first
-  `--tmdb` run on a big catalogue makes one request per film; later runs come from the cache.
+- The data comes from `https://raw.githubusercontent.com/len5ky/seatback-cinema/main/public`. `--base <url|dir>` or
+  `SEATBACK_DATASET_URL` points the script elsewhere: a mirror, `http://localhost:4173` (`bun run serve` in a
+  checkout of the repo), a local `public/` folder or a `file://` URL. Local folders are read in place, never cached.
+- Downloads are cached in `~/.cache/inflight-movie-picker/` (`$XDG_CACHE_HOME` respected). The index refreshes
+  every 12 hours; a finished month is cached for good.
+- `HTTP 404` on the index means nothing is published at that address: the repo may still be private, or the URL is
+  wrong. A missing month means it isn't published yet.
+- `TMDB_API_KEY` is optional (free at themoviedb.org, Settings, API; a v3 key or a v4 read token). The first
+  `--tmdb` run on a big catalogue makes one request per film; after that it's cached for 30 days.
