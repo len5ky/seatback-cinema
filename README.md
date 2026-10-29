@@ -1,8 +1,16 @@
-# plane_movie
+# Seatback Cinema — inflight movie picker
 
-Which films are on the plane this month, and which of them are worth watching. It pulls each airline's monthly
-movie catalogue, matches every film to IMDb using the public bulk datasets, ranks the result against your
-`taste.json`, and exports an open monthly dataset to `public/data/`.
+Seatback Cinema collects the in-flight entertainment (IFE) catalogue of 11 airlines every month, among them
+Emirates ice, United and British Airways, matches each film to IMDb, ranks the airline movie list by IMDb and
+Letterboxd ratings, and publishes it as an open dataset with an agent skill (Claude Code, Codex, Cursor) that
+picks what to watch. Short name: `seatback`.
+
+Also searched as: flightflix, skyflix, planeflix, inflight movie finder, airline movie ranker, mile-high movies,
+cabin cinema.
+
+Which films are on the plane this month, and which of them are worth watching? The pipeline pulls each airline's
+monthly movie catalogue, matches every film to IMDb using the public bulk datasets, ranks the result against your
+`taste.json`, and exports one JSON file per airline and month to `public/data/`.
 
 Airlines: Emirates, United, KLM, British Airways, Singapore Airlines, Lufthansa, Japan Airlines, Cathay Pacific,
 Qantas, ANA and American (`bun run cli` lists the registered ids).
@@ -189,8 +197,8 @@ Preview with `bunx serve public` or `python3 -m http.server -d public`.
 
 ## Skills
 
-- `.claude/skills/plane-movies/` is the local skill for this checkout. It drives the CLI and the SQLite database.
-- `skill/plane-movies/` is the installable thin client for everyone else. It downloads one airline-month from
+- `.claude/skills/inflight-movie-picker/` is the local skill for this checkout. It drives the CLI and the SQLite database.
+- `skill/inflight-movie-picker/` is the installable thin client for everyone else. It downloads one airline-month from
   the published dataset, caches it and prints a table for the model, so nobody needs to clone the pipeline. It
   runs on Bun, Node 22.6+ or Deno and works in Claude Code, Codex and Cursor. Install steps: `skill/README.md`.
-  It reads `https://raw.githubusercontent.com/len5ky/seatback/main/public` (override with `DATASET_BASE_URL`).
+  It reads `https://raw.githubusercontent.com/len5ky/seatback-cinema/main/public` (override with `DATASET_BASE_URL`).

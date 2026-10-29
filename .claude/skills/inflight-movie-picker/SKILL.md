@@ -1,9 +1,9 @@
 ---
-name: plane-movies
-description: Recommend what to watch on a flight from the airline's in-flight catalogue, ranked by IMDb rating and the user's taste. Use when the user asks what to watch on their flight or plane, what movies are on Emirates / ice, United, KLM, British Airways, Singapore Airlines, Lufthansa, JAL, Cathay Pacific, Qantas, ANA or American Airlines this month, for plane movie picks, or whether a specific film is available on a given airline.
+name: inflight-movie-picker
+description: Recommend what to watch on a flight from the airline's in-flight catalogue, ranked by IMDb rating and the user's taste. Use when the user asks what to watch on their flight or plane, what movies are on Emirates / ice, United, KLM, British Airways, Singapore Airlines, Lufthansa, JAL, Cathay Pacific, Qantas, ANA or American Airlines this month, for plane movie picks, or whether a specific film is available on a given airline. Also triggers on "inflight movie picker", "seatback cinema", "what's on the plane" and "in-flight entertainment" questions.
 ---
 
-# Plane movies
+# Inflight movie picker
 
 Local monthly catalogues for Emirates, United, KLM, British Airways (`ba`), Singapore Airlines (`singapore`),
 Lufthansa, Japan Airlines (`jal`), Cathay Pacific (`cathay`), Qantas, ANA and American (`american`),

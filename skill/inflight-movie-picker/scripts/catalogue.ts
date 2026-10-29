@@ -14,9 +14,9 @@ import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "no
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
-const DEFAULT_BASE_URL = "https://raw.githubusercontent.com/len5ky/seatback/main/public";
+const DEFAULT_BASE_URL = "https://raw.githubusercontent.com/len5ky/seatback-cinema/main/public";
 const BASE_URL = (process.env.DATASET_BASE_URL ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
-const CACHE_DIR = join(process.env.XDG_CACHE_HOME ?? join(homedir(), ".cache"), "plane-movies");
+const CACHE_DIR = join(process.env.XDG_CACHE_HOME ?? join(homedir(), ".cache"), "inflight-movie-picker");
 const INDEX_TTL_MS = 12 * 3600 * 1000;
 const TMDB_TTL_MS = 30 * 24 * 3600 * 1000;
 

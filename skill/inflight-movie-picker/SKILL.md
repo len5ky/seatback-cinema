@@ -1,9 +1,9 @@
 ---
-name: plane-movies
-description: Recommend what to watch on a flight from the airline's actual in-flight film catalogue for that month. Use when someone asks what to watch on their flight or plane, what movies are on Emirates, United, KLM, British Airways, Singapore Airlines, Lufthansa, JAL, Cathay Pacific, Qantas, ANA or American Airlines this month, wants plane movie picks for themselves or their kids, or asks whether a specific film is on a given airline.
+name: inflight-movie-picker
+description: Recommend what to watch on a flight from the airline's actual in-flight film catalogue for that month. Use when someone asks what to watch on their flight or plane, what movies are on Emirates, United, KLM, British Airways, Singapore Airlines, Lufthansa, JAL, Cathay Pacific, Qantas, ANA or American Airlines this month, wants plane movie picks for themselves or their kids, or asks whether a specific film is on a given airline. Also triggers on "inflight movie picker", "seatback cinema", "what's on the plane" and "in-flight entertainment" questions.
 ---
 
-# Plane movies
+# Inflight movie picker
 
 An open dataset lists every film in each airline's seatback catalogue, month by month, with an IMDb id for
 ~93% of them. `scripts/catalogue.ts` (next to this file) downloads one catalogue, caches it and prints a
@@ -73,7 +73,7 @@ international seatback set), and the airline may swap titles mid-month.
 ## Setup and troubleshooting
 
 - `DATASET_BASE_URL` overrides where the data comes from (default in the script). Downloads are cached under
-  `~/.cache/plane-movies/` (`$XDG_CACHE_HOME` respected). The index is refreshed every 12h, finished months never.
+  `~/.cache/inflight-movie-picker/` (`$XDG_CACHE_HOME` respected). The index is refreshed every 12h, finished months never.
 - `HTTP 404` on the index usually means the base URL is wrong. A missing month means it isn't published yet.
 - `TMDB_API_KEY` is optional (free at themoviedb.org > Settings > API; v3 key or v4 read token). The first
   `--tmdb` run on a big catalogue makes one request per film; later runs come from the cache.

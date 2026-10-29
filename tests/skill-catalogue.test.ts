@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { existsSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
 
-const SCRIPT = `${import.meta.dir}/../skill/plane-movies/scripts/catalogue.ts`;
+const SCRIPT = `${import.meta.dir}/../skill/inflight-movie-picker/scripts/catalogue.ts`;
 const tmpRoot = () => { const d = `${import.meta.dir}/../tmp`; mkdirSync(d, { recursive: true }); return d; };
 
 // The test serves the dataset from a loopback server and fetches it. Sandboxes that cannot bind one (codex's: listen
@@ -38,12 +38,12 @@ test.skipIf(!!noLoopback)("skill client: a 404 names the likely cause; invalid J
     const b = await run(base, cache, "--list");
     expect(b.code).toBe(1);
     expect(b.err).toContain("did not return JSON");
-    expect(existsSync(`${cache}/plane-movies/index.json`)).toBe(false);
+    expect(existsSync(`${cache}/inflight-movie-picker/index.json`)).toBe(false);
     mode = "ok";
     const c = await run(base, cache, "--list");
     expect(c.code).toBe(0);
     expect(c.out).toContain("qantas | Qantas");
-    expect(existsSync(`${cache}/plane-movies/index.json`)).toBe(true);
+    expect(existsSync(`${cache}/inflight-movie-picker/index.json`)).toBe(true);
   } finally {
     server.stop(true);
     rmSync(cache, { recursive: true, force: true });

@@ -1,4 +1,4 @@
-# plane-movies skill
+# inflight-movie-picker skill
 
 Ask your coding agent "what should I watch on my Emirates flight?" and it picks from the films Emirates is
 actually showing that month, with IMDb links. The skill is two files: `SKILL.md` (instructions for the model) and
@@ -8,20 +8,20 @@ any one of Bun, Node 22.6+ or Deno will run it.
 Airlines: Emirates, United, KLM, British Airways, Singapore Airlines, Lufthansa, Japan Airlines, Cathay Pacific,
 Qantas, ANA, American Airlines. The data is refreshed on the 1st and 15th of each month.
 
-The dataset is read from `https://raw.githubusercontent.com/len5ky/seatback/main/public`. Set `DATASET_BASE_URL`
+The dataset is read from `https://raw.githubusercontent.com/len5ky/seatback-cinema/main/public`. Set `DATASET_BASE_URL`
 to point the script at a mirror or a local copy (for example `http://localhost:3000` serving `public/`).
 
 ## Get the files
 
 ```bash
-git clone --depth 1 https://github.com/len5ky/seatback /tmp/plane-movies-src
-# the skill is the skill/plane-movies directory; copy it to where your agent looks (below)
+git clone --depth 1 https://github.com/len5ky/seatback-cinema /tmp/inflight-movie-picker-src
+# the skill is the skill/inflight-movie-picker directory; copy it to where your agent looks (below)
 ```
 
 ## Claude Code
 
 ```bash
-cp -r /tmp/plane-movies-src/skill/plane-movies ~/.claude/skills/       # all projects
+cp -r /tmp/inflight-movie-picker-src/skill/inflight-movie-picker ~/.claude/skills/       # all projects
 # or: cp -r ... <project>/.claude/skills/                              # one project
 ```
 
@@ -30,23 +30,23 @@ Claude Code picks it up from the `description` in `SKILL.md`. Ask "what's good o
 ## Codex CLI
 
 ```bash
-mkdir -p ~/.codex/skills && cp -r /tmp/plane-movies-src/skill/plane-movies ~/.codex/skills/
+mkdir -p ~/.codex/skills && cp -r /tmp/inflight-movie-picker-src/skill/inflight-movie-picker ~/.codex/skills/
 ```
 
 If your Codex version doesn't load skills, add this line to `~/.codex/AGENTS.md`:
-`For in-flight movie questions, follow ~/.codex/skills/plane-movies/SKILL.md.`
+`For in-flight movie questions, follow ~/.codex/skills/inflight-movie-picker/SKILL.md.`
 
 ## Cursor
 
-Copy the directory into your project (for example `.cursor/plane-movies/`) and add a rule,
-`.cursor/rules/plane-movies.mdc`:
+Copy the directory into your project (for example `.cursor/inflight-movie-picker/`) and add a rule,
+`.cursor/rules/inflight-movie-picker.mdc`:
 
 ```markdown
 ---
 description: In-flight movie recommendations from airline catalogues
 alwaysApply: false
 ---
-For questions about what to watch on a flight, follow .cursor/plane-movies/SKILL.md and run its script from that directory.
+For questions about what to watch on a flight, follow .cursor/inflight-movie-picker/SKILL.md and run its script from that directory.
 ```
 
 ## Any other agent
@@ -59,12 +59,12 @@ Point the agent at `SKILL.md` (paste it, or reference it from `AGENTS.md`). All 
 |---|---|
 | `DATASET_BASE_URL` | where to fetch the data from (defaults to this repo's published `public/` directory) |
 | `TMDB_API_KEY` | optional; `--tmdb` adds TMDB score and vote count per film (free key at themoviedb.org) |
-| `XDG_CACHE_HOME` | cache root; files go in `$XDG_CACHE_HOME/plane-movies/` (default `~/.cache/plane-movies/`) |
+| `XDG_CACHE_HOME` | cache root; files go in `$XDG_CACHE_HOME/inflight-movie-picker/` (default `~/.cache/inflight-movie-picker/`) |
 
 Try it by hand:
 
 ```bash
-cd ~/.claude/skills/plane-movies   # or wherever you put it
+cd ~/.claude/skills/inflight-movie-picker   # or wherever you put it
 bun scripts/catalogue.ts --list
 bun scripts/catalogue.ts singapore --genre comedy --max-runtime 110
 ```
