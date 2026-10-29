@@ -18,7 +18,8 @@ async function getPage(url: string): Promise<{ html: string; url: string } | nul
   try { res = await politeFetch(url, { headers: PAGE_HEADERS }); } catch (e) { throw new Transient(`${url}: ${e instanceof Error ? e.message : e}`); }
   if (res.status === 404 || res.status === 410) return null;
   if (!res.ok) throw new Transient(`${url} -> ${res.status}`);
-  return { html: await res.text(), url: res.url };
+  // the timeout signal also covers the body read, so a slow body must count as transient too
+  try { return { html: await res.text(), url: res.url }; } catch (e) { throw new Transient(`${url}: ${e instanceof Error ? e.message : e}`); }
 }
 
 export function storeScore(db: Database, tconst: string, source: string, s: Score, now = new Date().toISOString()): void {
