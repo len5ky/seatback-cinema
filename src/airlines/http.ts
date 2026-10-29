@@ -11,6 +11,11 @@ export function fetchDate(month: string, today = new Date()): string {
   return iso.startsWith(month) ? iso : `${month}-05`;
 }
 
+/** For sources with no month selector: only the current month can be fetched (cached months stay readable). */
+export function assertCurrentMonth(id: string, month: string, today = new Date()): void {
+  if (today.toISOString().slice(0, 7) !== month) throw new Error(`${id} only publishes the current cycle; cannot fetch ${month}`);
+}
+
 export const monthDir = (cacheDir: string, id: string, month: string) => `${cacheDir}/${id}/${month}`;
 
 export interface CachedRequest { url: string; path: string; init?: RequestInit; refresh?: boolean; minBytes?: number }
