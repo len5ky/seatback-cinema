@@ -166,3 +166,35 @@ test("Hero: a surname namesake a year off does not beat the exact year and runti
     [cand("tt_true", 2021, 155, ["X"], 5000), cand("tt_namesake", 2020, 120, ["Y"], 5000)], 2026);
   expect(noDir.confidence).toBe("low");
 });
+
+test("a different director caps the match at medium, even with exact year and runtime", () => {
+  // codex's Hero: a same-year, same-runtime Spike Lee title for Ang Lee's listing shares only a surname
+  const film = { cleanTitle: "Hero", year: 2002, duration: 99, director: "Ang Lee" };
+  const m = pickMatch(film, [cand("tt_spike", 2002, 99, ["Spike Lee"], 5000), cand("tt0299977", 2002, 120, ["Zhang Yimou"], 190000)], 2026);
+  expect(m.tconst).toBe("tt_spike");
+  expect(m.confidence).toBe("medium");
+  expect(m.reasons).toContain("director differs");
+  // the same person stays high
+  const same = pickMatch({ cleanTitle: "Hero", year: 2002, duration: 99, director: "Zhang Yimou" },
+    [cand("tt0299977", 2002, 99, ["Zhang Yimou"], 190000), cand("tt_spike", 2002, 99, ["Spike Lee"], 5000)], 2026);
+  expect(same).toMatchObject({ tconst: "tt0299977", confidence: "high" });
+  // no director on the airline side: year and runtime still make it high
+  expect(pickMatch({ ...film, director: null }, [cand("tt0299977", 2002, 99, ["Zhang Yimou"], 190000)], 2026).confidence).toBe("high");
+});
+
+test("fragment search finds a low-vote title among hundreds of popular ones (Battle of the Bands)", () => {
+  const db = openDb(":memory:");
+  const ins = db.prepare("INSERT INTO imdb_titles VALUES (?,'movie',?,NULL,?,?,'Drama',6.0,?,NULL)");
+  const key = db.prepare("INSERT INTO imdb_keys VALUES (?,?)");
+  for (let i = 0; i < 400; i++) {
+    ins.run(`tt${i}`, `Battle of the Thing ${i}`, 1980 + (i % 40), 120, 10000 + i);
+    key.run(`battle of the thing ${i}`, `tt${i}`);
+  }
+  ins.run("tt1595611", "Battle of the Bands", 2009, 85, 40);
+  key.run("battle of the bands", "tt1595611");
+  const r = findCandidates(db, "The Battle Of The ...", { year: 2009, runtime: 85 });
+  expect(r.candidates.map((c) => c.tconst)).toContain("tt1595611");
+  expect(r.candidates.every((c) => Math.abs(c.startYear! - 2009) <= 1 && Math.abs(c.runtime! - 85) <= 15)).toBe(true);
+  const m = pickMatch({ cleanTitle: "The Battle Of The ...", year: 2009, duration: 85, director: null }, r.candidates, 2026, r.viaVariant);
+  expect(m).toMatchObject({ tconst: "tt1595611", confidence: "medium" }); // high, downgraded once for the partial title
+});

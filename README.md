@@ -171,9 +171,12 @@ not a failure).
 
 `scripts/american-local.sh` runs from a user crontab on the dev machine at 03:00 UTC on the 1st and 15th: it fetches
 American with `--refresh`, matches, exports that airline only, rebuilds `index.json` and pushes the American file,
-`index.json`, `ids.json` and `health.json` to main with `[skip ci]`, rebasing right before the push and regenerating
-its files on top of CI's if they conflict. `--dry-run` reuses cached raw files, works on copies under
-`tmp/american-dry/` (database snapshot, raw cache, `public/data`) and stops before the commit.
+`index.json`, `ids.json` and `health.json` to main with `[skip ci]`. It publishes from its own worktree
+(`tmp/american-publish`, detached at `origin/main`), so the branch checked out here is never touched; a rejected push
+rebases that worktree, and on a conflict it regenerates its files on top of CI's. `--dry-run` reuses cached raw
+files, works on a database snapshot under `tmp/american-dry/`, commits in the worktree and stops before the push.
+CI's own push goes through `scripts/push-dataset.sh`, which rebases over a concurrent American publish and on a
+conflict rebuilds `index.json`, merges `ids.json` and keeps American's `health.json` entry from upstream.
 
 Locally: `scripts/fetch-all.sh [YYYY-MM]` runs the same fetch loop.
 

@@ -27,7 +27,7 @@ Options: `--search <text>`, `--genre <name>`, `--max-runtime <min>`, `--matched`
 Output is `title | year | min | genres | imdb`. Large catalogues (Emirates ~2,000, Cathay ~1,500) are long:
 filter by genre or runtime, or read the whole list once and shortlist from it.
 
-Airline ids: `emirates`, `united`, `klm`, `ba`, `singapore`, `lufthansa`, `jal`, `cathay`, `qantas`, `ana`.
+Airline ids: `emirates`, `united`, `klm`, `ba`, `singapore`, `lufthansa`, `jal`, `cathay`, `qantas`, `ana`, `american`.
 Delta, Turkish and Air France do not publish their catalogues, so say you can't see theirs. Don't guess.
 
 Month: catalogues change monthly, usually on the 1st (some mid-month). Use the month of the flight. If that

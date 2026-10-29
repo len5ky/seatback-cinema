@@ -111,8 +111,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "$msg"
-          git pull --rebase origin main
-          git push origin HEAD:main
+          # rebases over a concurrent American publish; regenerates index/ids/health.json on a conflict
+          SKIP_AIRLINES=american scripts/push-dataset.sh public/data
 
       - name: Upload fetch logs
         if: always()

@@ -7,8 +7,9 @@ export interface Candidate {
   tconst: string; primaryTitle: string; startYear: number | null; runtime: number | null;
   votes: number | null; directorNames: string[];
 }
-/** strong = confirming signals; hard = director or year disagreement (runtime disagreement only costs score: airlines edit films). */
-export interface Scored { candidate: Candidate; score: number; strong: number; hard: number; yearGap: number | null; reasons: string[] }
+/** strong = confirming signals; hard = director or year disagreement (runtime disagreement only costs score: airlines edit films);
+ *  otherDirector = both sides name a director and they are not the same person (a shared surname included). */
+export interface Scored { candidate: Candidate; score: number; strong: number; hard: number; yearGap: number | null; otherDirector: boolean; reasons: string[] }
 export interface MatchResult { tconst: string | null; confidence: Confidence; score: number; reasons: string[] }
 
 const tokens = (name: string) => new Set(normalizeTitle(name).split(" ").filter((t) => t.length >= 2));
@@ -52,6 +53,7 @@ export const directorsMatch = (a: string[], b: string[]): boolean => directorAgr
 export function scoreCandidate(film: FilmInfo, c: Candidate, nowYear: number): Scored {
   let score = 0, strong = 0, hard = 0;
   let yearGap: number | null = null;
+  let otherDirector = false;
   const reasons: string[] = [];
   if (film.duration && c.runtime) {
     const d = Math.abs(film.duration - c.runtime);
@@ -62,6 +64,7 @@ export function scoreCandidate(film: FilmInfo, c: Candidate, nowYear: number): S
   const ours = splitNames(film.director);
   if (ours.length && c.directorNames.length) {
     const agree = directorAgreement(ours, c.directorNames);
+    otherDirector = agree !== "full";
     if (agree === "full") { score += 4; strong++; reasons.push(`director ${c.directorNames.join(", ")}`); }
     else if (agree === "surname") reasons.push(`director ${c.directorNames.join(", ")} shares only a surname with ${film.director}`);
     else { score -= 2; hard++; reasons.push(`director ${c.directorNames.join(", ")} != ${film.director}`); }
@@ -75,7 +78,7 @@ export function scoreCandidate(film: FilmInfo, c: Candidate, nowYear: number): S
   }
   if (strong === 0 && c.startYear && c.startYear >= nowYear - 3) { score += 1; reasons.push(`recent ${c.startYear}`); }
   score += 0.25 * Math.log10((c.votes ?? 0) + 1);
-  return { candidate: c, score, strong, hard, yearGap, reasons };
+  return { candidate: c, score, strong, hard, yearGap, otherDirector, reasons };
 }
 
 const DOWNGRADE: Record<Confidence, Confidence> = { high: "medium", medium: "low", low: "low", none: "none" };
@@ -102,6 +105,11 @@ export function pickMatch(film: FilmInfo, candidates: Candidate[], nowYear = new
       reasons.push(`${exact.candidate.tconst} has the exact year`);
     }
   }
+  if (best.otherDirector && confidence === "high") {
+    // year and runtime alone cannot make a film by someone else a sure match ("Spike Lee" for Ang Lee's "Hero")
+    confidence = "medium";
+    reasons.push("director differs");
+  }
   if (viaVariant) {
     // a title fragment ("Kantara" for "Kantara: Chapter 1") often names the franchise, not the film
     confidence = DOWNGRADE[confidence];
@@ -112,7 +120,9 @@ export function pickMatch(film: FilmInfo, candidates: Candidate[], nowYear = new
 
 interface CandRow { tconst: string; primary_title: string; start_year: number | null; runtime: number | null; votes: number | null; directors: string | null }
 
-export function findCandidates(db: Database, title: string): { candidates: Candidate[]; viaVariant: boolean } {
+/** IMDb titles for an airline title: exact normalised keys, then title variants, then a truncated-title fragment. The fragment
+ *  search can hit hundreds of titles, so it is narrowed to the airline's year (±1) and runtime (±15 min) when known. */
+export function findCandidates(db: Database, title: string, hint: { year?: number | null; runtime?: number | null } = {}): { candidates: Candidate[]; viaVariant: boolean } {
   const q = db.query<CandRow, [string]>(
     "SELECT DISTINCT t.tconst, t.primary_title, t.start_year, t.runtime, t.votes, t.directors FROM imdb_keys k JOIN imdb_titles t USING (tconst) WHERE k.norm = ?");
   let rows = q.all(normalizeTitle(title));
@@ -124,10 +134,14 @@ export function findCandidates(db: Database, title: string): { candidates: Candi
     if (frag) {
       // a chopped title may have lost its head too ("The Desolation Of ..." for "The Hobbit: The Desolation of Smaug"),
       // so match the fragment at any word start; short fragments only as a prefix. Year/director must then confirm.
-      const cols = "SELECT DISTINCT t.tconst, t.primary_title, t.start_year, t.runtime, t.votes, t.directors FROM imdb_keys k JOIN imdb_titles t USING (tconst)";
+      // a year more than one off caps the match at low anyway; an IMDb row without a year or runtime stays in
+      const cols = `SELECT DISTINCT t.tconst, t.primary_title, t.start_year, t.runtime, t.votes, t.directors FROM imdb_keys k JOIN imdb_titles t USING (tconst)
+        WHERE (?1 IS NULL OR t.start_year IS NULL OR t.start_year BETWEEN ?1 - 1 AND ?1 + 1)
+          AND (?2 IS NULL OR t.runtime IS NULL OR t.runtime BETWEEN ?2 - 15 AND ?2 + 15)`;
+      const y = hint.year ?? null, rt = hint.runtime || null;
       const found = frag.length >= 8
-        ? db.query<CandRow, [string]>(`${cols} WHERE (' ' || k.norm) LIKE ? ORDER BY t.votes DESC LIMIT 200`).all(`% ${frag}%`) // full scan; rare
-        : db.query<CandRow, [string, string]>(`${cols} WHERE k.norm >= ? AND k.norm < ? ORDER BY t.votes DESC LIMIT 200`).all(frag, `${frag}\uffff`);
+        ? db.query<CandRow, [number | null, number | null, string]>(`${cols} AND (' ' || k.norm) LIKE ?3 ORDER BY t.votes DESC LIMIT 2000`).all(y, rt, `% ${frag}%`) // full scan; rare
+        : db.query<CandRow, [number | null, number | null, string, string]>(`${cols} AND k.norm >= ?3 AND k.norm < ?4 ORDER BY t.votes DESC LIMIT 2000`).all(y, rt, frag, `${frag}\uffff`);
       rows.push(...found
         .filter((r) => !seen.has(r.tconst) && !!seen.add(r.tconst)));
     }
@@ -159,8 +173,9 @@ export function matchAll(db: Database, airline?: string): Record<Confidence, num
       if (f.imdb_id && known.get(f.imdb_id)) m = { tconst: f.imdb_id, confidence: "high", score: 100, reasons: ["airline-provided IMDb id"] };
       else {
         const t = splitYearSuffix(f.title); // adapters without their own split ("The Breadwinner (2026)")
-        const { candidates, viaVariant } = findCandidates(db, t.title);
-        m = pickMatch({ cleanTitle: t.title, year: f.year ?? t.year ?? null, duration: f.runtime, director: f.directors }, candidates, undefined, viaVariant);
+        const year = f.year ?? t.year ?? null;
+        const { candidates, viaVariant } = findCandidates(db, t.title, { year, runtime: f.runtime });
+        m = pickMatch({ cleanTitle: t.title, year, duration: f.runtime, director: f.directors }, candidates, undefined, viaVariant);
       }
       counts[m.confidence]++;
       ins.run(f.airline, f.source_id, m.tconst, m.confidence, m.score, m.reasons.join("; "), now);

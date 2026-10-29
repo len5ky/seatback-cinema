@@ -130,7 +130,7 @@ export function importExport(db: Database, films: ExportFilm[], now = new Date()
   db.transaction(() => {
     db.run("DELETE FROM user_films WHERE source = 'letterboxd'");
     for (const f of films) {
-      const { candidates, viaVariant } = findCandidates(db, f.name);
+      const { candidates, viaVariant } = findCandidates(db, f.name, { year: f.year });
       const m = matchUserFilm(f.name, f.year, candidates, viaVariant);
       const ok = m.confidence === "high" || m.confidence === "medium";
       r.matched[m.confidence]++;
