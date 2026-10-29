@@ -1,0 +1,137 @@
+{
+ "generatedAt": "2026-10-29T16:17:05.278Z",
+ "airlines": [
+  {
+   "id": "american",
+   "name": "American Airlines",
+   "months": [
+    {
+     "month": "2026-10",
+     "count": 682,
+     "fetchedAt": "2026-10-29T16:12:30.484Z",
+     "path": "american/2026-10.json"
+    }
+   ]
+  },
+  {
+   "id": "ana",
+   "name": "ANA",
+   "months": [
+    {
+     "month": "2026-10",
+     "count": 233,
+     "fetchedAt": "2026-10-29T15:58:10.989Z",
+     "path": "ana/2026-10.json"
+    }
+   ]
+  },
+  {
+   "id": "ba",
+   "name": "British Airways",
+   "months": [
+    {
+     "month": "2026-10",
+     "count": 658,
+     "fetchedAt": "2026-10-29T15:54:38.070Z",
+     "path": "ba/2026-10.json"
+    }
+   ]
+  },
+  {
+   "id": "cathay",
+   "name": "Cathay Pacific",
+   "months": [
+    {
+     "month": "2026-10",
+     "count": 1551,
+     "fetchedAt": "2026-10-29T15:57:27.860Z",
+     "path": "cathay/2026-10.json"
+    }
+   ]
+  },
+  {
+   "id": "emirates",
+   "name": "Emirates",
+   "months": [
+    {
+     "month": "2026-10",
+     "count": 2055,
+     "fetchedAt": "2026-10-22T01:42:52.101Z",
+     "path": "emirates/2026-10.json"
+    }
+   ]
+  },
+  {
+   "id": "jal",
+   "name": "Japan Airlines",
+   "months": [
+    {
+     "month": "2026-10",
+     "count": 124,
+     "fetchedAt": "2026-10-29T15:57:39.979Z",
+     "path": "jal/2026-10.json"
+    }
+   ]
+  },
+  {
+   "id": "klm",
+   "name": "KLM",
+   "months": [
+    {
+     "month": "2026-10",
+     "count": 474,
+     "fetchedAt": "2026-10-29T15:54:36.180Z",
+     "path": "klm/2026-10.json"
+    }
+   ]
+  },
+  {
+   "id": "lufthansa",
+   "name": "Lufthansa",
+   "months": [
+    {
+     "month": "2026-10",
+     "count": 405,
+     "fetchedAt": "2026-10-29T15:58:00.927Z",
+     "path": "lufthansa/2026-10.json"
+    }
+   ]
+  },
+  {
+   "id": "qantas",
+   "name": "Qantas",
+   "months": [
+    {
+     "month": "2026-10",
+     "count": 257,
+     "fetchedAt": "2026-10-29T15:57:14.014Z",
+     "path": "qantas/2026-10.json"
+    }
+   ]
+  },
+  {
+   "id": "singapore",
+   "name": "Singapore Airlines",
+   "months": [
+    {
+     "month": "2026-10",
+     "count": 384,
+     "fetchedAt": "2026-10-29T15:54:37.074Z",
+     "path": "singapore/2026-10.json"
+    }
+   ]
+  },
+  {
+   "id": "united",
+   "name": "United Airlines",
+   "months": [
+    {
+     "month": "2026-10",
+     "count": 508,
+     "fetchedAt": "2026-10-29T15:54:35.461Z",
+     "path": "united/2026-10.json"
+    }
+   ]
+  }
+ ]
+}

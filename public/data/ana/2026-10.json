@@ -1,0 +1,6469 @@
+{
+ "airline": "ana",
+ "name": "ANA",
+ "month": "2026-10",
+ "fetchedAt": "2026-10-29T15:58:10.989Z",
+ "count": 233,
+ "films": [
+  {
+   "sourceId": "6abc717ce09936158e0c96fa",
+   "title": "500 Miles",
+   "year": 2026,
+   "runtime": 101,
+   "directors": [
+    "Morgan Matthews"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt31216533",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7182e09936158e0c97f4",
+   "title": "A Complete Unknown",
+   "year": 2024,
+   "runtime": 141,
+   "directors": [
+    "James Mangold"
+   ],
+   "genres": [
+    "Biography",
+    "Drama",
+    "Musical"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French",
+    "German",
+    "Spanish",
+    "Italian"
+   ],
+   "categories": [
+    "Biography",
+    "Drama",
+    "Musical"
+   ],
+   "imdbId": "tt11563598",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7159e09936158e0c9127",
+   "title": "A Side Character's Love Story",
+   "year": 2026,
+   "runtime": 122,
+   "directors": [
+    "Hiroki Kazama"
+   ],
+   "genres": [
+    "Romance",
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt35440111",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7175e09936158e0c95e2",
+   "title": "A Simple Favor",
+   "year": 2018,
+   "runtime": 108,
+   "directors": [
+    "Paul Feig"
+   ],
+   "genres": [
+    "Mystery",
+    "Thriller",
+    "Comedy"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French",
+    "German",
+    "Spanish",
+    "Portugese"
+   ],
+   "categories": [
+    "Comedy",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbId": "tt7040874",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7175e09936158e0c95ce",
+   "title": "A.I. Artificial Intelligence",
+   "year": 2001,
+   "runtime": 146,
+   "directors": [
+    "Steven Spielberg"
+   ],
+   "genres": [
+    "Adventure",
+    "Drama",
+    "Fantasy",
+    "Sci-Fi"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Italian"
+   ],
+   "categories": [
+    "Adventure",
+    "Drama",
+    "Fantasy",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt0212720",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716ae09936158e0c93ee",
+   "title": "ANIME SUPREMACY!",
+   "year": 2022,
+   "runtime": 129,
+   "directors": [
+    "Kohei Yoshino"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt16303194",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7177e09936158e0c9632",
+   "title": "About My Father",
+   "year": 2023,
+   "runtime": 90,
+   "directors": [
+    "Laura Terruso"
+   ],
+   "genres": [
+    "Comedy"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "English",
+    "French",
+    "Spanish",
+    "Portugese"
+   ],
+   "categories": [
+    "Comedy"
+   ],
+   "imdbId": "tt8373206",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7167e09936158e0c9380",
+   "title": "Aladdin (2019)",
+   "year": 2019,
+   "runtime": 128,
+   "directors": [
+    "Guy Ritchie"
+   ],
+   "genres": [
+    "Adventure",
+    "Family",
+    "Musical"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "Korean",
+    "Spanish",
+    "Italian"
+   ],
+   "categories": [
+    "Adventure",
+    "Family",
+    "Musical"
+   ],
+   "imdbId": "tt6139732",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7179e09936158e0c9696",
+   "title": "Alice Through the Looking Glass",
+   "year": 2016,
+   "runtime": 113,
+   "directors": [
+    "James Bobin"
+   ],
+   "genres": [
+    "Adventure",
+    "Family",
+    "Fantasy"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "Korean",
+    "Thai",
+    "Turkish"
+   ],
+   "categories": [
+    "Adventure",
+    "Family",
+    "Fantasy"
+   ],
+   "imdbId": "tt2567026",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716ee09936158e0c9498",
+   "title": "Always Winter",
+   "year": 2025,
+   "runtime": 112,
+   "directors": [
+    "David Trueba"
+   ],
+   "genres": [
+    "Comedy",
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "Spanish"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama"
+   ],
+   "imdbId": "tt33487489",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7183e09936158e0c9826",
+   "title": "American Underdog",
+   "year": 2021,
+   "runtime": 112,
+   "directors": [
+    "Andrew Erwin",
+    "Jon Erwin"
+   ],
+   "genres": [
+    "Drama",
+    "Sports"
+   ],
+   "rating": "PG",
+   "languages": [
+    "English",
+    "Spanish",
+    "Turkish"
+   ],
+   "categories": [
+    "Drama",
+    "Sports"
+   ],
+   "imdbId": "tt11729298",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716de09936158e0c947a",
+   "title": "Amrum",
+   "year": 2025,
+   "runtime": 89,
+   "directors": [
+    "Fatih Akin"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "German"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt22507216",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7153e09936158e0c9036",
+   "title": "Arthur the King",
+   "year": 2024,
+   "runtime": 107,
+   "directors": [
+    "Simon Cellan Jones"
+   ],
+   "genres": [
+    "Adventure",
+    "Drama",
+    "Sports"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "English",
+    "German",
+    "Turkish"
+   ],
+   "categories": [
+    "Adventure",
+    "Drama",
+    "Sports"
+   ],
+   "imdbId": "tt10720352",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7185e09936158e0c9894",
+   "title": "Avatar: Fire and Ash",
+   "year": 2025,
+   "runtime": 197,
+   "directors": [
+    "James Cameron"
+   ],
+   "genres": [
+    "Action",
+    "Fantasy",
+    "Sci-Fi"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Italian"
+   ],
+   "categories": [
+    "Action",
+    "Fantasy",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt1757678",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716ae09936158e0c940c",
+   "title": "Back to the Past",
+   "year": 2025,
+   "runtime": 107,
+   "directors": [
+    "Ng Yuen-Fai",
+    "Jack Lai"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Sci-Fi"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Cantonese",
+    "Mandarin"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt33348127",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7160e09936158e0c925e",
+   "title": "Backrooms",
+   "year": 2026,
+   "runtime": 111,
+   "directors": [
+    "Kane Parsons"
+   ],
+   "genres": [
+    "Horror",
+    "Sci-Fi"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French",
+    "Italian",
+    "Spanish"
+   ],
+   "categories": [
+    "Horror",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt26657236",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717ae09936158e0c96a0",
+   "title": "Beauty and the Beast",
+   "year": 1991,
+   "runtime": 85,
+   "directors": [
+    "Kirk Wise",
+    "Gary Trousdale"
+   ],
+   "genres": [
+    "Animation",
+    "Family"
+   ],
+   "rating": "G",
+   "languages": [
+    "Japanese",
+    "English",
+    "Cantonese",
+    "Korean",
+    "Thai"
+   ],
+   "categories": [
+    "Animation",
+    "Family"
+   ],
+   "imdbId": "tt0101414",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715ee09936158e0c91ef",
+   "title": "Better Class",
+   "year": 2026,
+   "runtime": 102,
+   "directors": [
+    "Victor García León"
+   ],
+   "genres": [
+    "Comedy",
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "Spanish"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama"
+   ],
+   "imdbId": "tt26931994",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7166e09936158e0c9358",
+   "title": "Better Man",
+   "year": 2024,
+   "runtime": 134,
+   "directors": [
+    "Michael Gracey"
+   ],
+   "genres": [
+    "Biography",
+    "Music"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "German",
+    "Spanish"
+   ],
+   "categories": [
+    "Biography",
+    "Music"
+   ],
+   "imdbId": "tt14260836",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7171e09936158e0c952e",
+   "title": "Billie Eilish - Hit Me Hard and Soft: The Tour",
+   "year": 2026,
+   "runtime": 114,
+   "directors": [
+    "James Cameron",
+    "Billie Eilish"
+   ],
+   "genres": [
+    "Documentary",
+    "Musical"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Documentary",
+    "Musical"
+   ],
+   "imdbId": null,
+   "imdbConfidence": "low",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7176e09936158e0c95f6",
+   "title": "Bridget Jones: Mad About the Boy",
+   "year": 2025,
+   "runtime": 125,
+   "directors": [
+    "Michael Morris"
+   ],
+   "genres": [
+    "Comedy",
+    "Drama",
+    "Romance"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French",
+    "German",
+    "Spanish",
+    "Italian"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt32063050",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715ae09936158e0c9159",
+   "title": "COLOR ME TRUE",
+   "year": 2018,
+   "runtime": 109,
+   "directors": [
+    "Hideki Takeuchi"
+   ],
+   "genres": [
+    "Fantasy",
+    "Romance"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Fantasy",
+    "Romance"
+   ],
+   "imdbId": "tt6908760",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7172e09936158e0c954c",
+   "title": "Casa Grande",
+   "year": 2026,
+   "runtime": 114,
+   "directors": [
+    "Juan Pablo Arias Muñoz"
+   ],
+   "genres": [
+    "Drama",
+    "Crime"
+   ],
+   "rating": "R",
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Crime",
+    "Drama"
+   ],
+   "imdbId": "tt35887288",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7152e09936158e0c8ff0",
+   "title": "Caught Stealing",
+   "year": 2025,
+   "runtime": 106,
+   "directors": [
+    "Darren Aronofsky"
+   ],
+   "genres": [
+    "Comedy",
+    "Crime",
+    "Thriller"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Spanish"
+   ],
+   "categories": [
+    "Comedy",
+    "Crime",
+    "Thriller"
+   ],
+   "imdbId": "tt1493274",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7159e09936158e0c911d",
+   "title": "Chimney Town: Frozen in Time",
+   "year": 2026,
+   "runtime": 98,
+   "directors": [
+    "Yusuke Hirota"
+   ],
+   "genres": [
+    "Animation"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Animation"
+   ],
+   "imdbId": "tt39371353",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7177e09936158e0c9628",
+   "title": "Clueless",
+   "year": 1995,
+   "runtime": 97,
+   "directors": [
+    "Amy Heckerling"
+   ],
+   "genres": [
+    "Comedy",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Spanish",
+    "Thai"
+   ],
+   "categories": [
+    "Comedy",
+    "Romance"
+   ],
+   "imdbId": "tt0112697",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7158e09936158e0c90f5",
+   "title": "Coco",
+   "year": 2017,
+   "runtime": 105,
+   "directors": [
+    "Lee Unkrich",
+    "Adrian Molina"
+   ],
+   "genres": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Korean",
+    "Spanish"
+   ],
+   "categories": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "imdbId": "tt2380307",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7178e09936158e0c9664",
+   "title": "Coldplay Music Of The Spheres: Live at River Plate",
+   "year": 2023,
+   "runtime": 138,
+   "directors": [
+    "Paul Dugdale"
+   ],
+   "genres": [
+    "Documentary",
+    "Musical"
+   ],
+   "rating": null,
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Documentary",
+    "Musical"
+   ],
+   "imdbId": "tt26934645",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716ee09936158e0c94b6",
+   "title": "Comic Escape",
+   "year": 2022,
+   "runtime": 15,
+   "directors": [
+    "Alphonso McAuley"
+   ],
+   "genres": [],
+   "rating": null,
+   "languages": [
+    "English"
+   ],
+   "categories": [],
+   "imdbId": null,
+   "imdbConfidence": "none",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7175e09936158e0c95d8",
+   "title": "Companion",
+   "year": 2025,
+   "runtime": 97,
+   "directors": [
+    "Drew Hancock"
+   ],
+   "genres": [
+    "Comedy",
+    "Sci-Fi",
+    "Thriller"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French",
+    "German",
+    "Thai",
+    "Italian"
+   ],
+   "categories": [
+    "Comedy",
+    "Sci-Fi",
+    "Thriller"
+   ],
+   "imdbId": "tt26584495",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717ce09936158e0c970e",
+   "title": "Couture",
+   "year": 2026,
+   "runtime": 101,
+   "directors": [
+    "Alice Winocour"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt34688195",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7165e09936158e0c9312",
+   "title": "Crazy Rich Asians",
+   "year": 2018,
+   "runtime": 120,
+   "directors": [
+    "Jon M. Chu"
+   ],
+   "genres": [
+    "Comedy",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Korean",
+    "Italian"
+   ],
+   "categories": [
+    "Comedy",
+    "Romance"
+   ],
+   "imdbId": "tt3104988",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7172e09936158e0c9556",
+   "title": "Crime 101",
+   "year": 2026,
+   "runtime": 140,
+   "directors": [
+    "Bart Layton"
+   ],
+   "genres": [
+    "Crime",
+    "Drama",
+    "Thriller"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Thai",
+    "Turkish"
+   ],
+   "categories": [
+    "Crime",
+    "Drama",
+    "Thriller"
+   ],
+   "imdbId": "tt32430579",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716de09936158e0c9470",
+   "title": "Cycle of time",
+   "year": 2025,
+   "runtime": 103,
+   "directors": [
+    "Vinciane Millereau"
+   ],
+   "genres": [
+    "Comedy"
+   ],
+   "rating": "PG",
+   "languages": [
+    "French"
+   ],
+   "categories": [
+    "Comedy"
+   ],
+   "imdbId": "tt33323667",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7155e09936158e0c9087",
+   "title": "Dark Shadows",
+   "year": 2012,
+   "runtime": 112,
+   "directors": [
+    "Tim Burton"
+   ],
+   "genres": [
+    "Comedy",
+    "Horror",
+    "Fantasy"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Korean",
+    "Thai"
+   ],
+   "categories": [
+    "Comedy",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt1077368",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7176e09936158e0c9614",
+   "title": "Dark Waters",
+   "year": 2019,
+   "runtime": 127,
+   "directors": [
+    "Todd Haynes"
+   ],
+   "genres": [
+    "Biography",
+    "Drama"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "English",
+    "French",
+    "Spanish"
+   ],
+   "categories": [
+    "Biography",
+    "Drama"
+   ],
+   "imdbId": "tt9071322",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7182e09936158e0c97fe",
+   "title": "Death on the Nile",
+   "year": 2022,
+   "runtime": 127,
+   "directors": [
+    "Kenneth Branagh"
+   ],
+   "genres": [
+    "Crime",
+    "Mystery"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Portugese",
+    "Turkish"
+   ],
+   "categories": [
+    "Crime",
+    "Mystery"
+   ],
+   "imdbId": "tt7657566",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7184e09936158e0c984e",
+   "title": "Despicable Me",
+   "year": 2010,
+   "runtime": 95,
+   "directors": [
+    "Pierre Coffin",
+    "Chris Renaud"
+   ],
+   "genres": [
+    "Animation"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Korean",
+    "Swedish"
+   ],
+   "categories": [
+    "Animation"
+   ],
+   "imdbId": "tt1323594",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7158e09936158e0c9109",
+   "title": "Detective Conan: Fallen Angel of the Highway",
+   "year": 2026,
+   "runtime": 109,
+   "directors": [
+    "Takahiro Hasui"
+   ],
+   "genres": [
+    "Animation"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Animation"
+   ],
+   "imdbId": "tt39123115",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc714fe09936158e0c8f82",
+   "title": "Disclosure Day",
+   "year": 2026,
+   "runtime": 146,
+   "directors": [
+    "Steven Spielberg"
+   ],
+   "genres": [
+    "Action",
+    "Drama",
+    "Sci-Fi"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Italian",
+    "Spanish"
+   ],
+   "categories": [
+    "Action",
+    "Drama",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt15047880",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716fe09936158e0c94e8",
+   "title": "Distances",
+   "year": 2020,
+   "runtime": 13,
+   "directors": [
+    "Susan Bejar"
+   ],
+   "genres": [],
+   "rating": null,
+   "languages": [
+    "Spanish"
+   ],
+   "categories": [],
+   "imdbId": null,
+   "imdbConfidence": "low",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7184e09936158e0c986c",
+   "title": "Doraemon the Movie: New Nobita and the Castle of the Undersea Devil",
+   "year": 2026,
+   "runtime": 101,
+   "directors": [
+    "Tetsuo Yajima"
+   ],
+   "genres": [
+    "Animation"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Animation"
+   ],
+   "imdbId": null,
+   "imdbConfidence": "none",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7154e09936158e0c9054",
+   "title": "Dream Horse",
+   "year": 2020,
+   "runtime": 114,
+   "directors": [
+    "Euros Lyn"
+   ],
+   "genres": [
+    "Biography",
+    "Drama"
+   ],
+   "rating": "PG",
+   "languages": [
+    "English",
+    "French",
+    "German",
+    "Italian"
+   ],
+   "categories": [
+    "Biography",
+    "Drama"
+   ],
+   "imdbId": "tt9883996",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7182e09936158e0c9812",
+   "title": "Dream Scenario",
+   "year": 2023,
+   "runtime": 102,
+   "directors": [
+    "Kristoffer Borgli"
+   ],
+   "genres": [
+    "Comedy"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French",
+    "Spanish",
+    "Italian",
+    "Portugese"
+   ],
+   "categories": [
+    "Comedy"
+   ],
+   "imdbId": "tt21942866",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7162e09936158e0c929a",
+   "title": "Dungeons & Dragons: Honor Among Thieves",
+   "year": 2023,
+   "runtime": 134,
+   "directors": [
+    "John Francis Daley",
+    "Jonathan Goldstein"
+   ],
+   "genres": [
+    "Adventure",
+    "Comedy"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Hindi"
+   ],
+   "categories": [
+    "Adventure",
+    "Comedy"
+   ],
+   "imdbId": "tt2906216",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717ee09936158e0c9768",
+   "title": "Edge of Tomorrow",
+   "year": 2014,
+   "runtime": 113,
+   "directors": [
+    "Doug Liman"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Drama"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "Korean",
+    "Italian",
+    "Portugese"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Drama"
+   ],
+   "imdbId": "tt1631867",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7176e09936158e0c9600",
+   "title": "Emma.",
+   "year": 2020,
+   "runtime": 125,
+   "directors": [
+    "Autumn de Wilde"
+   ],
+   "genres": [
+    "Drama",
+    "Romance"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Italian"
+   ],
+   "categories": [
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt9214832",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7172e09936158e0c9560",
+   "title": "Erupcja",
+   "year": 2026,
+   "runtime": 71,
+   "directors": [
+    "Pete Ohs"
+   ],
+   "genres": [
+    "Comedy",
+    "Romance"
+   ],
+   "rating": null,
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Comedy",
+    "Romance"
+   ],
+   "imdbId": "tt33712666",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7161e09936158e0c9286",
+   "title": "F1: The Movie",
+   "year": 2025,
+   "runtime": 155,
+   "directors": [
+    "Joseph Kosinski"
+   ],
+   "genres": [
+    "Action",
+    "Drama",
+    "Sports"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Spanish"
+   ],
+   "categories": [
+    "Action",
+    "Drama",
+    "Sports"
+   ],
+   "imdbId": "tt16311594",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717ce09936158e0c9718",
+   "title": "Fantasy Life",
+   "year": 2026,
+   "runtime": 92,
+   "directors": [
+    "Matthew Shear"
+   ],
+   "genres": [
+    "Comedy",
+    "Drama"
+   ],
+   "rating": "R",
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama"
+   ],
+   "imdbId": "tt35519497",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7178e09936158e0c9646",
+   "title": "Fatherhood",
+   "year": 2021,
+   "runtime": 109,
+   "directors": [
+    "Paul Weitz"
+   ],
+   "genres": [
+    "Comedy"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Italian"
+   ],
+   "categories": [
+    "Comedy"
+   ],
+   "imdbId": "tt4733624",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716ee09936158e0c94ac",
+   "title": "Fauve",
+   "year": 2018,
+   "runtime": 17,
+   "directors": [
+    "Jérémy Comte"
+   ],
+   "genres": [],
+   "rating": null,
+   "languages": [
+    "French"
+   ],
+   "categories": [],
+   "imdbId": null,
+   "imdbConfidence": "none",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7179e09936158e0c968c",
+   "title": "Finding Nemo",
+   "year": 2003,
+   "runtime": 101,
+   "directors": [
+    "Andrew Stanton"
+   ],
+   "genres": [
+    "Adventure",
+    "Animation",
+    "Family"
+   ],
+   "rating": "G",
+   "languages": [
+    "Japanese",
+    "English",
+    "Korean",
+    "Thai",
+    "Turkish"
+   ],
+   "categories": [
+    "Adventure",
+    "Animation",
+    "Family"
+   ],
+   "imdbId": "tt0266543",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7169e09936158e0c93d0",
+   "title": "Frontline - Yokohama Bay",
+   "year": 2025,
+   "runtime": 130,
+   "directors": [
+    "Kosai Sekine"
+   ],
+   "genres": [
+    "Drama",
+    "Suspense"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Drama",
+    "Suspense"
+   ],
+   "imdbId": "tt35302488",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7173e09936158e0c9592",
+   "title": "Furiosa: A Mad Max Saga",
+   "year": 2024,
+   "runtime": 148,
+   "directors": [
+    "George Miller"
+   ],
+   "genres": [
+    "Action",
+    "Adventure"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Thai",
+    "Spanish"
+   ],
+   "categories": [
+    "Action",
+    "Adventure"
+   ],
+   "imdbId": "tt12037194",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715ae09936158e0c913b",
+   "title": "GODZILLA MINUS ONE",
+   "year": 2023,
+   "runtime": 125,
+   "directors": [
+    "Takashi Yamazaki"
+   ],
+   "genres": [
+    "Action"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Action"
+   ],
+   "imdbId": "tt23289160",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7169e09936158e0c93bc",
+   "title": "GOODBYE MY CAR!?",
+   "year": 2026,
+   "runtime": 119,
+   "directors": [
+    "Hayato Kawai"
+   ],
+   "genres": [
+    "Drama",
+    "Action",
+    "Comedy"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Action",
+    "Comedy",
+    "Drama"
+   ],
+   "imdbId": "tt43636581",
+   "imdbConfidence": "medium",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7153e09936158e0c902c",
+   "title": "Ghostbusters",
+   "year": 2016,
+   "runtime": 117,
+   "directors": [
+    "Paul Feig"
+   ],
+   "genres": [
+    "Action",
+    "Comedy",
+    "Fantasy"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "Spanish",
+    "Thai",
+    "Italian"
+   ],
+   "categories": [
+    "Action",
+    "Comedy",
+    "Fantasy"
+   ],
+   "imdbId": "tt1289401",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7174e09936158e0c95b0",
+   "title": "Ghostbusters: Frozen Empire",
+   "year": 2024,
+   "runtime": 115,
+   "directors": [
+    "Gil Kenan"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Comedy"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Hindi"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Comedy"
+   ],
+   "imdbId": "tt21235248",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717de09936158e0c972c",
+   "title": "Giant",
+   "year": 2026,
+   "runtime": 110,
+   "directors": [
+    "Rowan Athale"
+   ],
+   "genres": [
+    "Biography",
+    "Drama",
+    "Sports"
+   ],
+   "rating": null,
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Biography",
+    "Drama",
+    "Sports"
+   ],
+   "imdbId": "tt26452616",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7172e09936158e0c956a",
+   "title": "Glenrothan",
+   "year": 2026,
+   "runtime": 99,
+   "directors": [
+    "Brian Cox"
+   ],
+   "genres": [
+    "Comedy",
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama"
+   ],
+   "imdbId": "tt16112292",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7185e09936158e0c988a",
+   "title": "Goat",
+   "year": 2026,
+   "runtime": 100,
+   "directors": [
+    "Tyree Dillihay"
+   ],
+   "genres": [
+    "Animation"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Italian"
+   ],
+   "categories": [
+    "Animation"
+   ],
+   "imdbId": "tt27613895",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715ce09936158e0c91b3",
+   "title": "Gohan",
+   "year": 2026,
+   "runtime": 141,
+   "directors": [
+    "Chayanop Boonprakob",
+    "Baz Poonpiriya",
+    "Atta Hemwadee"
+   ],
+   "genres": [
+    "Drama",
+    "Family"
+   ],
+   "rating": null,
+   "languages": [
+    "Thai"
+   ],
+   "categories": [
+    "Drama",
+    "Family"
+   ],
+   "imdbId": "tt36958999",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7151e09936158e0c8fdc",
+   "title": "Good Fortune",
+   "year": 2025,
+   "runtime": 98,
+   "directors": [
+    "Aziz Ansari"
+   ],
+   "genres": [
+    "Comedy"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French",
+    "Spanish"
+   ],
+   "categories": [
+    "Comedy"
+   ],
+   "imdbId": "tt27543578",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7165e09936158e0c933a",
+   "title": "Gravity",
+   "year": 2013,
+   "runtime": 91,
+   "directors": [
+    "Alfonso Cuarón"
+   ],
+   "genres": [
+    "Drama",
+    "Sci-Fi",
+    "Thriller"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Italian"
+   ],
+   "categories": [
+    "Drama",
+    "Sci-Fi",
+    "Thriller"
+   ],
+   "imdbId": "tt1454468",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7167e09936158e0c936c",
+   "title": "Grease",
+   "year": 1978,
+   "runtime": 111,
+   "directors": [
+    "Randal Kleiser"
+   ],
+   "genres": [
+    "Drama",
+    "Musical",
+    "Romance"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Turkish"
+   ],
+   "categories": [
+    "Drama",
+    "Musical",
+    "Romance"
+   ],
+   "imdbId": "tt0077631",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7151e09936158e0c8fd2",
+   "title": "Grow",
+   "year": 2025,
+   "runtime": 108,
+   "directors": [
+    "John McPhail"
+   ],
+   "genres": [
+    "Family",
+    "Comedy"
+   ],
+   "rating": "PG",
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Comedy",
+    "Family"
+   ],
+   "imdbId": "tt32659874",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7162e09936158e0c92a4",
+   "title": "Guy Ritchie's The Covenant",
+   "year": 2023,
+   "runtime": 123,
+   "directors": [
+    "Guy Ritchie"
+   ],
+   "genres": [
+    "Action",
+    "Drama",
+    "War"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Thai"
+   ],
+   "categories": [
+    "Action",
+    "Drama",
+    "War"
+   ],
+   "imdbId": "tt4873118",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717ae09936158e0c96be",
+   "title": "HOW TO STEAL THE GOLD",
+   "year": 2026,
+   "runtime": 112,
+   "directors": [
+    "Takayuki Kayano"
+   ],
+   "genres": [
+    "Crime",
+    "Comedy"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Comedy",
+    "Crime"
+   ],
+   "imdbId": null,
+   "imdbConfidence": "none",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7186e09936158e0c98c6",
+   "title": "Hamnet",
+   "year": 2025,
+   "runtime": 126,
+   "directors": [
+    "Chloé Zhao"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Spanish"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt14905854",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716ce09936158e0c9452",
+   "title": "Haq",
+   "year": 2025,
+   "runtime": 134,
+   "directors": [
+    "Suparn Varma"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "Hindi"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt36642456",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7155e09936158e0c907d",
+   "title": "Haunted Mansion",
+   "year": 2023,
+   "runtime": 123,
+   "directors": [
+    "Justin Simien"
+   ],
+   "genres": [
+    "Comedy",
+    "Drama",
+    "Fantasy"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Thai"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama",
+    "Fantasy"
+   ],
+   "imdbId": "tt1695843",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716ce09936158e0c9448",
+   "title": "Heartbreak Motel",
+   "year": 2024,
+   "runtime": 116,
+   "directors": [
+    "Angga Dwimas Sasongko"
+   ],
+   "genres": [
+    "Romance",
+    "Drama"
+   ],
+   "rating": "R",
+   "languages": [
+    "Indonesian"
+   ],
+   "categories": [
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt30320624",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7151e09936158e0c8fc8",
+   "title": "Henry Johnson",
+   "year": 2025,
+   "runtime": 85,
+   "directors": [
+    "David Mamet"
+   ],
+   "genres": [
+    "Crime",
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Crime",
+    "Drama"
+   ],
+   "imdbId": "tt36266270",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7155e09936158e0c9091",
+   "title": "Hitch",
+   "year": 2005,
+   "runtime": 118,
+   "directors": [
+    "Andy Tennant"
+   ],
+   "genres": [
+    "Comedy",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "Korean",
+    "Thai",
+    "Italian"
+   ],
+   "categories": [
+    "Comedy",
+    "Romance"
+   ],
+   "imdbId": "tt0386588",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717be09936158e0c96e6",
+   "title": "Hoppers",
+   "year": 2026,
+   "runtime": 105,
+   "directors": [
+    "Daniel Chong"
+   ],
+   "genres": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Thai",
+    "Vietnamese"
+   ],
+   "categories": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "imdbId": "tt26443616",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7186e09936158e0c989e",
+   "title": "How to Make a Killing",
+   "year": 2026,
+   "runtime": 105,
+   "directors": [
+    "John Patton Ford"
+   ],
+   "genres": [
+    "Comedy",
+    "Thriller"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French",
+    "Spanish",
+    "Turkish"
+   ],
+   "categories": [
+    "Comedy",
+    "Thriller"
+   ],
+   "imdbId": "tt4357198",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7171e09936158e0c9538",
+   "title": "I Swear",
+   "year": 2025,
+   "runtime": 120,
+   "directors": [
+    "Kirk Jones"
+   ],
+   "genres": [
+    "Comedy",
+    "Drama"
+   ],
+   "rating": "R",
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama"
+   ],
+   "imdbId": "tt31514146",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7160e09936158e0c9254",
+   "title": "In the Grey",
+   "year": 2026,
+   "runtime": 97,
+   "directors": [
+    "Guy Ritchie"
+   ],
+   "genres": [
+    "Action",
+    "Drama",
+    "Thriller"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French",
+    "German"
+   ],
+   "categories": [
+    "Action",
+    "Drama",
+    "Thriller"
+   ],
+   "imdbId": "tt27681354",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7180e09936158e0c97ae",
+   "title": "Indiana Jones and the Kingdom of the Crystal Skull",
+   "year": 2008,
+   "runtime": 123,
+   "directors": [
+    "Steven Spielberg"
+   ],
+   "genres": [
+    "Action",
+    "Adventure"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "French",
+    "Turkish"
+   ],
+   "categories": [
+    "Action",
+    "Adventure"
+   ],
+   "imdbId": "tt0367882",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7180e09936158e0c97a4",
+   "title": "Indiana Jones and the Last Crusade",
+   "year": 1989,
+   "runtime": 127,
+   "directors": [
+    "Steven Spielberg"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Thriller"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Thai",
+    "Portugese"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Thriller"
+   ],
+   "imdbId": "tt0097576",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717fe09936158e0c979a",
+   "title": "Indiana Jones and the Raiders of the Lost Ark",
+   "year": 1981,
+   "runtime": 115,
+   "directors": [
+    "Steven Spielberg"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Thriller"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Hindi"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Thriller"
+   ],
+   "imdbId": "tt0082971",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7181e09936158e0c97d6",
+   "title": "Interstellar",
+   "year": 2014,
+   "runtime": 169,
+   "directors": [
+    "Christopher Nolan"
+   ],
+   "genres": [
+    "Action",
+    "Drama",
+    "Sci-Fi"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Korean",
+    "Turkish"
+   ],
+   "categories": [
+    "Action",
+    "Drama",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt0816692",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7156e09936158e0c90a5",
+   "title": "Jerry & Marge Go Large",
+   "year": 2022,
+   "runtime": 96,
+   "directors": [
+    "David Frankel"
+   ],
+   "genres": [
+    "Comedy",
+    "Biography",
+    "Drama"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Spanish"
+   ],
+   "categories": [
+    "Biography",
+    "Comedy",
+    "Drama"
+   ],
+   "imdbId": "tt8323668",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716fe09936158e0c94ca",
+   "title": "Joey",
+   "year": 2020,
+   "runtime": 15,
+   "directors": [
+    "William Ash",
+    "Andrew Knott"
+   ],
+   "genres": [],
+   "rating": null,
+   "languages": [
+    "English"
+   ],
+   "categories": [],
+   "imdbId": null,
+   "imdbConfidence": "low",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7174e09936158e0c95ba",
+   "title": "John Wick: Chapter 4",
+   "year": 2023,
+   "runtime": 169,
+   "directors": [
+    "Chad Stahelski"
+   ],
+   "genres": [
+    "Action",
+    "Thriller"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French",
+    "German",
+    "Spanish",
+    "Italian"
+   ],
+   "categories": [
+    "Action",
+    "Thriller"
+   ],
+   "imdbId": "tt10366206",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7153e09936158e0c9022",
+   "title": "Johnny English Strikes Again",
+   "year": 2018,
+   "runtime": 89,
+   "directors": [
+    "David Kerr"
+   ],
+   "genres": [
+    "Comedy"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Thai",
+    "Italian"
+   ],
+   "categories": [
+    "Comedy"
+   ],
+   "imdbId": "tt6921996",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715ce09936158e0c91a9",
+   "title": "Journeys in Math and Genetics",
+   "year": 2025,
+   "runtime": 121,
+   "directors": [
+    "Choi Chang-Hwan"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "Korean"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt38705058",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7165e09936158e0c931c",
+   "title": "Julie & Julia",
+   "year": 2009,
+   "runtime": 120,
+   "directors": [
+    "Nora Ephron"
+   ],
+   "genres": [
+    "Comedy",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Korean",
+    "Thai"
+   ],
+   "categories": [
+    "Comedy",
+    "Romance"
+   ],
+   "imdbId": "tt1135503",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7163e09936158e0c92c2",
+   "title": "Jurassic Park",
+   "year": 1993,
+   "runtime": 127,
+   "directors": [
+    "Steven Spielberg"
+   ],
+   "genres": [
+    "Adventure"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Portuguese"
+   ],
+   "categories": [
+    "Adventure"
+   ],
+   "imdbId": "tt0107290",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7151e09936158e0c8fe6",
+   "title": "Jurassic World: Rebirth",
+   "year": 2025,
+   "runtime": 134,
+   "directors": [
+    "Gareth Edwards"
+   ],
+   "genres": [
+    "Action",
+    "Sci-Fi",
+    "Adventure"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Thai",
+    "Italian"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt31036941",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7187e09936158e0c98ee",
+   "title": "K-POPS!",
+   "year": 2024,
+   "runtime": 117,
+   "directors": [
+    "Anderson .Paak"
+   ],
+   "genres": [
+    "Comedy"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Comedy"
+   ],
+   "imdbId": "tt19896510",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717de09936158e0c9740",
+   "title": "Karate Kid: Legends",
+   "year": 2025,
+   "runtime": 94,
+   "directors": [
+    "Jonathan Entwistle"
+   ],
+   "genres": [
+    "Action",
+    "Drama",
+    "Family"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Spanish"
+   ],
+   "categories": [
+    "Action",
+    "Drama",
+    "Family"
+   ],
+   "imdbId": "tt1674782",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7166e09936158e0c9344",
+   "title": "Killers of the Flower Moon",
+   "year": 2023,
+   "runtime": 206,
+   "directors": [
+    "Martin Scorsese"
+   ],
+   "genres": [
+    "Crime",
+    "Documentary",
+    "Drama"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Spanish"
+   ],
+   "categories": [
+    "Crime",
+    "Documentary",
+    "Drama"
+   ],
+   "imdbId": "tt5537002",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7183e09936158e0c981c",
+   "title": "King Richard",
+   "year": 2021,
+   "runtime": 145,
+   "directors": [
+    "Reinaldo Marcus Green"
+   ],
+   "genres": [
+    "Biography",
+    "Drama",
+    "Sports"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "English",
+    "French",
+    "Italian",
+    "Spanish",
+    "Portugese"
+   ],
+   "categories": [
+    "Biography",
+    "Drama",
+    "Sports"
+   ],
+   "imdbId": "tt9620288",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716de09936158e0c948e",
+   "title": "La Ola",
+   "year": 2025,
+   "runtime": 128,
+   "directors": [
+    "Sebastián Lelio"
+   ],
+   "genres": [
+    "Drama",
+    "Musical"
+   ],
+   "rating": null,
+   "languages": [
+    "Spanish"
+   ],
+   "categories": [
+    "Drama",
+    "Musical"
+   ],
+   "imdbId": "tt32082522",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7178e09936158e0c965a",
+   "title": "Les Misérables",
+   "year": 2012,
+   "runtime": 158,
+   "directors": [
+    "Tom Hooper"
+   ],
+   "genres": [
+    "Drama",
+    "Musical",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Drama",
+    "Musical",
+    "Romance"
+   ],
+   "imdbId": "tt1707386",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7173e09936158e0c957e",
+   "title": "Lilo & Stitch (2025)",
+   "year": 2025,
+   "runtime": 108,
+   "directors": [
+    "Dean Fleischer Camp"
+   ],
+   "genres": [
+    "Adventure",
+    "Comedy",
+    "Family"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Thai",
+    "Spanish"
+   ],
+   "categories": [
+    "Adventure",
+    "Comedy",
+    "Family"
+   ],
+   "imdbId": "tt11655566",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717de09936158e0c9722",
+   "title": "Little Amélie or the Character of Rain",
+   "year": 2025,
+   "runtime": 78,
+   "directors": [
+    "Maïlys Vallade",
+    "Liane-Cho Han"
+   ],
+   "genres": [
+    "Animation",
+    "Family"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French"
+   ],
+   "categories": [
+    "Animation",
+    "Family"
+   ],
+   "imdbId": "tt29313285",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7181e09936158e0c97e0",
+   "title": "Living",
+   "year": 2022,
+   "runtime": 102,
+   "directors": [
+    "Oliver Hermanus"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt9051908",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7163e09936158e0c92cc",
+   "title": "Logan",
+   "year": 2017,
+   "runtime": 137,
+   "directors": [
+    "James Mangold"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Sci-Fi"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Italian"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt3315342",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716fe09936158e0c94de",
+   "title": "Loulou",
+   "year": 2023,
+   "runtime": 2,
+   "directors": [
+    "Raphaël Thet"
+   ],
+   "genres": [],
+   "rating": null,
+   "languages": [
+    "French"
+   ],
+   "categories": [],
+   "imdbId": null,
+   "imdbConfidence": "low",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716be09936158e0c9420",
+   "title": "Love Go Go Go!",
+   "year": 2026,
+   "runtime": 112,
+   "directors": [
+    "Philip Yung"
+   ],
+   "genres": [
+    "Romance",
+    "Comedy"
+   ],
+   "rating": null,
+   "languages": [
+    "Mandarin"
+   ],
+   "categories": [
+    "Comedy",
+    "Romance"
+   ],
+   "imdbId": "tt39645434",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716be09936158e0c942a",
+   "title": "Love is Hard",
+   "year": 2025,
+   "runtime": 98,
+   "directors": [
+    "Dong Xu"
+   ],
+   "genres": [
+    "Comedy"
+   ],
+   "rating": null,
+   "languages": [
+    "Mandarin"
+   ],
+   "categories": [
+    "Comedy"
+   ],
+   "imdbId": "tt39215355",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7184e09936158e0c9862",
+   "title": "Luca",
+   "year": 2021,
+   "runtime": 95,
+   "directors": [
+    "Enrico Casarosa"
+   ],
+   "genres": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Korean",
+    "Turkish"
+   ],
+   "categories": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "imdbId": "tt12801262",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716ae09936158e0c9402",
+   "title": "MASQUERADE HOTEL",
+   "year": 2019,
+   "runtime": 133,
+   "directors": [
+    "Masayuki Suzuki"
+   ],
+   "genres": [
+    "Suspense",
+    "Mystery"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Mystery",
+    "Suspense"
+   ],
+   "imdbId": "tt7502322",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716ce09936158e0c9466",
+   "title": "Maareesan",
+   "year": 2025,
+   "runtime": 144,
+   "directors": [
+    "Sudheesh Sankar"
+   ],
+   "genres": [
+    "Comedy",
+    "Drama",
+    "Thriller"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Tamil"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama",
+    "Thriller"
+   ],
+   "imdbId": "tt29383191",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7169e09936158e0c93c6",
+   "title": "Magical Secret Tour",
+   "year": 2026,
+   "runtime": 116,
+   "directors": [
+    "Chihiro Amano"
+   ],
+   "genres": [
+    "Drama",
+    "Suspense"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Drama",
+    "Suspense"
+   ],
+   "imdbId": "tt43653936",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7187e09936158e0c98d0",
+   "title": "Marty Supreme",
+   "year": 2025,
+   "runtime": 149,
+   "directors": [
+    "Josh Safdie"
+   ],
+   "genres": [
+    "Drama",
+    "Sports"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French",
+    "Italian",
+    "Spanish",
+    "Russian"
+   ],
+   "categories": [
+    "Drama",
+    "Sports"
+   ],
+   "imdbId": "tt32916440",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7174e09936158e0c959c",
+   "title": "Marvel Studios' Guardians of the Galaxy Vol. 2",
+   "year": 2017,
+   "runtime": 136,
+   "directors": [
+    "James Gunn"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Comedy"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Korean",
+    "Italian"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Comedy"
+   ],
+   "imdbId": "tt3896198",
+   "imdbConfidence": "medium",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7187e09936158e0c98da",
+   "title": "Mercy",
+   "year": 2026,
+   "runtime": 100,
+   "directors": [
+    "Timur Bekmambetov"
+   ],
+   "genres": [
+    "Action",
+    "Crime",
+    "Drama"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Thai",
+    "Turkish"
+   ],
+   "categories": [
+    "Action",
+    "Crime",
+    "Drama"
+   ],
+   "imdbId": "tt31050594",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7188e09936158e0c98f8",
+   "title": "Merrily We Roll Along",
+   "year": 2025,
+   "runtime": 136,
+   "directors": [
+    "Maria Friedman"
+   ],
+   "genres": [
+    "Comedy",
+    "Musical"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Comedy",
+    "Musical"
+   ],
+   "imdbId": "tt32641442",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715de09936158e0c91c7",
+   "title": "Messenger",
+   "year": 2025,
+   "runtime": 107,
+   "directors": [
+    "Ramesh Elangamani"
+   ],
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Romance"
+   ],
+   "rating": null,
+   "languages": [
+    "Tamil"
+   ],
+   "categories": [
+    "Drama",
+    "Fantasy",
+    "Romance"
+   ],
+   "imdbId": "tt35231012",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7181e09936158e0c97cc",
+   "title": "Mickey 17",
+   "year": 2025,
+   "runtime": 136,
+   "directors": [
+    "Bong Joon Ho"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Comedy"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Thai",
+    "Italian"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Comedy"
+   ],
+   "imdbId": "tt12299608",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7154e09936158e0c9068",
+   "title": "Minari",
+   "year": 2020,
+   "runtime": 115,
+   "directors": [
+    "Lee Isaac Chung"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "English",
+    "German"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt10633456",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7152e09936158e0c900e",
+   "title": "Minority Report",
+   "year": 2002,
+   "runtime": 145,
+   "directors": [
+    "Steven Spielberg"
+   ],
+   "genres": [
+    "Action",
+    "Sci-Fi",
+    "Thriller"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Korean",
+    "Spanish"
+   ],
+   "categories": [
+    "Action",
+    "Sci-Fi",
+    "Thriller"
+   ],
+   "imdbId": "tt0181689",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7161e09936158e0c9272",
+   "title": "Miss You, Love You",
+   "year": 2026,
+   "runtime": 97,
+   "directors": [
+    "Jim Rash"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt30343126",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717de09936158e0c9736",
+   "title": "Mission: Impossible - The Final Reckoning",
+   "year": 2025,
+   "runtime": 170,
+   "directors": [
+    "Christopher McQuarrie"
+   ],
+   "genres": [
+    "Action",
+    "Adventure"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Turkish",
+    "Hindi"
+   ],
+   "categories": [
+    "Action",
+    "Adventure"
+   ],
+   "imdbId": "tt9603208",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7150e09936158e0c8fa0",
+   "title": "Moana",
+   "year": 2026,
+   "runtime": 115,
+   "directors": [
+    "Thomas Kail"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Fantasy"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Korean",
+    "Turkish"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Fantasy"
+   ],
+   "imdbId": "tt27419466",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7158e09936158e0c90eb",
+   "title": "Moana (2016)",
+   "year": 2016,
+   "runtime": 107,
+   "directors": [
+    "Ron Clements",
+    "John Musker"
+   ],
+   "genres": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "Korean",
+    "Thai",
+    "Swedish"
+   ],
+   "categories": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "imdbId": "tt3521164",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715ce09936158e0c9195",
+   "title": "Mongrels",
+   "year": 2024,
+   "runtime": 106,
+   "directors": [
+    "Jerome Yoo"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "Korean"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt33269198",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7168e09936158e0c93a8",
+   "title": "Monsters, Inc.",
+   "year": 2001,
+   "runtime": 96,
+   "directors": [
+    "Pete Docter",
+    "Lee Unkrich",
+    "David Silverman"
+   ],
+   "genres": [
+    "Animation",
+    "Comedy",
+    "Family"
+   ],
+   "rating": "G",
+   "languages": [
+    "Japanese",
+    "English",
+    "Cantonese",
+    "Korean",
+    "Spanish"
+   ],
+   "categories": [
+    "Animation",
+    "Comedy",
+    "Family"
+   ],
+   "imdbId": "tt0198781",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7162e09936158e0c92ae",
+   "title": "Mortal Kombat",
+   "year": 2021,
+   "runtime": 110,
+   "directors": [
+    "Simon McQuoid"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Fantasy"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Spanish",
+    "Thai"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Fantasy"
+   ],
+   "imdbId": "tt0293429",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715fe09936158e0c922b",
+   "title": "Mortal Kombat II",
+   "year": 2026,
+   "runtime": 115,
+   "directors": [
+    "Simon McQuoid"
+   ],
+   "genres": [
+    "Action",
+    "Sci-Fi"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Thai"
+   ],
+   "categories": [
+    "Action",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt17490712",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7171e09936158e0c9542",
+   "title": "Mother Mary",
+   "year": 2026,
+   "runtime": 112,
+   "directors": [
+    "David Lowery"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French",
+    "German",
+    "Spanish"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt27200708",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7178e09936158e0c9650",
+   "title": "Music and Lyrics",
+   "year": 2007,
+   "runtime": 104,
+   "directors": [
+    "Marc Lawrence"
+   ],
+   "genres": [
+    "Comedy",
+    "Musical",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Korean",
+    "Thai"
+   ],
+   "categories": [
+    "Comedy",
+    "Musical",
+    "Romance"
+   ],
+   "imdbId": "tt0758766",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715be09936158e0c916d",
+   "title": "Night King",
+   "year": 2026,
+   "runtime": 133,
+   "directors": [
+    "Jack Ng"
+   ],
+   "genres": [
+    "Comedy",
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "Cantonese"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama"
+   ],
+   "imdbId": "tt37284356",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7186e09936158e0c98b2",
+   "title": "Nirvanna the Band, the Show, the Movie",
+   "year": 2026,
+   "runtime": 101,
+   "directors": [
+    "Matt Johnson"
+   ],
+   "genres": [
+    "Adventure",
+    "Comedy",
+    "Sci-Fi"
+   ],
+   "rating": "R",
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Adventure",
+    "Comedy",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt35522483",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715de09936158e0c91db",
+   "title": "Nobody's Son",
+   "year": 2026,
+   "runtime": 96,
+   "directors": [
+    "Safy Nebbou"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "French"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt36827509",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716ae09936158e0c93f8",
+   "title": "OUR LITTLE SISTER",
+   "year": 2015,
+   "runtime": 127,
+   "directors": [
+    "Hirokazu Koreeda"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt3756788",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716ce09936158e0c943e",
+   "title": "Omniscient Reader: The Prophecy",
+   "year": 2025,
+   "runtime": 117,
+   "directors": [
+    "Kim Byung-woo"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Fantasy"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Korean"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Fantasy"
+   ],
+   "imdbId": "tt30254719",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716be09936158e0c9434",
+   "title": "Once We Were Us",
+   "year": 2025,
+   "runtime": 115,
+   "directors": [
+    "Kim Do-young"
+   ],
+   "genres": [
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Korean"
+   ],
+   "categories": [
+    "Romance"
+   ],
+   "imdbId": "tt37764737",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7176e09936158e0c960a",
+   "title": "One Day",
+   "year": 2011,
+   "runtime": 108,
+   "directors": [
+    "Lone Scherfig"
+   ],
+   "genres": [
+    "Drama",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Korean",
+    "Italian"
+   ],
+   "categories": [
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt1563738",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717ae09936158e0c96aa",
+   "title": "One Last Love Letter",
+   "year": 2026,
+   "runtime": 121,
+   "directors": [
+    "Yuya Ishii"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt41936211",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7169e09936158e0c93e4",
+   "title": "PETALS AND MEMORIES",
+   "year": 2025,
+   "runtime": 119,
+   "directors": [
+    "Tetsu Maeda"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt36618849",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7179e09936158e0c9682",
+   "title": "Paddington in Peru",
+   "year": 2025,
+   "runtime": 105,
+   "directors": [
+    "Dougal Wilson"
+   ],
+   "genres": [
+    "Adventure",
+    "Family",
+    "Comedy"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Korean",
+    "Vietnamese"
+   ],
+   "categories": [
+    "Adventure",
+    "Comedy",
+    "Family"
+   ],
+   "imdbId": "tt5822536",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7186e09936158e0c98a8",
+   "title": "Paul McCartney: Man on the Run",
+   "year": 2026,
+   "runtime": 116,
+   "directors": [
+    "Morgan Neville"
+   ],
+   "genres": [
+    "Biography",
+    "Documentary",
+    "Musical"
+   ],
+   "rating": "R",
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Biography",
+    "Documentary",
+    "Musical"
+   ],
+   "imdbId": "tt26931594",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716be09936158e0c9416",
+   "title": "Pegasus 3",
+   "year": 2026,
+   "runtime": 126,
+   "directors": [
+    "Han Han"
+   ],
+   "genres": [
+    "Action"
+   ],
+   "rating": null,
+   "languages": [
+    "Mandarin"
+   ],
+   "categories": [
+    "Action"
+   ],
+   "imdbId": "tt38035835",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7173e09936158e0c9588",
+   "title": "Pink Floyd: The Story of Wish You Were Here",
+   "year": 2012,
+   "runtime": 60,
+   "directors": [
+    "John Edginton"
+   ],
+   "genres": [
+    "Documentary",
+    "Music"
+   ],
+   "rating": null,
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Documentary",
+    "Music"
+   ],
+   "imdbId": "tt2296909",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7162e09936158e0c92b8",
+   "title": "Pirates of the Caribbean: Dead Men Tell No Tales",
+   "year": 2017,
+   "runtime": 129,
+   "directors": [
+    "Joachim Rønning",
+    "Espen Sandberg"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Fantasy"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "Korean",
+    "Spanish",
+    "Italian"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Fantasy"
+   ],
+   "imdbId": "tt1790809",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7156e09936158e0c90af",
+   "title": "Pitch Perfect",
+   "year": 2012,
+   "runtime": 112,
+   "directors": [
+    "Jason Moore"
+   ],
+   "genres": [
+    "Comedy",
+    "Musical"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Italian"
+   ],
+   "categories": [
+    "Comedy",
+    "Musical"
+   ],
+   "imdbId": "tt1981677",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7156e09936158e0c90b9",
+   "title": "Pitch Perfect 2",
+   "year": 2015,
+   "runtime": 115,
+   "directors": [
+    "Elizabeth Banks"
+   ],
+   "genres": [
+    "Comedy",
+    "Musical"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "Korean",
+    "Thai",
+    "Spanish"
+   ],
+   "categories": [
+    "Comedy",
+    "Musical"
+   ],
+   "imdbId": "tt2848292",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7169e09936158e0c93da",
+   "title": "Pokémon: The First Movie",
+   "year": 1998,
+   "runtime": 75,
+   "directors": [
+    "Kunihiko Yuyama"
+   ],
+   "genres": [
+    "Animation"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Animation"
+   ],
+   "imdbId": "tt0190641",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7150e09936158e0c8faa",
+   "title": "Power Ballad",
+   "year": 2026,
+   "runtime": 98,
+   "directors": [
+    "John Carney"
+   ],
+   "genres": [
+    "Comedy",
+    "Drama",
+    "Musical"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French",
+    "German",
+    "Spanish",
+    "Portuguese"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama",
+    "Musical"
+   ],
+   "imdbId": "tt32267691",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716de09936158e0c9484",
+   "title": "Primavera",
+   "year": 2025,
+   "runtime": 111,
+   "directors": [
+    "Damiano Michieletto"
+   ],
+   "genres": [
+    "Drama",
+    "Musical",
+    "History"
+   ],
+   "rating": null,
+   "languages": [
+    "Italian"
+   ],
+   "categories": [
+    "Drama",
+    "History",
+    "Musical"
+   ],
+   "imdbId": "tt33586629",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717be09936158e0c96dc",
+   "title": "Project Hail Mary",
+   "year": 2026,
+   "runtime": 157,
+   "directors": [
+    "Phil Lord",
+    "Christopher Miller"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Drama"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Drama"
+   ],
+   "imdbId": "tt12042730",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7168e09936158e0c939e",
+   "title": "Ratatouille",
+   "year": 2007,
+   "runtime": 111,
+   "directors": [
+    "Brad Bird"
+   ],
+   "genres": [
+    "Adventure",
+    "Comedy",
+    "Family"
+   ],
+   "rating": "G",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Italian"
+   ],
+   "categories": [
+    "Adventure",
+    "Comedy",
+    "Family"
+   ],
+   "imdbId": "tt0382932",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7161e09936158e0c927c",
+   "title": "Regretting You",
+   "year": 2025,
+   "runtime": 116,
+   "directors": [
+    "Josh Boone"
+   ],
+   "genres": [
+    "Drama",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Spanish",
+    "Turkish"
+   ],
+   "categories": [
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt33088452",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715be09936158e0c9177",
+   "title": "Road to Vendetta",
+   "year": 2025,
+   "runtime": 107,
+   "directors": [
+    "Njo Kui Ying"
+   ],
+   "genres": [
+    "Action",
+    "Crime"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Cantonese"
+   ],
+   "categories": [
+    "Action",
+    "Crime"
+   ],
+   "imdbId": "tt37986585",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7168e09936158e0c93b2",
+   "title": "SHEEP IN THE BOX",
+   "year": 2026,
+   "runtime": 126,
+   "directors": [
+    "Hirokazu Koreeda"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt38551209",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7185e09936158e0c9880",
+   "title": "Samurai Vengeance",
+   "year": 2026,
+   "runtime": 120,
+   "directors": [
+    "Takashi Minamoto"
+   ],
+   "genres": [
+    "Mystery",
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Drama",
+    "Mystery"
+   ],
+   "imdbId": "tt40224018",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7159e09936158e0c9131",
+   "title": "School Meals Time - School Excursion Inferno",
+   "year": 2025,
+   "runtime": 114,
+   "directors": [
+    "Shinya Ayabe"
+   ],
+   "genres": [
+    "Comedy",
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama"
+   ],
+   "imdbId": "tt38755585",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716ce09936158e0c945c",
+   "title": "Seetha Payanam",
+   "year": 2026,
+   "runtime": 144,
+   "directors": [
+    "Arjun Sarja"
+   ],
+   "genres": [
+    "Drama",
+    "Romance"
+   ],
+   "rating": null,
+   "languages": [
+    "Tamil"
+   ],
+   "categories": [
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt28199950",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715be09936158e0c918b",
+   "title": "Shanghai Wonton",
+   "year": 2025,
+   "runtime": 108,
+   "directors": [
+    "Tiange Wu"
+   ],
+   "genres": [
+    "Drama",
+    "Romance"
+   ],
+   "rating": null,
+   "languages": [
+    "Mandarin"
+   ],
+   "categories": [
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt35348924",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7152e09936158e0c9004",
+   "title": "Shazam! Fury of the Gods",
+   "year": 2023,
+   "runtime": 130,
+   "directors": [
+    "David F. Sandberg"
+   ],
+   "genres": [
+    "Action",
+    "Adventure"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Spanish",
+    "Thai"
+   ],
+   "categories": [
+    "Action",
+    "Adventure"
+   ],
+   "imdbId": "tt10151854",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7182e09936158e0c9808",
+   "title": "She Said",
+   "year": 2022,
+   "runtime": 129,
+   "directors": [
+    "Maria Schrader"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Spanish",
+    "Russian"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt11198810",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7165e09936158e0c9326",
+   "title": "Sleepless in Seattle",
+   "year": 1993,
+   "runtime": 104,
+   "directors": [
+    "Nora Ephron"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Spanish",
+    "Italian"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt0108160",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716ee09936158e0c94c0",
+   "title": "Sonyeo",
+   "year": 2022,
+   "runtime": 16,
+   "directors": [
+    "Kihong Lee"
+   ],
+   "genres": [],
+   "rating": null,
+   "languages": [
+    "Korean"
+   ],
+   "categories": [],
+   "imdbId": null,
+   "imdbConfidence": "low",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717fe09936158e0c9772",
+   "title": "Spider-Man™",
+   "year": 2002,
+   "runtime": 120,
+   "directors": [
+    "Sam Raimi"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Fantasy"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Thai",
+    "Korean"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Fantasy"
+   ],
+   "imdbId": null,
+   "imdbConfidence": "none",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717fe09936158e0c977c",
+   "title": "Spider-Man™ 2",
+   "year": 2004,
+   "runtime": 120,
+   "directors": [
+    "Sam Raimi"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Fantasy"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Korean",
+    "Portugese"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Fantasy"
+   ],
+   "imdbId": null,
+   "imdbConfidence": "none",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717fe09936158e0c9790",
+   "title": "Spider-Man™: Across the Spider-Verse",
+   "year": 2023,
+   "runtime": 140,
+   "directors": [
+    "Joaquim Dos Santos",
+    "Kemp Powers",
+    "Justin K. Thompson"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Animation"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Spanish",
+    "Portugese"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Animation"
+   ],
+   "imdbId": null,
+   "imdbConfidence": "none",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717fe09936158e0c9786",
+   "title": "Spider-Man™: Into the Spider-Verse",
+   "year": 2018,
+   "runtime": 117,
+   "directors": [
+    "Bob Persichetti",
+    "Peter Ramsey",
+    "Rodney Rothman"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Animation"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Spanish",
+    "Italian"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Animation"
+   ],
+   "imdbId": null,
+   "imdbConfidence": "none",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7163e09936158e0c92d6",
+   "title": "Stand By Me",
+   "year": 1986,
+   "runtime": 89,
+   "directors": [
+    "Rob Reiner"
+   ],
+   "genres": [
+    "Adventure",
+    "Drama"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Spanish"
+   ],
+   "categories": [
+    "Adventure",
+    "Drama"
+   ],
+   "imdbId": "tt0092005",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715fe09936158e0c9221",
+   "title": "Star Wars: The Mandalorian and Grogu",
+   "year": 2026,
+   "runtime": 132,
+   "directors": [
+    "Jon Favreau"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Sci-Fi"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Thai",
+    "Spanish"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt30825738",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715ce09936158e0c919f",
+   "title": "Sugar: A Mother’s Code",
+   "year": 2026,
+   "runtime": 106,
+   "directors": [
+    "Choi Sin-choon"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Korean"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt39555976",
+   "imdbConfidence": "medium",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc714fe09936158e0c8f8c",
+   "title": "Supergirl",
+   "year": 2026,
+   "runtime": 108,
+   "directors": [
+    "Craig Gillespie"
+   ],
+   "genres": [
+    "Sci-Fi",
+    "Fantasy",
+    "Action"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Turkish"
+   ],
+   "categories": [
+    "Action",
+    "Fantasy",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt8814476",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7159e09936158e0c9113",
+   "title": "THE SAMURAI AND THE PRISONER",
+   "year": 2026,
+   "runtime": 148,
+   "directors": [
+    "Kiyoshi Kurosawa"
+   ],
+   "genres": [
+    "Drama",
+    "History"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Drama",
+    "History"
+   ],
+   "imdbId": "tt39602215",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715ae09936158e0c9145",
+   "title": "TOKYO MER: Mobile Emergency Room - \"Nankai Mission\"",
+   "year": 2025,
+   "runtime": 115,
+   "directors": [
+    "Aya Matsuki"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": null,
+   "imdbConfidence": "low",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7180e09936158e0c97c2",
+   "title": "Tenet",
+   "year": 2020,
+   "runtime": 150,
+   "directors": [
+    "Christopher Nolan"
+   ],
+   "genres": [
+    "Action",
+    "Drama",
+    "Sci-Fi"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Tamil"
+   ],
+   "categories": [
+    "Action",
+    "Drama",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt6723592",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715de09936158e0c91bd",
+   "title": "Thalaivar Thambi Thalaimaiyil",
+   "year": 2026,
+   "runtime": 114,
+   "directors": [
+    "Nithish Sahadev"
+   ],
+   "genres": [
+    "Action",
+    "Comedy",
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "Tamil"
+   ],
+   "categories": [
+    "Action",
+    "Comedy",
+    "Drama"
+   ],
+   "imdbId": "tt36926733",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7158e09936158e0c90ff",
+   "title": "The Addams Family",
+   "year": 2019,
+   "runtime": 87,
+   "directors": [
+    "Conrad Vernon",
+    "Greg Tiernan"
+   ],
+   "genres": [
+    "Animation",
+    "Comedy"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Spanish"
+   ],
+   "categories": [
+    "Animation",
+    "Comedy"
+   ],
+   "imdbId": "tt1620981",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715de09936158e0c91d1",
+   "title": "The American Dream : Le rêve américain",
+   "year": 2026,
+   "runtime": 126,
+   "directors": [
+    "Anthony Marciano"
+   ],
+   "genres": [
+    "Comedy",
+    "Sports"
+   ],
+   "rating": null,
+   "languages": [
+    "French"
+   ],
+   "categories": [
+    "Comedy",
+    "Sports"
+   ],
+   "imdbId": "tt36313062",
+   "imdbConfidence": "medium",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7164e09936158e0c9308",
+   "title": "The Art of Racing in the Rain",
+   "year": 2019,
+   "runtime": 109,
+   "directors": [
+    "Simon Curtis"
+   ],
+   "genres": [
+    "Comedy",
+    "Drama"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "Korean",
+    "Thai",
+    "Hindi"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama"
+   ],
+   "imdbId": "tt1478839",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7173e09936158e0c9574",
+   "title": "The Birthday Party",
+   "year": 2025,
+   "runtime": 103,
+   "directors": [
+    "Miguel Ángel Jiménez"
+   ],
+   "genres": [
+    "Drama",
+    "Thriller"
+   ],
+   "rating": null,
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Drama",
+    "Thriller"
+   ],
+   "imdbId": "tt33269988",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7154e09936158e0c904a",
+   "title": "The Blind Side",
+   "year": 2009,
+   "runtime": 124,
+   "directors": [
+    "John Lee Hancock"
+   ],
+   "genres": [
+    "Drama",
+    "Biography",
+    "Sports"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Korean",
+    "Spanish"
+   ],
+   "categories": [
+    "Biography",
+    "Drama",
+    "Sports"
+   ],
+   "imdbId": "tt0878804",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7160e09936158e0c923f",
+   "title": "The Breadwinner",
+   "year": 2026,
+   "runtime": 99,
+   "directors": [
+    "Eric Appel"
+   ],
+   "genres": [
+    "Comedy",
+    "Family"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Portuguese",
+    "Hindi"
+   ],
+   "categories": [
+    "Comedy",
+    "Family"
+   ],
+   "imdbId": "tt34459219",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7156e09936158e0c909b",
+   "title": "The Bucket List",
+   "year": 2007,
+   "runtime": 97,
+   "directors": [
+    "Rob Reiner"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Comedy"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Thai",
+    "Turkish"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Comedy"
+   ],
+   "imdbId": "tt0825232",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716ee09936158e0c94a2",
+   "title": "The Cameraman",
+   "year": 2016,
+   "runtime": 17,
+   "directors": [
+    "Connor Gaston"
+   ],
+   "genres": [],
+   "rating": null,
+   "languages": [
+    "English"
+   ],
+   "categories": [],
+   "imdbId": null,
+   "imdbConfidence": "low",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7166e09936158e0c9362",
+   "title": "The Color Purple",
+   "year": 2023,
+   "runtime": 141,
+   "directors": [
+    "Blitz Bazawule"
+   ],
+   "genres": [
+    "Drama",
+    "Musical"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "English",
+    "French",
+    "German",
+    "Spanish",
+    "Italian"
+   ],
+   "categories": [
+    "Drama",
+    "Musical"
+   ],
+   "imdbId": "tt1200263",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7165e09936158e0c9330",
+   "title": "The Curious Case of Benjamin Button",
+   "year": 2008,
+   "runtime": 166,
+   "directors": [
+    "David Fincher"
+   ],
+   "genres": [
+    "Drama",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Spanish",
+    "Italian"
+   ],
+   "categories": [
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt0421715",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7177e09936158e0c963c",
+   "title": "The Devil Wears Prada",
+   "year": 2006,
+   "runtime": 109,
+   "directors": [
+    "David Frankel"
+   ],
+   "genres": [
+    "Comedy",
+    "Drama",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Italian"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt0458352",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7170e09936158e0c951a",
+   "title": "The Devil Wears Prada 2",
+   "year": 2026,
+   "runtime": 119,
+   "directors": [
+    "David Frankel"
+   ],
+   "genres": [
+    "Drama",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Thai",
+    "Italian"
+   ],
+   "categories": [
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt33612209",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717be09936158e0c96f0",
+   "title": "The Drama",
+   "year": 2026,
+   "runtime": 105,
+   "directors": [
+    "Kristoffer Borgli"
+   ],
+   "genres": [
+    "Comedy",
+    "Drama",
+    "Romance"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French",
+    "German",
+    "Italian"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt33071426",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7154e09936158e0c9040",
+   "title": "The Fabelmans",
+   "year": 2022,
+   "runtime": 151,
+   "directors": [
+    "Steven Spielberg"
+   ],
+   "genres": [
+    "Drama",
+    "Biography"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Spanish"
+   ],
+   "categories": [
+    "Biography",
+    "Drama"
+   ],
+   "imdbId": "tt14208870",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7162e09936158e0c9290",
+   "title": "The Fantastic Four: First Steps",
+   "year": 2025,
+   "runtime": 115,
+   "directors": [
+    "Matt Shakman"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Sci-Fi"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Thai",
+    "Vietnamese"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt10676052",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7154e09936158e0c905e",
+   "title": "The Farewell",
+   "year": 2019,
+   "runtime": 101,
+   "directors": [
+    "Lulu Wang"
+   ],
+   "genres": [
+    "Comedy",
+    "Drama"
+   ],
+   "rating": "PG",
+   "languages": [
+    "English",
+    "French",
+    "German",
+    "Spanish",
+    "Korean"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama"
+   ],
+   "imdbId": "tt8637428",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7183e09936158e0c9844",
+   "title": "The Fault in Our Stars",
+   "year": 2014,
+   "runtime": 122,
+   "directors": [
+    "Josh Boone"
+   ],
+   "genres": [
+    "Drama",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Thai",
+    "Turkish"
+   ],
+   "categories": [
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt2582846",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717ee09936158e0c9754",
+   "title": "The Flash",
+   "year": 2023,
+   "runtime": 144,
+   "directors": [
+    "Andy Muschietti"
+   ],
+   "genres": [
+    "Action",
+    "Adventure"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Thai"
+   ],
+   "categories": [
+    "Action",
+    "Adventure"
+   ],
+   "imdbId": "tt0439572",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715de09936158e0c91e5",
+   "title": "The Girl Without a Name",
+   "year": 2025,
+   "runtime": 108,
+   "directors": [
+    "Nicolas Keitel"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "French"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt27664510",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7163e09936158e0c92e0",
+   "title": "The Great Gatsby",
+   "year": 2013,
+   "runtime": 142,
+   "directors": [
+    "Baz Luhrmann"
+   ],
+   "genres": [
+    "Drama",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Korean",
+    "Turkish"
+   ],
+   "categories": [
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt1343092",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7166e09936158e0c934e",
+   "title": "The Green Mile",
+   "year": 1999,
+   "runtime": 173,
+   "directors": [
+    "Frank Darabont"
+   ],
+   "genres": [
+    "Drama",
+    "Crime",
+    "Thriller"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "German",
+    "Korean",
+    "Spanish",
+    "Italian"
+   ],
+   "categories": [
+    "Crime",
+    "Drama",
+    "Thriller"
+   ],
+   "imdbId": "tt0120689",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7155e09936158e0c9072",
+   "title": "The Holiday",
+   "year": 2006,
+   "runtime": 122,
+   "directors": [
+    "Nancy Meyers"
+   ],
+   "genres": [
+    "Comedy",
+    "Romance",
+    "Holiday"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Korean"
+   ],
+   "categories": [
+    "Comedy",
+    "Holiday",
+    "Romance"
+   ],
+   "imdbId": "tt0457939",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7164e09936158e0c92fe",
+   "title": "The Idea of You",
+   "year": 2024,
+   "runtime": 116,
+   "directors": [
+    "Michael Showalter"
+   ],
+   "genres": [
+    "Comedy",
+    "Drama",
+    "Romance"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Thai",
+    "Hindi"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt9466114",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7153e09936158e0c9018",
+   "title": "The Italian Job",
+   "year": 2003,
+   "runtime": 111,
+   "directors": [
+    "F. Gary Gray"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Drama"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Spanish"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Drama"
+   ],
+   "imdbId": "tt0317740",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7177e09936158e0c961e",
+   "title": "The King's Speech",
+   "year": 2010,
+   "runtime": 119,
+   "directors": [
+    "Tom Hooper"
+   ],
+   "genres": [
+    "Biography",
+    "Drama"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Korean",
+    "Turkish"
+   ],
+   "categories": [
+    "Biography",
+    "Drama"
+   ],
+   "imdbId": "tt1504320",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7167e09936158e0c938a",
+   "title": "The LEGO Batman Movie",
+   "year": 2017,
+   "runtime": 105,
+   "directors": [
+    "Chris McKay"
+   ],
+   "genres": [
+    "Adventure",
+    "Animation",
+    "Family"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Thai",
+    "Swedish"
+   ],
+   "categories": [
+    "Adventure",
+    "Animation",
+    "Family"
+   ],
+   "imdbId": "tt4116284",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717ae09936158e0c96b4",
+   "title": "The Last Song You Left Behind",
+   "year": 2026,
+   "runtime": 117,
+   "directors": [
+    "Takahiro Miki"
+   ],
+   "genres": [
+    "Romance"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Romance"
+   ],
+   "imdbId": "tt41149182",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717ee09936158e0c974a",
+   "title": "The Life of Chuck",
+   "year": 2025,
+   "runtime": 111,
+   "directors": [
+    "Mike Flanagan"
+   ],
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Sci-Fi"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French"
+   ],
+   "categories": [
+    "Drama",
+    "Fantasy",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt12908150",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7174e09936158e0c95a6",
+   "title": "The Meg",
+   "year": 2018,
+   "runtime": 113,
+   "directors": [
+    "Jon Turteltaub"
+   ],
+   "genres": [
+    "Action",
+    "Sci-Fi",
+    "Thriller"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "Korean",
+    "Thai",
+    "Turkish"
+   ],
+   "categories": [
+    "Action",
+    "Sci-Fi",
+    "Thriller"
+   ],
+   "imdbId": "tt4779682",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7186e09936158e0c98bc",
+   "title": "The Moment",
+   "year": 2026,
+   "runtime": 103,
+   "directors": [
+    "Aidan Zamiri"
+   ],
+   "genres": [
+    "Drama"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French",
+    "German",
+    "Italian",
+    "Spanish"
+   ],
+   "categories": [
+    "Drama"
+   ],
+   "imdbId": "tt35524793",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7164e09936158e0c92ea",
+   "title": "The Notebook",
+   "year": 2004,
+   "runtime": 120,
+   "directors": [
+    "Nick Cassavetes"
+   ],
+   "genres": [
+    "Drama",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "Korean",
+    "Italian",
+    "Turkish"
+   ],
+   "categories": [
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt0332280",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7178e09936158e0c966e",
+   "title": "The Princess Diaries",
+   "year": 2001,
+   "runtime": 116,
+   "directors": [
+    "Garry Marshall"
+   ],
+   "genres": [
+    "Comedy"
+   ],
+   "rating": "G",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Thai",
+    "Italian"
+   ],
+   "categories": [
+    "Comedy"
+   ],
+   "imdbId": "tt0247638",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7175e09936158e0c95ec",
+   "title": "The Shawshank Redemption",
+   "year": 1994,
+   "runtime": 120,
+   "directors": [
+    "Frank Darabont"
+   ],
+   "genres": [
+    "Crime",
+    "Drama"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Korean"
+   ],
+   "categories": [
+    "Crime",
+    "Drama"
+   ],
+   "imdbId": "tt0111161",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7150e09936158e0c8fb4",
+   "title": "The Sheep Detectives",
+   "year": 2026,
+   "runtime": 109,
+   "directors": [
+    "Kyle Balda"
+   ],
+   "genres": [
+    "Action",
+    "Comedy",
+    "Family"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Hindi"
+   ],
+   "categories": [
+    "Action",
+    "Comedy",
+    "Family"
+   ],
+   "imdbId": "tt32565993",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc716fe09936158e0c94d4",
+   "title": "The Spadina House",
+   "year": 2018,
+   "runtime": 2,
+   "directors": [
+    "Taso Alexander"
+   ],
+   "genres": [],
+   "rating": null,
+   "languages": [
+    "English"
+   ],
+   "categories": [],
+   "imdbId": null,
+   "imdbConfidence": "none",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717ee09936158e0c975e",
+   "title": "The Suicide Squad",
+   "year": 2021,
+   "runtime": 132,
+   "directors": [
+    "James Gunn"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Sci-Fi"
+   ],
+   "rating": "R",
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt6334354",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7179e09936158e0c9678",
+   "title": "The Super Mario Bros. Movie",
+   "year": 2023,
+   "runtime": 92,
+   "directors": [
+    "Aaron Horvath",
+    "Michael Jelenic"
+   ],
+   "genres": [
+    "Animation",
+    "Family"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Korean",
+    "Thai"
+   ],
+   "categories": [
+    "Animation",
+    "Family"
+   ],
+   "imdbId": "tt6718170",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7171e09936158e0c9524",
+   "title": "The Super Mario Galaxy Movie",
+   "year": 2026,
+   "runtime": 98,
+   "directors": [
+    "Pierre LeDuc",
+    "Fabian Polack",
+    "Aaron Horvath",
+    "Michael Jelenic"
+   ],
+   "genres": [
+    "Family",
+    "Animation"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Korean",
+    "Thai"
+   ],
+   "categories": [
+    "Animation",
+    "Family"
+   ],
+   "imdbId": "tt28650488",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7181e09936158e0c97ea",
+   "title": "The Vow",
+   "year": 2012,
+   "runtime": 104,
+   "directors": [
+    "Michael Sucsy"
+   ],
+   "genres": [
+    "Drama",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Spanish",
+    "Italian"
+   ],
+   "categories": [
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt1606389",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7167e09936158e0c9376",
+   "title": "The Wizard of Oz",
+   "year": 1939,
+   "runtime": 102,
+   "directors": [
+    "Victor Fleming"
+   ],
+   "genres": [
+    "Adventure",
+    "Family",
+    "Fantasy",
+    "Musical"
+   ],
+   "rating": "G",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Portuguese",
+    "Italian"
+   ],
+   "categories": [
+    "Adventure",
+    "Family",
+    "Fantasy",
+    "Musical"
+   ],
+   "imdbId": "tt0032138",
+   "imdbConfidence": "high",
+   "tmdbId": 630,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7187e09936158e0c98e4",
+   "title": "The Wrecking Crew",
+   "year": 2026,
+   "runtime": 120,
+   "directors": [
+    "Angel Manuel Soto"
+   ],
+   "genres": [
+    "Action",
+    "Comedy",
+    "Crime"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Thai",
+    "Hindi"
+   ],
+   "categories": [
+    "Action",
+    "Comedy",
+    "Crime"
+   ],
+   "imdbId": "tt33046197",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7185e09936158e0c9876",
+   "title": "The ogre's bride",
+   "year": 2026,
+   "runtime": 122,
+   "directors": [
+    "Chihiro Ikeda"
+   ],
+   "genres": [
+    "Romance",
+    "Fantasy"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Fantasy",
+    "Romance"
+   ],
+   "imdbId": "tt39112665",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7183e09936158e0c983a",
+   "title": "Ticket to Paradise",
+   "year": 2022,
+   "runtime": 104,
+   "directors": [
+    "Ol Parker"
+   ],
+   "genres": [
+    "Comedy",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Thai",
+    "Spanish"
+   ],
+   "categories": [
+    "Comedy",
+    "Romance"
+   ],
+   "imdbId": "tt14109724",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7184e09936158e0c9858",
+   "title": "Tom & Jerry",
+   "year": 2021,
+   "runtime": 101,
+   "directors": [
+    "Tim Story"
+   ],
+   "genres": [
+    "Adventure",
+    "Animation"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "Korean",
+    "Thai"
+   ],
+   "categories": [
+    "Adventure",
+    "Animation"
+   ],
+   "imdbId": "tt1361336",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7150e09936158e0c8fbe",
+   "title": "Tom Clancy's Jack Ryan: Ghost War",
+   "year": 2026,
+   "runtime": 105,
+   "directors": [
+    "Andrew Bernstein"
+   ],
+   "genres": [
+    "Action",
+    "Drama",
+    "Thriller"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Spanish",
+    "Italian"
+   ],
+   "categories": [
+    "Action",
+    "Drama",
+    "Thriller"
+   ],
+   "imdbId": "tt34378301",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7174e09936158e0c95c4",
+   "title": "Top Gun",
+   "year": 1986,
+   "runtime": 109,
+   "directors": [
+    "Tony Scott"
+   ],
+   "genres": [
+    "Action",
+    "Drama"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Spanish"
+   ],
+   "categories": [
+    "Action",
+    "Drama"
+   ],
+   "imdbId": "tt0092099",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7157e09936158e0c90c3",
+   "title": "Toy Story",
+   "year": 1995,
+   "runtime": 81,
+   "directors": [
+    "John Lasseter"
+   ],
+   "genres": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "rating": "G",
+   "languages": [
+    "Japanese",
+    "English",
+    "Mandarin",
+    "Korean",
+    "Italian"
+   ],
+   "categories": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "imdbId": "tt0114709",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7157e09936158e0c90cd",
+   "title": "Toy Story 2",
+   "year": 1999,
+   "runtime": 93,
+   "directors": [
+    "John Lasseter"
+   ],
+   "genres": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "rating": "G",
+   "languages": [
+    "Japanese",
+    "English",
+    "Cantonese",
+    "Korean",
+    "Thai"
+   ],
+   "categories": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "imdbId": "tt0120363",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7157e09936158e0c90d7",
+   "title": "Toy Story 3",
+   "year": 2010,
+   "runtime": 103,
+   "directors": [
+    "Lee Unkrich"
+   ],
+   "genres": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "rating": "G",
+   "languages": [
+    "Japanese",
+    "English",
+    "Cantonese",
+    "German",
+    "Turkish"
+   ],
+   "categories": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "imdbId": "tt0435761",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7157e09936158e0c90e1",
+   "title": "Toy Story 4",
+   "year": 2019,
+   "runtime": 100,
+   "directors": [
+    "Josh Cooley"
+   ],
+   "genres": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "rating": "G",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Italian"
+   ],
+   "categories": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "imdbId": "tt1979376",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7150e09936158e0c8f96",
+   "title": "Toy Story 5",
+   "year": 2026,
+   "runtime": 102,
+   "directors": [
+    "Andrew Stanton"
+   ],
+   "genres": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "rating": "PG",
+   "languages": [
+    "Japanese",
+    "English",
+    "Mandarin",
+    "Korean",
+    "Italian"
+   ],
+   "categories": [
+    "Adventure",
+    "Animation",
+    "Comedy"
+   ],
+   "imdbId": "tt29355505",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7160e09936158e0c9249",
+   "title": "Tuner",
+   "year": 2026,
+   "runtime": 108,
+   "directors": [
+    "Daniel Roher"
+   ],
+   "genres": [
+    "Crime",
+    "Drama",
+    "Music"
+   ],
+   "rating": "R",
+   "languages": [
+    "English",
+    "French"
+   ],
+   "categories": [
+    "Crime",
+    "Drama",
+    "Music"
+   ],
+   "imdbId": "tt33296751",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715be09936158e0c9181",
+   "title": "Unexpected Family",
+   "year": 2026,
+   "runtime": 121,
+   "directors": [
+    "Taiyan Li"
+   ],
+   "genres": [
+    "Drama",
+    "Comedy"
+   ],
+   "rating": "G",
+   "languages": [
+    "Mandarin"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama"
+   ],
+   "imdbId": "tt31738051",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7168e09936158e0c9394",
+   "title": "WALL-E",
+   "year": 2008,
+   "runtime": 98,
+   "directors": [
+    "Andrew Stanton"
+   ],
+   "genres": [
+    "Animation",
+    "Sci-Fi"
+   ],
+   "rating": "G",
+   "languages": [
+    "Japanese",
+    "English",
+    "Cantonese",
+    "Thai",
+    "Swedish"
+   ],
+   "categories": [
+    "Animation",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt0910970",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715ae09936158e0c9163",
+   "title": "WANDERING",
+   "year": 2022,
+   "runtime": 151,
+   "directors": [
+    "Lee Sang-il"
+   ],
+   "genres": [
+    "Drama",
+    "Mystery"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Drama",
+    "Mystery"
+   ],
+   "imdbId": null,
+   "imdbConfidence": "low",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc717ce09936158e0c9704",
+   "title": "Wasteman",
+   "year": 2026,
+   "runtime": 88,
+   "directors": [
+    "Cal McMau"
+   ],
+   "genres": [
+    "Crime",
+    "Drama"
+   ],
+   "rating": null,
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Crime",
+    "Drama"
+   ],
+   "imdbId": "tt29028515",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7180e09936158e0c97b8",
+   "title": "Weekend in Taipei",
+   "year": 2024,
+   "runtime": 100,
+   "directors": [
+    "George Huang"
+   ],
+   "genres": [
+    "Action",
+    "Comedy",
+    "Thriller"
+   ],
+   "rating": "R",
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Action",
+    "Comedy",
+    "Thriller"
+   ],
+   "imdbId": "tt28142896",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715ae09936158e0c914f",
+   "title": "Who cares? -The Movie-",
+   "year": 2025,
+   "runtime": 115,
+   "directors": [
+    "TAKASHI NINOMIYA"
+   ],
+   "genres": [
+    "Comedy"
+   ],
+   "rating": null,
+   "languages": [
+    "Japanese"
+   ],
+   "categories": [
+    "Comedy"
+   ],
+   "imdbId": "tt40249256",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7164e09936158e0c92f4",
+   "title": "Winter Spring Summer or Fall",
+   "year": 2024,
+   "runtime": 97,
+   "directors": [
+    "Tiffany Paulsen"
+   ],
+   "genres": [
+    "Drama",
+    "Romance",
+    "Comedy"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "German",
+    "Spanish",
+    "Turkish"
+   ],
+   "categories": [
+    "Comedy",
+    "Drama",
+    "Romance"
+   ],
+   "imdbId": "tt24515124",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7152e09936158e0c8ffa",
+   "title": "Wonder Woman",
+   "year": 2017,
+   "runtime": 141,
+   "directors": [
+    "Patty Jenkins"
+   ],
+   "genres": [
+    "Action",
+    "Adventure",
+    "Fantasy"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "Japanese",
+    "English",
+    "French",
+    "German",
+    "Turkish"
+   ],
+   "categories": [
+    "Action",
+    "Adventure",
+    "Fantasy"
+   ],
+   "imdbId": "tt0451279",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7183e09936158e0c9830",
+   "title": "You're Cordially Invited",
+   "year": 2025,
+   "runtime": 109,
+   "directors": [
+    "Nicholas Stoller"
+   ],
+   "genres": [
+    "Comedy",
+    "Romance"
+   ],
+   "rating": "R",
+   "languages": [
+    "Japanese",
+    "English",
+    "Thai",
+    "Spanish",
+    "Hindi"
+   ],
+   "categories": [
+    "Comedy",
+    "Romance"
+   ],
+   "imdbId": "tt21227864",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc7161e09936158e0c9268",
+   "title": "You're Dating a Narcissist!",
+   "year": 2025,
+   "runtime": 91,
+   "directors": [
+    "Ann Marie Allison"
+   ],
+   "genres": [
+    "Comedy",
+    "Romance"
+   ],
+   "rating": null,
+   "languages": [
+    "English"
+   ],
+   "categories": [
+    "Comedy",
+    "Romance"
+   ],
+   "imdbId": "tt29375937",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  },
+  {
+   "sourceId": "6abc715fe09936158e0c9235",
+   "title": "You, Me & Tuscany",
+   "year": 2026,
+   "runtime": 105,
+   "directors": [
+    "Kat Coiro"
+   ],
+   "genres": [
+    "Comedy",
+    "Romance"
+   ],
+   "rating": "PG13",
+   "languages": [
+    "English",
+    "French",
+    "German",
+    "Italian",
+    "Spanish"
+   ],
+   "categories": [
+    "Comedy",
+    "Romance"
+   ],
+   "imdbId": "tt36352591",
+   "imdbConfidence": "high",
+   "tmdbId": null,
+   "versions": 1
+  }
+ ]
+}
