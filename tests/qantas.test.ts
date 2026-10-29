@@ -1,9 +1,9 @@
 import { afterEach, expect, test } from "bun:test";
-import { mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { qantas, qantasAdapter, servedMonth, type QantasRaw } from "../src/airlines/qantas.ts";
 import raw from "./fixtures/qantas-raw.json";
 
+const tmpRoot = () => { const d = `${import.meta.dir}/../tmp`; mkdirSync(d, { recursive: true }); return d; };
 const realFetch = globalThis.fetch;
 afterEach(() => { globalThis.fetch = realFetch; });
 
@@ -25,7 +25,7 @@ test("served month comes from MMYY", () => {
 });
 
 test("fetchMonth: POSTs the configured route, caches, refuses a month the API is not serving", async () => {
-  const cacheDir = mkdtempSync(`${tmpdir()}/qantas-`);
+  const cacheDir = mkdtempSync(`${tmpRoot()}/qantas-`);
   const calls: { url: string; method?: string }[] = [];
   globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
     calls.push({ url: String(input), method: init?.method });

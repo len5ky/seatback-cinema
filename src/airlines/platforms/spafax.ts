@@ -99,7 +99,7 @@ export async function fetchSpafax(site: SpafaxSite, month: string, opts: { cache
       console.warn(`${site.id}: detail ${item.id} failed: ${(e as Error).message}`);
     }
   });
-  if (failed > list.data.length / 10) throw new Error(`${site.id}: ${failed}/${list.data.length} detail calls failed`);
+  if (failed > Math.max(2, list.data.length / 10)) throw new Error(`${site.id}: ${failed}/${list.data.length} detail calls failed`);
   return { list, details };
 }
 

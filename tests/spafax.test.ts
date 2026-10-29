@@ -1,11 +1,11 @@
 import { afterEach, expect, test } from "bun:test";
-import { mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { jal } from "../src/airlines/jal.ts";
 import { lufthansa } from "../src/airlines/lufthansa.ts";
 import jalRaw from "./fixtures/jal-raw.json";
 import lhRaw from "./fixtures/lufthansa-raw.json";
 
+const tmpRoot = () => { const d = `${import.meta.dir}/../tmp`; mkdirSync(d, { recursive: true }); return d; };
 const realFetch = globalThis.fetch;
 afterEach(() => { globalThis.fetch = realFetch; });
 
@@ -42,7 +42,7 @@ test("jal: splits packed cast, cleans zero-width genres, reads rating from the s
 });
 
 test("fetchMonth: key from /api/config, flightSystem, detail calls cached under cacheDir/<id>/<month>/", async () => {
-  const cacheDir = mkdtempSync(`${tmpdir()}/spafax-`);
+  const cacheDir = mkdtempSync(`${tmpRoot()}/spafax-`);
   const urls: string[] = [];
   const list = { data: jalRaw.list.data, paging: { pageCount: 1 } };
   globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
