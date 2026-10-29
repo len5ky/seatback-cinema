@@ -11,7 +11,7 @@ export interface PickRow {
   year: number | null; primary_language: string | null; synopsis: string | null; tconst: string; confidence: string;
   imdb_title: string; start_year: number | null; imdb_genres: string | null; rating: number; votes: number; imdb_directors: string | null;
 }
-export interface Pick { row: PickRow; score: number; reasons: string[]; sources: string[] }
+export interface Pick { row: PickRow; score: number; reasons: string[]; sources: string[]; ratings: FilmRatings }
 
 const PRIOR_MEAN = 6.5;
 
@@ -125,10 +125,7 @@ export function scorePick(r: PickRow, taste: Taste, favouriteDirectors: string[]
   const ratings = x.ratings ?? {};
   const parts = blendParts(r, ratings, taste.min_votes);
   let score = blend(parts);
-  const reasons = [`IMDb ${r.rating.toFixed(1)} (${r.votes.toLocaleString("en-US")} votes)`];
-  if (ratings.letterboxd) reasons.push(`Letterboxd ${ratings.letterboxd.value.toFixed(1)}/5`);
-  if (ratings.rt_audience) reasons.push(`RT audience ${ratings.rt_audience.value}%`);
-  if (ratings.mc_critics) reasons.push(`Metacritic ${ratings.mc_critics.value}`);
+  const reasons: string[] = []; // rating sources live in Pick.ratings, shown on the card's first line
   if (x.model) {
     if (x.model.watchlist.has(r.tconst)) { score += WATCHLIST_BOOST; reasons.push("on your watchlist"); }
     const t = tasteAdjustment(x.model, r.imdb_genres?.split(",") ?? [], r.imdb_directors?.split(",") ?? [], x.nameOf);
@@ -143,7 +140,43 @@ export function scorePick(r: PickRow, taste: Taste, favouriteDirectors: string[]
   if (favouriteDirectors.length && directorsMatch(splitNames(r.directors), favouriteDirectors)) {
     score += 0.5; reasons.push(`director of a favourite (${r.directors})`);
   }
-  return { row: r, score: Math.round(score * 100) / 100, reasons, sources: parts.map((p) => p.source) };
+  return { row: r, score: Math.round(score * 100) / 100, reasons, sources: parts.map((p) => p.source), ratings };
+}
+
+/** Votes in short form: 414,367 -> "414k", 1,234,567 -> "1.2M". */
+export function abbreviateVotes(n: number): string {
+  if (n >= 999_500) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${Math.round(n / 1_000)}k`;
+  return String(n);
+}
+
+/** Whitespace collapsed; text longer than max is cut at the last word boundary that fits, plus an ellipsis (length <= max). */
+export function truncateAtWord(text: string, max: number): string {
+  const s = text.replace(/\s+/g, " ").trim();
+  if (s.length <= max) return s;
+  const cut = s.slice(0, max - 1);
+  const end = cut.lastIndexOf(" ");
+  return `${(end > 0 ? cut.slice(0, end) : cut).replace(/[\s,;:]+$/, "")}…`;
+}
+
+/** The three-line card `picks` prints for one pick: ratings line, synopsis, reasons. */
+export function formatPickCard(p: Pick, rank: number, full = false): string {
+  const x = p.row;
+  const r = p.ratings;
+  const head = [
+    `${String(rank).padStart(2)}. ${x.title} (${x.start_year ?? x.year ?? "?"})`,
+    x.genres ?? x.imdb_genres,
+    `${x.runtime ?? "?"} min`,
+    `IMDb ${x.rating.toFixed(1)} (${abbreviateVotes(x.votes)})`,
+    ...(r.letterboxd ? [`LB ${r.letterboxd.value.toFixed(1)}`] : []),
+    ...(r.rt_audience ? [`RT ${r.rt_audience.value}%`] : []),
+    ...(r.mc_critics ? [`MC ${r.mc_critics.value}`] : []),
+    `score ${p.score.toFixed(2)}`,
+  ].filter((s): s is string => !!s).join("  ");
+  const syn = (x.synopsis ?? "").replace(/\s+/g, " ").trim();
+  const synLine = !syn ? "(no synopsis)" : full ? syn : truncateAtWord(syn, 180);
+  const why = [...p.reasons, x.directors ?? "?", x.primary_language ?? "?", `https://www.imdb.com/title/${x.tconst}/ (${x.confidence})`];
+  return [head, `    ${synLine}`, `    why: ${why.join("; ")}`].join("\n");
 }
 
 export function isSeen(r: PickRow, taste: Taste): boolean {

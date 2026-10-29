@@ -41,7 +41,7 @@ Extra rating sources (optional, slow the first time): `bun run cli ids sync`, th
 `bun run cli ratings sync [--source letterboxd|rt|mc|tmdb] [--airline X]`. Scraped sites go at 1 request/s with a
 30-day cache, so a first full run is about an hour per source; scope it with `--airline` or `--limit N`. TMDB needs
 `TMDB_API_KEY` in `.env` (free key from themoviedb.org > Settings > API) and is skipped otherwise. Picks then blend
-IMDb, Letterboxd, RT audience and Metacritic; each pick lists its `sources:`.
+IMDb, Letterboxd, RT audience and Metacritic; each pick shows its LB, RT and MC scores on its first line.
 
 `taste.json` stays as manual overrides: `liked_genres`, `disliked_genres` (IMDb names such as Sci-Fi, Thriller,
 Horror), `min_rating`, `min_votes`, `seen` (titles or tt ids, excluded from picks), `favourites` (titles; their

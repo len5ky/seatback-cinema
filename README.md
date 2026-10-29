@@ -24,7 +24,7 @@ bun run cli fetch <airline|all> [--month 2026-11] [--refresh]  # monthly catalog
 bun run cli imdb sync [--force]    # download IMDb datasets (refreshed when >7 days old) and load them
 bun run cli match [--airline X]    # match catalogue films to IMDb titles
 bun run cli stats [--airline X]    # film count and match rate by confidence, per airline
-bun run cli picks [--airline emirates] [--top 30] [--genre Thriller] [--min-rating 7] [--language English] [--min-year 2020] [--max-year 2025] [--year 2025]
+bun run cli picks [--airline emirates] [--top 30] [--genre Thriller] [--min-rating 7] [--language English] [--min-year 2020] [--max-year 2025] [--year 2025] [--full]
 bun run cli search "toy story" [--airline X]   # which airlines carry it this month
 bun run cli export [--month 2026-10]           # public/data/<airline>/<month>.json + public/data/index.json
 bun run cli taste import [file ...]            # IMDb ratings/watchlist CSVs, Letterboxd zip (default: data/imdb-ratings/, data/letterboxd/)
@@ -124,8 +124,8 @@ Picks are scored on a 10-point scale in two steps.
 **1. Blend of public ratings.** IMDb 0.4, Letterboxd average 0.3 (stars x2), RT audience score 0.15 (/10) and
 Metascore 0.15 (/10). IMDb is first pulled toward 6.5 by `min_votes`, and IMDb and Letterboxd weights scale with
 log10 of their vote counts (0.2 at a handful of votes, full weight from 100k). A source with no score drops out
-and the remaining weights re-normalise, so a film with only an IMDb rating scores exactly as it did before the blend. `picks` prints the
-sources behind each score.
+and the remaining weights re-normalise, so a film with only an IMDb rating scores exactly as it did before the blend. `picks` shows the
+Letterboxd, RT and Metacritic scores behind each pick on its first line.
 
 **2. Your taste.** With an IMDb or Letterboxd export imported, every rated film adds its deviation from your average
 rating to each of its IMDb genres and directors. An affinity is the sum of those deviations divided by

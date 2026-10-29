@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { blend, blendParts, isSeen, learnAffinities, picks, scorePick, SHRINK, tasteAdjustment, voteWeight, WATCHLIST_BOOST, type PickRow, type Taste, type TasteModel } from "../src/rank.ts";
+import { blend, blendParts, formatPickCard, isSeen, learnAffinities, picks, scorePick, SHRINK, tasteAdjustment, voteWeight, WATCHLIST_BOOST, type PickRow, type Taste, type TasteModel } from "../src/rank.ts";
 import { openDb } from "../src/db.ts";
 
 const taste: Taste = { liked_genres: ["Sci-Fi", "Thriller"], disliked_genres: ["Horror"], min_rating: 6, min_votes: 5000, seen: ["Casablanca", "tt0111161"], favourites: [] };
@@ -45,8 +45,27 @@ test("blend: missing sources re-normalise; IMDb alone is the v1 score", () => {
   const p = scorePick(r, taste, [], { ratings: { letterboxd: { value: 4, votes: 200000 }, rt_audience: { value: 90, votes: 5000 }, mc_critics: { value: 70, votes: 40 } } });
   expect(p.score).toBeCloseTo((0.4 * imdbOnly + 0.3 * 8 + 0.15 * 9 + 0.15 * 7) / 1.0, 2);
   expect(p.sources).toEqual(["imdb", "letterboxd", "rt_audience", "mc_critics"]);
-  expect(p.reasons).toContain("Letterboxd 4.0/5");
-  expect(p.reasons).toContain("RT audience 90%");
+  expect(p.ratings.letterboxd?.value).toBe(4);
+  expect(p.ratings.rt_audience?.value).toBe(90);
+});
+
+test("pick card: year, abbreviated votes, LB/RT/MC on line 1, synopsis cut at a word boundary, reasons on line 3", () => {
+  const synopsis = "A young widow's grief takes a sinister turn after she begins to sense her late husband's presence in the empty house, and every night the whispers grow louder and closer to the truth about his death";
+  const r = row({ title: "Obsession", year: 2025, start_year: 2025, genres: "Horror, Thriller", runtime: 109, rating: 7.8, votes: 414367, synopsis, tconst: "tt37287335", confidence: "high", directors: "Curry Barker" });
+  const p = scorePick(r, taste, [], { ratings: { letterboxd: { value: 4.1, votes: 50000 }, rt_audience: { value: 94, votes: 3000 } } });
+  const [line1, line2, line3, extra] = formatPickCard(p, 1).split("\n");
+  expect(line1).toBe(` 1. Obsession (2025)  Horror, Thriller  109 min  IMDb 7.8 (414k)  LB 4.1  RT 94%  score ${p.score.toFixed(2)}`);
+  expect(line2!.startsWith("    ")).toBe(true);
+  const text = line2!.trim();
+  expect(text.length).toBeLessThanOrEqual(180);
+  expect(text.endsWith("…")).toBe(true);
+  expect(synopsis.startsWith(text.slice(0, -1) + " ")).toBe(true); // cut between words, not mid-word
+  expect(line3).toBe(`    why: ${[...p.reasons, "Curry Barker", "English", "https://www.imdb.com/title/tt37287335/ (high)"].join("; ")}`);
+  expect(extra).toBeUndefined();
+  expect(line3!.includes("IMDb") || line3!.includes("Letterboxd")).toBe(false); // rating sources are not repeated
+  expect(formatPickCard(p, 1, true).split("\n")[1]).toBe(`    ${synopsis}`);
+  expect(formatPickCard({ ...p, row: { ...r, synopsis: "  " } }, 2).split("\n")[1]).toBe("    (no synopsis)");
+  expect(formatPickCard({ ...p, row: { ...r, votes: 1234567 } }, 1)).toContain("IMDb 7.8 (1.2M)");
 });
 
 test("vote weight grows with log10 votes, floored and capped", () => {

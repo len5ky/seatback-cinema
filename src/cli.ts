@@ -5,7 +5,7 @@ import { adapters } from "./airlines/index.ts";
 import { monthDir } from "./airlines/http.ts";
 import { downloadImdb, loadImdb } from "./imdb.ts";
 import { matchAll } from "./match.ts";
-import { loadTaste, picks } from "./rank.ts";
+import { formatPickCard, loadTaste, picks } from "./rank.ts";
 import { PUBLIC_DIR, exportAll } from "./export.ts";
 import { syncIds } from "./ratings/ids.ts";
 import { SOURCES, syncRatings, type Source } from "./ratings/sync.ts";
@@ -17,7 +17,7 @@ const USAGE = `usage: bun run cli <command>
   imdb sync [--force]                                download IMDb datasets (if >7 days old) and load them
   match [--airline X]                                match catalogue films to IMDb titles
   picks [--airline emirates] [--top 30] [--genre X] [--min-rating 7] [--language English] [--month YYYY-MM]
-                                                     [--min-year N] [--max-year N] [--year N] (--year sets both)
+                                                     [--min-year N] [--max-year N] [--year N] (--year sets both) [--full]
   search <title> [--airline X]                       find a film in the latest catalogue of each airline
   stats [--airline X] [--month YYYY-MM]
   export [--month YYYY-MM] [--airline X]             write public/data/<airline>/<month>.json, ids.json, index.json
@@ -34,7 +34,7 @@ const { values: opt, positionals: pos } = parseArgs({
   options: {
     month: { type: "string" }, refresh: { type: "boolean" }, force: { type: "boolean" }, airline: { type: "string" },
     top: { type: "string" }, genre: { type: "string" }, "min-rating": { type: "string" }, language: { type: "string" },
-    "min-year": { type: "string" }, "max-year": { type: "string" }, year: { type: "string" },
+    "min-year": { type: "string" }, "max-year": { type: "string" }, year: { type: "string" }, full: { type: "boolean" },
     limit: { type: "string" }, source: { type: "string" },
   },
 });
@@ -160,12 +160,7 @@ async function main(): Promise<void> {
       console.log(r.model
         ? `taste: ${r.model.rated} ratings (mean ${r.model.mean.toFixed(1)}/10), ${r.model.watched.size} watched, ${r.model.watchlist.size} on watchlist; taste.json as overrides\n`
         : "taste: taste.json only (no IMDb or Letterboxd export imported: `bun run cli taste import`)\n");
-      r.picks.forEach((p, i) => {
-        const x = p.row;
-        console.log(`${String(i + 1).padStart(2)}. ${x.title} (${x.start_year ?? x.year ?? "?"})  score ${p.score.toFixed(2)}  ${x.runtime ?? "?"} min  ${x.genres ?? ""}`);
-        console.log(`    ${p.reasons.join(", ")}; ${x.directors ?? "?"}; ${x.primary_language ?? "?"}; https://www.imdb.com/title/${x.tconst}/ (${x.confidence})`);
-        console.log(`    sources: ${p.sources.join(" + ")}`);
-      });
+      r.picks.forEach((p, i) => console.log(formatPickCard(p, i + 1, opt.full ?? false)));
       return;
     }
     case "search": {
