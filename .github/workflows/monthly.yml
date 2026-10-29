@@ -1,0 +1,101 @@
+# Monthly dataset refresh: fetch every airline, match against IMDb, export public/data, commit it back to main.
+# Runs on the 1st and the 15th (some airlines publish the new cycle mid-month) and on demand.
+#
+# Cost: the IMDb bulk datasets are ~1.2 GB of .gz per download (inbound traffic, free and unmetered on
+# GitHub-hosted runners); loading them into SQLite takes ~3 min. A full run is roughly 10-20 min, most of it the
+# ~1,000 detail calls made by Lufthansa, JAL and ANA.
+name: monthly
+
+on:
+  schedule:
+    - cron: "17 5 1 * *"
+    - cron: "17 5 15 * *"
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "Month to fetch (YYYY-MM). Empty = current UTC month. BA, Singapore and Qantas only serve the current month."
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: monthly-dataset
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      MONTH: ${{ inputs.month }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+
+      - run: bun install --frozen-lockfile
+
+      - name: Resolve month
+        id: month
+        run: echo "month=${MONTH:-$(date -u +%Y-%m)}" >> "$GITHUB_OUTPUT"
+
+      # The IMDb files count as fresh for 7 days (by mtime), so the cache mainly saves re-runs and manual
+      # dispatches in the same week; the 1st/15th runs usually download again.
+      - name: Cache IMDb datasets
+        uses: actions/cache@v4
+        with:
+          path: data/imdb/*.gz
+          key: imdb-${{ steps.month.outputs.month }}
+
+      # Only once the American adapter (headless Chromium) has landed.
+      - name: Install Playwright Chromium
+        if: hashFiles('src/airlines/american.ts') != ''
+        run: bunx playwright install --with-deps chromium
+
+      - name: IMDb sync
+        run: bun run cli imdb sync
+
+      # One airline at a time; a failure is recorded in public/data/health.json and the rest continue.
+      # The step fails only if every airline failed.
+      - name: Fetch all airlines
+        run: scripts/fetch-all.sh "${{ steps.month.outputs.month }}"
+
+      - name: Match
+        run: bun run cli match
+
+      - name: Export
+        run: |
+          bun run cli export --month "${{ steps.month.outputs.month }}"
+          bun scripts/build-index.ts public/data
+
+      - name: Stats
+        continue-on-error: true
+        run: bun run cli stats --month "${{ steps.month.outputs.month }}"
+
+      - name: Commit dataset
+        run: |
+          git add public/data
+          if git diff --cached --quiet; then
+            echo "no dataset changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Publish ${{ steps.month.outputs.month }} catalogue data [skip ci]"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Upload fetch logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fetch-logs-${{ steps.month.outputs.month }}
+          path: data/logs/
+          if-no-files-found: ignore
+          retention-days: 30
