@@ -24,9 +24,8 @@ bun run cli ids sync [--airline X] [--limit N] # Wikidata: TMDB / Letterboxd / R
 bun run cli ratings sync [--source tmdb|letterboxd|rt|mc|all] [--airline X] [--limit N]
 ```
 
-`bun test` runs the unit tests (fixtures in `tests/fixtures/` are real responses with synopses, cast names and image
-URLs stripped);
-`bunx tsc --noEmit` typechecks.
+`bun test` runs the unit tests (the fixtures in `tests/fixtures/` are real responses with synopses, cast names and
+image URLs stripped), and `bunx tsc --noEmit` typechecks.
 
 ## Sources
 
@@ -105,7 +104,7 @@ Letterboxd, Rotten Tomatoes and Metacritic ids) is copied from Wikidata, which i
   director and runtime; the other airlines all send a year.
 - **Ranking**: see [Ratings and taste](#ratings-and-taste).
 - **Export**: one JSON per airline and month with `sourceId, title, year, runtime, directors, genres, rating,
-  languages, categories, imdbId, imdbConfidence, tmdbId` (`imdbId` only for high/medium matches; `tmdbId` is a
+  languages, categories, imdbId, imdbConfidence, tmdbId` (`imdbId` only for high/medium matches; `tmdbId` comes
   from Wikidata via `ids sync`). No synopsis, poster or cast. `index.json` lists airlines, months, counts and fetch
   times. `ids.json` maps `{tconst: {tmdb, letterboxd, rt, mc}}`; `ids sync` loads it before asking Wikidata, so a
   fresh database (CI) only queries films that are not in it yet.
@@ -117,7 +116,7 @@ Picks are scored on a 10-point scale in two steps.
 **1. Blend of public ratings.** IMDb 0.4, Letterboxd average 0.3 (stars x2), RT audience score 0.15 (/10) and
 Metascore 0.15 (/10). IMDb is first pulled toward 6.5 by `min_votes`, and IMDb and Letterboxd weights scale with
 log10 of their vote counts (0.2 at a handful of votes, full weight from 100k). A source with no score drops out
-and the remaining weights re-normalise, so a film with IMDb alone scores exactly as before. `picks` prints the
+and the remaining weights re-normalise, so a film with only an IMDb rating scores exactly as it did before the blend. `picks` prints the
 sources behind each score.
 
 **2. Your taste.** With a Letterboxd export imported, every rated film adds its deviation from your average
@@ -169,6 +168,7 @@ duration, error tail and `lastSuccess`.
 American answers HTTP 429 to GitHub runner IPs, so CI skips it and keeps whatever entry the local job last wrote
 (`status: "skipped"`, `reason: "fetched locally"` only if there is none; the leaderboard shows that as a neutral badge,
 not a failure).
+
 `scripts/american-local.sh` runs from a user crontab on the dev machine at 03:00 UTC on the 1st and 15th: it fetches
 American with `--refresh`, matches, exports that airline only, rebuilds `index.json` and pushes the American file,
 `index.json`, `ids.json` and `health.json` to main with `[skip ci]`, rebasing right before the push and regenerating

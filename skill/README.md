@@ -1,9 +1,9 @@
 # plane-movies skill
 
-Ask your coding agent "what should I watch on my Emirates flight?" and get picks from that airline's real
-catalogue for the month, with IMDb links. The skill is two files: `SKILL.md` (instructions for the model) and
-`scripts/catalogue.ts` (downloads and prints a catalogue from the open dataset). It has no dependencies and
-needs only one of Bun, Node 22.6+ or Deno.
+Ask your coding agent "what should I watch on my Emirates flight?" and it picks from the films Emirates is
+actually showing that month, with IMDb links. The skill is two files: `SKILL.md` (instructions for the model) and
+`scripts/catalogue.ts` (downloads and prints a catalogue from the open dataset). There are no dependencies;
+any one of Bun, Node 22.6+ or Deno will run it.
 
 Airlines: Emirates, United, KLM, British Airways, Singapore Airlines, Lufthansa, Japan Airlines, Cathay Pacific,
 Qantas, ANA, American Airlines. The data is refreshed on the 1st and 15th of each month.
@@ -51,7 +51,7 @@ For questions about what to watch on a flight, follow .cursor/plane-movies/SKILL
 
 ## Any other agent
 
-Point the agent at `SKILL.md` (paste it, or reference it from `AGENTS.md`). It only needs to run a shell command.
+Point the agent at `SKILL.md` (paste it, or reference it from `AGENTS.md`). All it has to be able to do is run a shell command.
 
 ## Options
 
