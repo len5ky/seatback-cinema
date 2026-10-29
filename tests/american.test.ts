@@ -1,0 +1,70 @@
+import { expect, test } from "bun:test";
+import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { type AaRecord, american, extractRscRecords, fetchAmerican, servedMonth } from "../src/airlines/american.ts";
+import records from "./fixtures/american-records.json";
+
+const page1 = records as unknown as AaRecord[];
+const tmpRoot = () => { const d = `${import.meta.dir}/../tmp`; mkdirSync(d, { recursive: true }); return d; };
+
+test("parse: one film per record with IMDb id, year from release date, shelves as categories", () => {
+  const films = american.parse({ pages: [page1] });
+  expect(films).toHaveLength(28);
+  expect(films.filter((f) => f.imdbId)).toHaveLength(26);
+  const sg = films.find((f) => f.title === "Supergirl")!;
+  expect(sg).toMatchObject({
+    sourceId: "a106cd2c-aa0a-4683-868b-8642a0824023", imdbId: "tt8814476", year: 2026, runtime: 107,
+    directors: ["Craig Gillespie"], genres: ["Action", "Adventure", "Drama"],
+  });
+  expect(sg.cast).toEqual(["Milly Alcock", "Matthias Schoenaerts", "Eve Ridley", "David Krumholtz"]);
+  expect(sg.languages).toContain("Japanese");
+  expect(sg.subtitles).toContain("Spanish (Latin)");
+  expect(sg.categories).toEqual(expect.arrayContaining(["New Releases", "Superpowered Cinema", "Heroes & Villains", "New This Month"]));
+  expect(sg.categories.some((c) => /Tile|Hero -|Thales|Category Image/.test(c))).toBe(false);
+  expect(films.find((f) => f.title === "Ash")?.imdbId).toBeUndefined();
+});
+
+test("parse dedupes a record repeated across pages", () => {
+  expect(american.parse({ pages: [page1, page1.slice(0, 3)] })).toHaveLength(28);
+});
+
+test("servedMonth reads the current cycle start", () => {
+  expect(servedMonth({ pages: [page1] })).toBe("2026-10");
+});
+
+test("extractRscRecords walks JSON rows and skips module, text and broken rows", () => {
+  const [a, b] = page1 as [AaRecord, AaRecord];
+  const text = [
+    '1:"$Sreact.fragment"',
+    '2:I[8837,["/_next/static/chunk.js"],"default"]',
+    `5:["$","$L25",null,{"items":[${JSON.stringify(a)},{"nested":{"x":${JSON.stringify(b)}}}]}]`,
+    `6:["$","div",null,{"children":${JSON.stringify(a)}}]`,
+    '7:{"name":"Not a film","other":1}',
+    "8:T4c,plain text chunk",
+    '9:["broken',
+  ].join("\n");
+  expect(extractRscRecords(text).map((r) => r.name)).toEqual([a.name, b.name]);
+});
+
+test("fetchAmerican: walks pages until empty, caches them, then serves from cache without a browser", async () => {
+  const cacheDir = mkdtempSync(`${tmpRoot()}/american-`);
+  const rsc = (rs: AaRecord[]) => `0:${JSON.stringify(["$", "div", null, { items: rs }])}`;
+  const pages = [page1.slice(0, 20), page1.slice(20), []];
+  const asked: number[] = [];
+  let opened = 0;
+  const open = async () => {
+    opened++;
+    return { fetchPage: async (n: number) => { asked.push(n); return rsc(pages[n - 1] ?? []); }, close: async () => {} };
+  };
+  try {
+    const raw = await fetchAmerican("2026-10", cacheDir, false, open);
+    expect(asked).toEqual([1, 2, 3]);
+    expect(american.parse(raw)).toHaveLength(28);
+    const again = await fetchAmerican("2026-10", cacheDir, false, open);
+    expect(opened).toBe(1);
+    expect(again.pages.flat()).toHaveLength(28);
+    await expect(fetchAmerican("2026-11", cacheDir, false, open)).rejects.toThrow("serves 2026-10 only");
+    expect(await Bun.file(`${cacheDir}/american/2026-11/page-1.json`).exists()).toBe(false);
+  } finally {
+    rmSync(cacheDir, { recursive: true, force: true });
+  }
+});

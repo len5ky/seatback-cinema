@@ -50,7 +50,29 @@ export function parseQantas(raw: unknown): CatalogueFilm[] {
       });
     }
   }
-  return [...films.values()];
+  return foldAudioDescriptive([...films.values()]);
+}
+
+const AD_SUFFIX = /\s*\(Audio Descriptive\)$/i;
+const AD_CATEGORY = "Audio Descriptive";
+
+/**
+ * Qantas lists audio-described versions as their own titles ("Toy Story 5 (Audio Descriptive)", own mid). Fold each
+ * into the base film with the same title and year, which gains the "Audio Descriptive" category; one with no base
+ * keeps its own entry, title stripped, category kept.
+ */
+export function foldAudioDescriptive(films: CatalogueFilm[]): CatalogueFilm[] {
+  const key = (f: CatalogueFilm) => `${f.title.toLowerCase()}|${f.year ?? ""}`;
+  const base = new Map(films.filter((f) => !AD_SUFFIX.test(f.title)).map((f) => [key(f), f]));
+  const out: CatalogueFilm[] = [];
+  for (const f of films) {
+    if (!AD_SUFFIX.test(f.title)) { out.push(f); continue; }
+    const stripped = { ...f, title: f.title.replace(AD_SUFFIX, ""), categories: f.categories.includes(AD_CATEGORY) ? f.categories : [...f.categories, AD_CATEGORY] };
+    const target = base.get(key(stripped));
+    if (!target) { out.push(stripped); continue; }
+    for (const c of stripped.categories) if (!target.categories.includes(c)) target.categories.push(c);
+  }
+  return out;
 }
 
 /** "1026" -> "2026-10" */

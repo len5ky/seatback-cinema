@@ -47,6 +47,8 @@ export function parseSpafax(raw: unknown): CatalogueFilm[] {
     const year = item.year || d?.year || undefined;
     const rating = item.rating ?? d?.rating ?? ratingFromSynopsis(item.synopsis);
     const poster = item.images?.find((i) => i.type === "Poster")?.images;
+    const genres = cleanList(d?.genres);
+    const categories = cleanList(d?.categories);
     films.set(sourceId, {
       sourceId,
       title: item.title.trim(),
@@ -54,13 +56,13 @@ export function parseSpafax(raw: unknown): CatalogueFilm[] {
       ...(runtime !== undefined ? { runtime } : {}),
       directors: nameList(d?.directors),
       cast: nameList(d?.cast),
-      genres: cleanList(d?.genres),
+      genres,
       ...(rating ? { rating } : {}),
       languages: cleanList(d?.dubbings).filter((l) => !/audio description/i.test(l)),
       subtitles: cleanList(d?.subtitles),
       ...(item.synopsis ? { synopsis: item.synopsis.split(" | ")[0]!.trim() } : {}),
       ...(poster?.length ? { poster: (poster.find((p) => p.size === "Large") ?? poster[0])!.url } : {}),
-      categories: cleanList(d?.categories),
+      categories: categories.length ? categories : [...genres], // JAL films without shelves fall back to genre
     });
   }
   return [...films.values()];

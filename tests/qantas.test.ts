@@ -20,6 +20,23 @@ test("movies only, deduped on mid, shelves collected as categories", () => {
   expect(ts.subtitles).toEqual(["English", "Simplified Chinese"]);
 });
 
+test("Audio Descriptive versions fold into the base film; an orphan keeps its own entry", () => {
+  const r = raw as QantasRaw;
+  const ts = r.shelves.flatMap((s) => s.media).find((m) => m.mid === "518587")!;
+  const withAd: QantasRaw = {
+    ...r,
+    shelves: [...r.shelves, { title: "Audio Descriptive", media: [
+      { ...ts, mid: "518589", title: "Toy Story 5 (Audio Descriptive)" },
+      { ...ts, mid: "999", title: "Hamnet (Audio Descriptive)", year: "2025" },
+    ] }],
+  };
+  const films = qantas.parse(withAd);
+  expect(films.find((f) => f.sourceId === "518589")).toBeUndefined();
+  expect(films.find((f) => f.sourceId === "518587")!.categories).toEqual(["New Releases", "Family", "Audio Descriptive"]);
+  expect(films.find((f) => f.sourceId === "999")).toMatchObject({ title: "Hamnet", year: 2025, categories: ["Audio Descriptive"] });
+  expect(films).toHaveLength(7);
+});
+
 test("served month comes from MMYY", () => {
   expect(servedMonth(raw as QantasRaw)).toBe("2026-10");
 });
