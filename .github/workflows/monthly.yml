@@ -80,7 +80,7 @@ jobs:
 
       - name: Commit dataset
         run: |
-          git add --force public/data   # .gitignore "data/" also matches public/data
+          git add public/data
           if git diff --cached --quiet; then
             echo "no dataset changes"
             exit 0
