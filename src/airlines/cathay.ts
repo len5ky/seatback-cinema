@@ -51,13 +51,8 @@ async function fetchCathay(month: string, { cacheDir, refresh }: { cacheDir: str
   return { items: [{ ...root, child_items }] };
 }
 
-/** ~50 titles carry a disambiguating year ("Moana (2026)"); move it into `year`. */
-export function parseCathay(raw: unknown): CatalogueFilm[] {
-  return parseAirtime(raw as AirtimeTree).map((f) => {
-    const m = f.title.match(/^(.+?)\s*\((\d{4})\)$/);
-    return m ? { ...f, title: m[1]!, year: f.year ?? Number(m[2]) } : f;
-  });
-}
+/** parseAirtime already moves a disambiguating "(2026)" title suffix into `year` (~50 Cathay titles). */
+export const parseCathay = (raw: unknown): CatalogueFilm[] => parseAirtime(raw as AirtimeTree);
 
 export const cathay: AirlineAdapter = {
   id: "cathay",
