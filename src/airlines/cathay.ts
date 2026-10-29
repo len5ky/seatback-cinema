@@ -39,7 +39,8 @@ async function fetchCathay(month: string, { cacheDir, refresh }: { cacheDir: str
     return node;
   };
 
-  const root = await item(MOVIES_SECTION, 0, `${dir}/movies.json`);
+  // the API rejects max_child_depth=0; depth 1 lists the child sections without their movies
+  const root = await item(MOVIES_SECTION, 1, `${dir}/movies.json`);
   const sectionIds = root.child_id_list ?? [];
   if (!sectionIds.length) throw new Error(`cathay: Movies section ${MOVIES_SECTION} lists no child sections`);
   const sections = new Map<string, AirtimeNode>();
