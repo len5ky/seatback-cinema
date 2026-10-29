@@ -90,7 +90,6 @@ export async function syncRatings(db: Database, o: RatingsSyncOptions): Promise<
     out[source] = r;
     if (source === "tmdb" && !o.tmdbKey) {
       r.aborted = "TMDB_API_KEY not set: add it to .env (free key: themoviedb.org > Settings > API); skipping TMDB";
-      o.log?.(r.aborted);
       continue;
     }
     let streak = 0;
