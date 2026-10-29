@@ -3,7 +3,7 @@ import { isSeen, scorePick, type PickRow, type Taste } from "../src/rank.ts";
 
 const taste: Taste = { liked_genres: ["Sci-Fi", "Thriller"], disliked_genres: ["Horror"], min_rating: 6, min_votes: 5000, seen: ["Casablanca", "tt0111161"], favourites: [] };
 const row = (o: Partial<PickRow>): PickRow => ({
-  track_list: "1", title: "X", director: "A B", genre: "Drama", duration: 100, primary_language: "English", summary: null,
+  source_id: "1", title: "X", directors: "A B", genres: "Drama", runtime: 100, year: 2020, primary_language: "English", synopsis: null,
   tconst: "tt1", confidence: "high", imdb_title: "X", start_year: 2020, imdb_genres: "Drama", rating: 7.5, votes: 100000, imdb_directors: null, ...o,
 });
 
@@ -16,7 +16,7 @@ test("votes shrink ratings toward the prior", () => {
 
 test("genre boosts and penalties", () => {
   const base = scorePick(row({}), taste).score;
-  const liked = scorePick(row({ genre: "Sci-Fi / Thriller" }), taste);
+  const liked = scorePick(row({ genres: "Sci-Fi, Thriller" }), taste);
   const disliked = scorePick(row({ imdb_genres: "Drama,Horror" }), taste);
   expect(liked.score).toBeCloseTo(base + 0.8, 5);
   expect(liked.reasons).toContain("+Sci-Fi/Thriller");
@@ -24,7 +24,7 @@ test("genre boosts and penalties", () => {
 });
 
 test("favourite director boost", () => {
-  const p = scorePick(row({ director: "Denis Villeneuve" }), taste, ["Denis Villeneuve"]);
+  const p = scorePick(row({ directors: "Denis Villeneuve" }), taste, ["Denis Villeneuve"]);
   expect(p.score).toBeCloseTo(scorePick(row({}), taste).score + 0.5, 5);
 });
 

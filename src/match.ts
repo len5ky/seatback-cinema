@@ -93,21 +93,29 @@ export function findCandidates(db: Database, title: string): { candidates: Candi
   return { candidates, viaVariant: viaVariant && candidates.length > 0 };
 }
 
-/** Match every film of an airline (all snapshots) against IMDb and store the results. */
-export function matchAll(db: Database, airline = "emirates"): Record<Confidence, number> {
-  const films = db.query<{ track_list: string; clean_title: string; year: number | null; duration: number | null; director: string | null }, [string]>(
+interface FilmRow { source_id: string; title: string; year: number | null; runtime: number | null; directors: string | null; imdb_id: string | null }
+
+/** Match every film of one airline (or all airlines) against IMDb and store the results. An airline-provided IMDb id is trusted when IMDb knows it. */
+export function matchAll(db: Database, airline?: string): Record<Confidence, number> {
+  const films = db.query<FilmRow & { airline: string }, [string | null, string | null]>(
     // bare columns come from the MAX(month) row (SQLite min/max semantics)
-    "SELECT track_list, clean_title, year, duration, director, MAX(month) AS month FROM movies WHERE airline = ? GROUP BY track_list",
-  ).all(airline);
+    `SELECT airline, source_id, title, year, runtime, directors, imdb_id, MAX(month) AS month FROM movies
+     WHERE (? IS NULL OR airline = ?) GROUP BY airline, source_id`,
+  ).all(airline ?? null, airline ?? null);
+  const known = db.query<{ tconst: string }, [string]>("SELECT tconst FROM imdb_titles WHERE tconst = ?");
   const ins = db.prepare("INSERT OR REPLACE INTO matches VALUES (?,?,?,?,?,?,?)");
   const counts: Record<Confidence, number> = { high: 0, medium: 0, low: 0, none: 0 };
   const now = new Date().toISOString();
   db.transaction(() => {
     for (const f of films) {
-      const { candidates, viaVariant } = findCandidates(db, f.clean_title);
-      const m = pickMatch({ cleanTitle: f.clean_title, year: f.year, duration: f.duration, director: f.director }, candidates, undefined, viaVariant);
+      let m: MatchResult;
+      if (f.imdb_id && known.get(f.imdb_id)) m = { tconst: f.imdb_id, confidence: "high", score: 100, reasons: ["airline-provided IMDb id"] };
+      else {
+        const { candidates, viaVariant } = findCandidates(db, f.title);
+        m = pickMatch({ cleanTitle: f.title, year: f.year, duration: f.runtime, director: f.directors }, candidates, undefined, viaVariant);
+      }
       counts[m.confidence]++;
-      ins.run(airline, f.track_list, m.tconst, m.confidence, m.score, m.reasons.join("; "), now);
+      ins.run(f.airline, f.source_id, m.tconst, m.confidence, m.score, m.reasons.join("; "), now);
     }
   })();
   return counts;

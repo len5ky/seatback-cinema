@@ -1,6 +1,7 @@
 import { Database } from "bun:sqlite";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
+import type { CatalogueFilm } from "./airlines/types.ts";
 
 export const DATA_DIR = process.env.PLANE_MOVIE_DATA ?? "data";
 export const DB_PATH = `${DATA_DIR}/plane_movie.sqlite`;
@@ -8,29 +9,27 @@ export const DB_PATH = `${DATA_DIR}/plane_movie.sqlite`;
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS airlines (code TEXT PRIMARY KEY, name TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS snapshots (
-  airline TEXT NOT NULL, month TEXT NOT NULL, fetched_at TEXT NOT NULL, source_date TEXT NOT NULL,
-  raw_path TEXT NOT NULL, rows INTEGER NOT NULL, films INTEGER NOT NULL,
+  airline TEXT NOT NULL, month TEXT NOT NULL, fetched_at TEXT NOT NULL, raw_dir TEXT NOT NULL, films INTEGER NOT NULL,
   PRIMARY KEY (airline, month)
 );
 CREATE TABLE IF NOT EXISTS movies (
-  airline TEXT NOT NULL, month TEXT NOT NULL, track_list TEXT NOT NULL,
-  title TEXT NOT NULL, clean_title TEXT NOT NULL, year INTEGER,
-  starring TEXT, director TEXT, genre TEXT, summary TEXT, rating TEXT, duration INTEGER,
-  languages TEXT, primary_language TEXT, subtitles TEXT, image TEXT, trailer TEXT,
-  PRIMARY KEY (airline, month, track_list)
+  airline TEXT NOT NULL, month TEXT NOT NULL, source_id TEXT NOT NULL,
+  title TEXT NOT NULL, year INTEGER, runtime INTEGER, directors TEXT, cast TEXT, genres TEXT, rating TEXT,
+  languages TEXT, primary_language TEXT, subtitles TEXT, synopsis TEXT, imdb_id TEXT, poster TEXT, partial INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (airline, month, source_id)
 );
 CREATE TABLE IF NOT EXISTS movie_categories (
-  airline TEXT NOT NULL, month TEXT NOT NULL, track_list TEXT NOT NULL,
-  category_id INTEGER NOT NULL, category_name TEXT,
-  PRIMARY KEY (airline, month, track_list, category_id)
+  airline TEXT NOT NULL, month TEXT NOT NULL, source_id TEXT NOT NULL, category TEXT NOT NULL,
+  PRIMARY KEY (airline, month, source_id, category)
 );
 CREATE TABLE IF NOT EXISTS matches (
-  airline TEXT NOT NULL, track_list TEXT NOT NULL, tconst TEXT, confidence TEXT NOT NULL,
+  airline TEXT NOT NULL, source_id TEXT NOT NULL, tconst TEXT, confidence TEXT NOT NULL,
   score REAL NOT NULL, reasons TEXT NOT NULL, matched_at TEXT NOT NULL,
-  PRIMARY KEY (airline, track_list)
+  PRIMARY KEY (airline, source_id)
 );
-INSERT OR IGNORE INTO airlines VALUES ('emirates', 'Emirates');
 `;
+/** v1 catalogue tables (Emirates-only, keyed by track_list); catalogue data is rebuilt from the cached raw files. */
+const V1_TABLES = ["movies", "movie_categories", "matches", "snapshots"];
 
 /** IMDb tables; `suffix` "_new" builds staging copies that loadImdb swaps in atomically. */
 export const imdbSchema = (suffix = "") => `
@@ -47,8 +46,30 @@ export function openDb(path: string = DB_PATH): Database {
   if (path !== ":memory:") mkdirSync(dirname(path), { recursive: true });
   const db = new Database(path, { create: true, strict: true });
   db.exec("PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL;");
+  const v1 = db.query<{ name: string }, []>("SELECT name FROM pragma_table_info('movies')").all().some((c) => c.name === "track_list");
+  if (v1) for (const t of V1_TABLES) db.run(`DROP TABLE IF EXISTS ${t}`);
   db.exec(SCHEMA + imdbSchema());
   return db;
+}
+
+const join = (xs: string[]) => (xs.length ? xs.join(", ") : null);
+
+/** Replace one airline-month snapshot with the parsed films. */
+export function storeFilms(db: Database, airline: { id: string; name: string }, month: string, films: CatalogueFilm[], rawDir: string, fetchedAt = new Date().toISOString()): void {
+  const insMovie = db.prepare("INSERT INTO movies VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+  const insCat = db.prepare("INSERT OR IGNORE INTO movie_categories VALUES (?,?,?,?)");
+  db.transaction(() => {
+    db.run("INSERT OR REPLACE INTO airlines VALUES (?, ?)", [airline.id, airline.name]);
+    db.run("DELETE FROM movies WHERE airline = ? AND month = ?", [airline.id, month]);
+    db.run("DELETE FROM movie_categories WHERE airline = ? AND month = ?", [airline.id, month]);
+    for (const f of films) {
+      insMovie.run(airline.id, month, f.sourceId, f.title, f.year ?? null, f.runtime ?? null, join(f.directors), join(f.cast),
+        join(f.genres), f.rating ?? null, join(f.languages), f.languages[0] ?? null, join(f.subtitles), f.synopsis ?? null,
+        f.imdbId ?? null, f.poster ?? null, f.partial ? 1 : 0);
+      for (const c of f.categories) insCat.run(airline.id, month, f.sourceId, c);
+    }
+    db.run("INSERT OR REPLACE INTO snapshots VALUES (?, ?, ?, ?, ?)", [airline.id, month, fetchedAt, rawDir, films.length]);
+  })();
 }
 
 /** Latest snapshot month for an airline, or null if none fetched yet. */

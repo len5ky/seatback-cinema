@@ -7,8 +7,8 @@ export interface Taste {
   seen: string[]; favourites: string[];
 }
 export interface PickRow {
-  track_list: string; title: string; director: string | null; genre: string | null; duration: number | null;
-  primary_language: string | null; summary: string | null; tconst: string; confidence: string;
+  source_id: string; title: string; directors: string | null; genres: string | null; runtime: number | null;
+  year: number | null; primary_language: string | null; synopsis: string | null; tconst: string; confidence: string;
   imdb_title: string; start_year: number | null; imdb_genres: string | null; rating: number; votes: number; imdb_directors: string | null;
 }
 export interface Pick { row: PickRow; score: number; reasons: string[] }
@@ -25,7 +25,7 @@ export async function loadTaste(path = "taste.json"): Promise<Taste> {
 }
 
 const genreSet = (r: PickRow) =>
-  new Set([...(r.imdb_genres?.split(",") ?? []), ...(r.genre?.split("/") ?? [])].map((g) => g.trim().toLowerCase()).filter(Boolean));
+  new Set([...(r.imdb_genres?.split(",") ?? []), ...(r.genres?.split(/[,/]/) ?? [])].map((g) => g.trim().toLowerCase()).filter(Boolean));
 
 /** Bayesian-weighted rating (shrinks low-vote films toward 6.5) plus genre and favourite-director adjustments. */
 export function scorePick(r: PickRow, taste: Taste, favouriteDirectors: string[] = []): Pick {
@@ -37,8 +37,8 @@ export function scorePick(r: PickRow, taste: Taste, favouriteDirectors: string[]
   const disliked = taste.disliked_genres.filter((g) => genres.has(g.toLowerCase()));
   if (liked.length) { score += Math.min(liked.length, 2) * 0.4; reasons.push(`+${liked.join("/")}`); }
   if (disliked.length) { score -= disliked.length * 1.0; reasons.push(`-${disliked.join("/")}`); }
-  if (favouriteDirectors.length && directorsMatch(splitNames(r.director), favouriteDirectors)) {
-    score += 0.5; reasons.push(`director of a favourite (${r.director})`);
+  if (favouriteDirectors.length && directorsMatch(splitNames(r.directors), favouriteDirectors)) {
+    score += 0.5; reasons.push(`director of a favourite (${r.directors})`);
   }
   return { row: r, score: Math.round(score * 100) / 100, reasons };
 }
@@ -48,19 +48,19 @@ export function isSeen(r: PickRow, taste: Taste): boolean {
   return keys.has(r.tconst) || keys.has(normalizeTitle(r.title)) || keys.has(normalizeTitle(r.imdb_title));
 }
 
-export interface PickOptions { month: string; top: number; genre?: string; minRating?: number; language?: string }
+export interface PickOptions { airline: string; month: string; top: number; genre?: string; minRating?: number; language?: string }
 
 export function picks(db: Database, taste: Taste, o: PickOptions): { picks: Pick[]; excludedLow: number; unmatched: number } {
-  const rows = db.query<PickRow, [string]>(`
-    SELECT m.track_list, m.title, m.director, m.genre, m.duration, m.primary_language, m.summary,
+  const rows = db.query<PickRow, [string, string]>(`
+    SELECT m.source_id, m.title, m.directors, m.genres, m.runtime, m.year, m.primary_language, m.synopsis,
            x.tconst, x.confidence, t.primary_title AS imdb_title, t.start_year, t.genres AS imdb_genres,
            t.rating, t.votes, t.directors AS imdb_directors
-    FROM movies m JOIN matches x ON x.airline = m.airline AND x.track_list = m.track_list
+    FROM movies m JOIN matches x ON x.airline = m.airline AND x.source_id = m.source_id
     JOIN imdb_titles t ON t.tconst = x.tconst
-    WHERE m.airline = 'emirates' AND m.month = ? AND x.confidence IN ('high','medium') AND t.rating IS NOT NULL`).all(o.month);
-  const counts = db.query<{ low: number; none: number }, [string]>(`
+    WHERE m.airline = ? AND m.month = ? AND x.confidence IN ('high','medium') AND t.rating IS NOT NULL`).all(o.airline, o.month);
+  const counts = db.query<{ low: number; none: number }, [string, string]>(`
     SELECT SUM(x.confidence = 'low') AS low, SUM(x.confidence = 'none' OR x.confidence IS NULL) AS none
-    FROM movies m LEFT JOIN matches x ON x.airline = m.airline AND x.track_list = m.track_list WHERE m.month = ?`).get(o.month);
+    FROM movies m LEFT JOIN matches x ON x.airline = m.airline AND x.source_id = m.source_id WHERE m.airline = ? AND m.month = ?`).get(o.airline, o.month);
   const favDirs = favouriteDirectors(db, taste.favourites);
   const minRating = o.minRating ?? taste.min_rating;
   const seenTconst = new Set<string>();
@@ -70,7 +70,7 @@ export function picks(db: Database, taste: Taste, o: PickOptions): { picks: Pick
     .filter((r) => !o.language || (r.primary_language ?? "").toLowerCase() === o.language.toLowerCase())
     .map((r) => scorePick(r, taste, favDirs))
     .sort((a, b) => b.score - a.score)
-    .filter((p) => !seenTconst.has(p.row.tconst) && !!seenTconst.add(p.row.tconst)) // two trackLists, one film
+    .filter((p) => !seenTconst.has(p.row.tconst) && !!seenTconst.add(p.row.tconst)) // two source ids, one film
     .slice(0, o.top);
   return { picks: out, excludedLow: counts?.low ?? 0, unmatched: counts?.none ?? 0 };
 }

@@ -1,20 +1,33 @@
 import { expect, test } from "bun:test";
-import { cleanTitle, parseCategories, parseMovies, sourceDate, storeSnapshot, type IceRow } from "../src/airlines/emirates.ts";
-import { openDb } from "../src/db.ts";
+import { cleanTitle, parseCategories, parseEmirates, type EmiratesRaw } from "../src/airlines/emirates.ts";
+import { adapters } from "../src/airlines/index.ts";
+import { fetchDate } from "../src/airlines/http.ts";
+import { openDb, storeFilms } from "../src/db.ts";
 import movies from "./fixtures/emirates-movies.json";
 import taxonomy from "./fixtures/emirates-taxonomy.json";
 
-const rows = movies.results as IceRow[];
-const films = parseMovies(rows);
+const raw = { taxonomy, movies } as EmiratesRaw;
+const films = parseEmirates(raw);
 
 test("dedupes on trackList and drops the placeholder", () => {
-  expect(rows.length).toBe(21);
+  expect(raw.movies.results.length).toBe(21);
   expect(films.length).toBe(11);
   expect(films.find((f) => /new on ice/i.test(f.title))).toBeUndefined();
   const dd = films.find((f) => f.title === "Disclosure Day");
-  expect(dd?.categoryIds).toEqual([100, 111, 130, 131]);
+  expect(dd?.categories).toEqual(["Latest Movies", "Sci-Fi & Fantasy", expect.any(String), expect.any(String)]);
   // same title, two trackLists stay two films
-  expect(films.filter((f) => f.title === "The Sheep Detectives").map((f) => f.trackList).sort()).toEqual(["1370024", "1370303"]);
+  expect(films.filter((f) => f.title === "The Sheep Detectives").map((f) => f.sourceId).sort()).toEqual(["1370024", "1370303"]);
+});
+
+test("maps fields onto the adapter contract", () => {
+  const dd = films.find((f) => f.title === "Disclosure Day")!;
+  expect(dd).toMatchObject({
+    sourceId: "1370023", runtime: 146, directors: ["Steven Spielberg"], cast: ["Emily Blunt", "Josh O'Connor", "Colin Firth"],
+    genres: ["Sci-Fi", "Thriller"], rating: "PG13", subtitles: [],
+  });
+  expect(dd.languages[0]).toBe("English");
+  expect(new Set(dd.languages).size).toBe(dd.languages.length);
+  expect(adapters.emirates?.parse(raw)).toEqual(films);
 });
 
 test("maps category ids to names", () => {
@@ -29,18 +42,23 @@ test("cleans year suffix and language prefix", () => {
   expect(cleanTitle("Telugu - War 2", "Telugu")).toEqual({ cleanTitle: "War 2", year: null });
   expect(cleanTitle("Kannada - Kantara: A Legend Chapter 1", "Hindi").cleanTitle).toBe("Kantara: A Legend Chapter 1");
   expect(cleanTitle("Wicked - The Real Story", "English")).toEqual({ cleanTitle: "Wicked - The Real Story", year: null });
-  expect(films.find((f) => f.trackList === "1297012")?.year).toBe(1942);
+  expect(films.find((f) => f.sourceId === "1297012")).toMatchObject({ title: "Casablanca", year: 1942 });
 });
 
-test("source date: today for the current month, the 5th otherwise", () => {
+test("fetch date: today for the current month, the 5th otherwise", () => {
   const now = new Date("2026-10-22T10:00:00Z");
-  expect(sourceDate("2026-10", now)).toBe("2026-10-22");
-  expect(sourceDate("2026-11", now)).toBe("2026-11-05");
+  expect(fetchDate("2026-10", now)).toBe("2026-10-22");
+  expect(fetchDate("2026-11", now)).toBe("2026-11-05");
 });
 
 test("stores a snapshot with category names", () => {
   const db = openDb(":memory:");
-  storeSnapshot(db, "2026-10", "2026-10-22", "x", rows.length, films, parseCategories(taxonomy));
+  storeFilms(db, adapters.emirates!, "2026-10", films, "x");
   expect(db.query("SELECT COUNT(*) AS n FROM movies").get()).toEqual({ n: 11 });
-  expect(db.query("SELECT category_name AS c FROM movie_categories WHERE track_list = '1370023' AND category_id = 111").get()).toEqual({ c: "Sci-Fi & Fantasy" });
+  expect(db.query("SELECT category FROM movie_categories WHERE source_id = '1370023' AND category = 'Sci-Fi & Fantasy'").get()).toEqual({ category: "Sci-Fi & Fantasy" });
+  expect(db.query("SELECT directors, genres, primary_language FROM movies WHERE source_id = '1370023'").get())
+    .toEqual({ directors: "Steven Spielberg", genres: "Sci-Fi, Thriller", primary_language: "English" });
+  // re-storing the same month replaces it
+  storeFilms(db, adapters.emirates!, "2026-10", films.slice(0, 3), "x");
+  expect(db.query("SELECT COUNT(*) AS n FROM movies").get()).toEqual({ n: 3 });
 });
