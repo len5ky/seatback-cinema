@@ -2,7 +2,7 @@
  "airline": "lufthansa",
  "name": "Lufthansa",
  "month": "2026-10",
- "fetchedAt": "2026-10-29T15:58:00.927Z",
+ "fetchedAt": "2026-10-29T16:24:54.398Z",
  "count": 405,
  "films": [
   {
@@ -2328,8 +2328,8 @@
     "Family Films",
     "Kids"
    ],
-   "imdbId": null,
-   "imdbConfidence": "none",
+   "imdbId": "tt7296782",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
@@ -2687,8 +2687,8 @@
     "Family Films",
     "Kids"
    ],
-   "imdbId": null,
-   "imdbConfidence": "none",
+   "imdbId": "tt4917564",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },

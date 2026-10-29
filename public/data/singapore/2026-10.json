@@ -2,7 +2,7 @@
  "airline": "singapore",
  "name": "Singapore Airlines",
  "month": "2026-10",
- "fetchedAt": "2026-10-29T15:54:37.074Z",
+ "fetchedAt": "2026-10-29T16:24:35.093Z",
  "count": 384,
  "films": [
   {
@@ -4541,8 +4541,8 @@
     "European",
     "Romance"
    ],
-   "imdbId": null,
-   "imdbConfidence": "none",
+   "imdbId": "tt36284371",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
@@ -5086,8 +5086,8 @@
     "European",
     "Leaving Soon"
    ],
-   "imdbId": null,
-   "imdbConfidence": "none",
+   "imdbId": "tt38814447",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
@@ -5525,8 +5525,8 @@
     "New on KrisWorld",
     "Top 20 on KrisWorld"
    ],
-   "imdbId": null,
-   "imdbConfidence": "low",
+   "imdbId": "tt35514520",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
@@ -6952,7 +6952,7 @@
     "New"
    ],
    "imdbId": "tt5606664",
-   "imdbConfidence": "medium",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },

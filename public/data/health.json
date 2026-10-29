@@ -1,0 +1,107 @@
+{
+  "generatedAt": "2026-10-29T16:25:20Z",
+  "month": "2026-10",
+  "ok": 10,
+  "failed": 1,
+  "airlines": {
+    "emirates": {
+      "status": "ok",
+      "exitCode": 0,
+      "films": 2158,
+      "seconds": 2,
+      "checkedAt": "2026-10-29T16:24:20Z",
+      "lastSuccess": "2026-10-29T16:24:20Z",
+      "error": null
+    },
+    "united": {
+      "status": "ok",
+      "exitCode": 0,
+      "films": 508,
+      "seconds": 1,
+      "checkedAt": "2026-10-29T16:24:21Z",
+      "lastSuccess": "2026-10-29T16:24:21Z",
+      "error": null
+    },
+    "klm": {
+      "status": "ok",
+      "exitCode": 0,
+      "films": 474,
+      "seconds": 1,
+      "checkedAt": "2026-10-29T16:24:22Z",
+      "lastSuccess": "2026-10-29T16:24:22Z",
+      "error": null
+    },
+    "ba": {
+      "status": "ok",
+      "exitCode": 0,
+      "films": 658,
+      "seconds": 12,
+      "checkedAt": "2026-10-29T16:24:34Z",
+      "lastSuccess": "2026-10-29T16:24:34Z",
+      "error": null
+    },
+    "singapore": {
+      "status": "ok",
+      "exitCode": 0,
+      "films": 384,
+      "seconds": 1,
+      "checkedAt": "2026-10-29T16:24:35Z",
+      "lastSuccess": "2026-10-29T16:24:35Z",
+      "error": null
+    },
+    "lufthansa": {
+      "status": "ok",
+      "exitCode": 0,
+      "films": 405,
+      "seconds": 19,
+      "checkedAt": "2026-10-29T16:24:54Z",
+      "lastSuccess": "2026-10-29T16:24:54Z",
+      "error": null
+    },
+    "jal": {
+      "status": "ok",
+      "exitCode": 0,
+      "films": 124,
+      "seconds": 7,
+      "checkedAt": "2026-10-29T16:25:01Z",
+      "lastSuccess": "2026-10-29T16:25:01Z",
+      "error": null
+    },
+    "cathay": {
+      "status": "ok",
+      "exitCode": 0,
+      "films": 1552,
+      "seconds": 7,
+      "checkedAt": "2026-10-29T16:25:08Z",
+      "lastSuccess": "2026-10-29T16:25:08Z",
+      "error": null
+    },
+    "qantas": {
+      "status": "ok",
+      "exitCode": 0,
+      "films": 259,
+      "seconds": 1,
+      "checkedAt": "2026-10-29T16:25:09Z",
+      "lastSuccess": "2026-10-29T16:25:09Z",
+      "error": null
+    },
+    "ana": {
+      "status": "ok",
+      "exitCode": 0,
+      "films": 233,
+      "seconds": 10,
+      "checkedAt": "2026-10-29T16:25:19Z",
+      "lastSuccess": "2026-10-29T16:25:19Z",
+      "error": null
+    },
+    "american": {
+      "status": "failed",
+      "exitCode": 1,
+      "films": null,
+      "seconds": 1,
+      "checkedAt": "2026-10-29T16:25:20Z",
+      "lastSuccess": null,
+      "error": "$ bun src/cli.ts fetch american --month \"2026-10\" american 2026-10: FAILED american page 1 -> 429: <!DOCTYPE html><html lang=\"en\" data-astro-cid-4wdtffzm><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"theme-color\" content=\"#000\"><link rel "
+    }
+  }
+}

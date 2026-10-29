@@ -2,7 +2,7 @@
  "airline": "united",
  "name": "United Airlines",
  "month": "2026-10",
- "fetchedAt": "2026-10-29T15:54:35.461Z",
+ "fetchedAt": "2026-10-29T16:24:21.309Z",
  "count": 508,
  "films": [
   {
@@ -1210,8 +1210,8 @@
    "categories": [
     "Recently added"
    ],
-   "imdbId": null,
-   "imdbConfidence": "low",
+   "imdbId": "tt39018643",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
@@ -1795,7 +1795,7 @@
    ],
    "imdbId": "tt0034583",
    "imdbConfidence": "high",
-   "tmdbId": 289,
+   "tmdbId": null,
    "versions": 1
   },
   {
@@ -1923,7 +1923,7 @@
    ],
    "imdbId": "tt0033467",
    "imdbConfidence": "high",
-   "tmdbId": 15,
+   "tmdbId": null,
    "versions": 1
   },
   {
@@ -7126,8 +7126,8 @@
     "Anime",
     "International"
    ],
-   "imdbId": null,
-   "imdbConfidence": "none",
+   "imdbId": "tt34881132",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
@@ -7510,7 +7510,7 @@
     "Recently added"
    ],
    "imdbId": "tt36464353",
-   "imdbConfidence": "medium",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
@@ -11704,8 +11704,8 @@
    "categories": [
     "International"
    ],
-   "imdbId": null,
-   "imdbConfidence": "low",
+   "imdbId": "tt32809709",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },

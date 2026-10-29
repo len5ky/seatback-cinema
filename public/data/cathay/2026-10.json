@@ -2,7 +2,7 @@
  "airline": "cathay",
  "name": "Cathay Pacific",
  "month": "2026-10",
- "fetchedAt": "2026-10-29T15:57:27.860Z",
+ "fetchedAt": "2026-10-29T16:25:07.952Z",
  "count": 1551,
  "films": [
   {
@@ -3864,7 +3864,7 @@
     "Documentary"
    ],
    "imdbId": "tt39018643",
-   "imdbConfidence": "medium",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
@@ -3914,8 +3914,8 @@
     "Romantic Comedy",
     "日本語"
    ],
-   "imdbId": null,
-   "imdbConfidence": "none",
+   "imdbId": "tt34754710",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
@@ -10862,8 +10862,8 @@
    "categories": [
     "Chinese Cinema"
    ],
-   "imdbId": null,
-   "imdbConfidence": "low",
+   "imdbId": "tt11564214",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
@@ -12124,7 +12124,7 @@
    ],
    "imdbId": "tt0032455",
    "imdbConfidence": "high",
-   "tmdbId": 756,
+   "tmdbId": null,
    "versions": 1
   },
   {
@@ -20561,8 +20561,8 @@
     "European & More",
     "Romantic Comedy"
    ],
-   "imdbId": null,
-   "imdbConfidence": "none",
+   "imdbId": "tt36284371",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
@@ -22576,7 +22576,7 @@
    ],
    "imdbId": "tt0039628",
    "imdbConfidence": "medium",
-   "tmdbId": 11881,
+   "tmdbId": null,
    "versions": 1
   },
   {
@@ -23733,8 +23733,8 @@
     "Asian Cinema",
     "日本語"
    ],
-   "imdbId": null,
-   "imdbConfidence": "none",
+   "imdbId": "tt34663773",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
@@ -25446,8 +25446,8 @@
    "categories": [
     "European & More"
    ],
-   "imdbId": null,
-   "imdbConfidence": "none",
+   "imdbId": "tt33888334",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
@@ -26282,8 +26282,8 @@
     "Chinese Cinema",
     "Latest Releases"
    ],
-   "imdbId": null,
-   "imdbConfidence": "low",
+   "imdbId": "tt35514520",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
@@ -27676,8 +27676,8 @@
    "categories": [
     "Indian Cinema"
    ],
-   "imdbId": null,
-   "imdbConfidence": "low",
+   "imdbId": "tt16539454",
+   "imdbConfidence": "medium",
    "tmdbId": null,
    "versions": 1
   },
@@ -30568,7 +30568,7 @@
    ],
    "imdbId": "tt0029583",
    "imdbConfidence": "high",
-   "tmdbId": 408,
+   "tmdbId": null,
    "versions": 1
   },
   {
@@ -32627,8 +32627,8 @@
     "Top Franchises",
     "Western Hits"
    ],
-   "imdbId": null,
-   "imdbConfidence": "low",
+   "imdbId": "tt0103064",
+   "imdbConfidence": "medium",
    "tmdbId": null,
    "versions": 1
   },
@@ -37917,8 +37917,8 @@
     "Latest Releases",
     "Made in HK"
    ],
-   "imdbId": null,
-   "imdbConfidence": "low",
+   "imdbId": "tt32809709",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
@@ -39410,7 +39410,7 @@
    ],
    "imdbId": "tt0032138",
    "imdbConfidence": "high",
-   "tmdbId": 630,
+   "tmdbId": null,
    "versions": 1
   },
   {

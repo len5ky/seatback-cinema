@@ -2,7 +2,7 @@
  "airline": "ba",
  "name": "British Airways",
  "month": "2026-10",
- "fetchedAt": "2026-10-29T15:54:38.070Z",
+ "fetchedAt": "2026-10-29T16:24:34.418Z",
  "count": 658,
  "films": [
   {
@@ -8581,8 +8581,8 @@
     "European Cinema",
     "Romance"
    ],
-   "imdbId": null,
-   "imdbConfidence": "none",
+   "imdbId": "tt36284371",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
@@ -10547,8 +10547,8 @@
     "Comedy",
     "European Cinema"
    ],
-   "imdbId": null,
-   "imdbConfidence": "none",
+   "imdbId": "tt33888334",
+   "imdbConfidence": "high",
    "tmdbId": null,
    "versions": 1
   },
