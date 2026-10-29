@@ -2,7 +2,7 @@
  "airline": "singapore",
  "name": "Singapore Airlines",
  "month": "2026-10",
- "fetchedAt": "2026-10-29T17:11:09.478Z",
+ "fetchedAt": "2026-10-29T15:54:37.074Z",
  "count": 384,
  "films": [
   {
@@ -295,7 +295,7 @@
    ],
    "imdbId": "tt38599274",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1521346,
    "versions": 1
   },
   {
@@ -396,7 +396,7 @@
    ],
    "imdbId": "tt36587142",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1489510,
    "versions": 1
   },
   {
@@ -719,7 +719,7 @@
    ],
    "imdbId": "tt3811672",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 345153,
    "versions": 1
   },
   {
@@ -1089,7 +1089,7 @@
    ],
    "imdbId": "tt35712847",
    "imdbConfidence": "medium",
-   "tmdbId": null,
+   "tmdbId": 1537690,
    "versions": 1
   },
   {
@@ -1723,7 +1723,7 @@
    ],
    "imdbId": "tt40970129",
    "imdbConfidence": "medium",
-   "tmdbId": null,
+   "tmdbId": 1643854,
    "versions": 1
   },
   {
@@ -2874,7 +2874,7 @@
    ],
    "imdbId": "tt38504130",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1554048,
    "versions": 1
   },
   {
@@ -2954,7 +2954,7 @@
    ],
    "imdbId": "tt32155764",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1442053,
    "versions": 1
   },
   {
@@ -4017,7 +4017,7 @@
    ],
    "imdbId": "tt38516774",
    "imdbConfidence": "medium",
-   "tmdbId": null,
+   "tmdbId": 1514614,
    "versions": 1
   },
   {
@@ -4263,7 +4263,7 @@
    ],
    "imdbId": "tt39388678",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1557893,
    "versions": 1
   },
   {
@@ -4287,7 +4287,7 @@
    ],
    "imdbId": "tt39130999",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1557886,
    "versions": 1
   },
   {
@@ -4567,7 +4567,7 @@
    ],
    "imdbId": "tt39349480",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1630772,
    "versions": 1
   },
   {
@@ -5216,7 +5216,7 @@
    ],
    "imdbId": "tt38504766",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1499101,
    "versions": 1
   },
   {
@@ -5707,7 +5707,7 @@
    ],
    "imdbId": "tt39308931",
    "imdbConfidence": "medium",
-   "tmdbId": null,
+   "tmdbId": 1565545,
    "versions": 1
   },
   {
@@ -6187,7 +6187,7 @@
    ],
    "imdbId": "tt37435553",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1503040,
    "versions": 1
   },
   {
@@ -6212,7 +6212,7 @@
    ],
    "imdbId": "tt23988936",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1222306,
    "versions": 1
   },
   {
@@ -7029,7 +7029,7 @@
    ],
    "imdbId": "tt37629310",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1513656,
    "versions": 1
   },
   {
@@ -7056,7 +7056,7 @@
    ],
    "imdbId": "tt39555976",
    "imdbConfidence": "medium",
-   "tmdbId": null,
+   "tmdbId": 1325556,
    "versions": 1
   },
   {
@@ -7274,7 +7274,7 @@
    ],
    "imdbId": "tt36926733",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 869140,
    "versions": 1
   },
   {
@@ -7957,7 +7957,7 @@
    ],
    "imdbId": "tt38935199",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1572604,
    "versions": 1
   },
   {
@@ -8442,7 +8442,7 @@
    ],
    "imdbId": "tt39309554",
    "imdbConfidence": "medium",
-   "tmdbId": null,
+   "tmdbId": 1604166,
    "versions": 1
   },
   {
@@ -8847,7 +8847,7 @@
    ],
    "imdbId": "tt38589232",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1555810,
    "versions": 1
   },
   {
@@ -9013,7 +9013,7 @@
    ],
    "imdbId": "tt33310793",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1591287,
    "versions": 1
   },
   {
@@ -9037,7 +9037,7 @@
    ],
    "imdbId": "tt36591286",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1361054,
    "versions": 1
   },
   {
@@ -9807,7 +9807,7 @@
    ],
    "imdbId": "tt33202240",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1506537,
    "versions": 1
   },
   {
@@ -10173,7 +10173,7 @@
    ],
    "imdbId": "tt37370906",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1501453,
    "versions": 1
   },
   {

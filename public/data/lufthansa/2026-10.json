@@ -2,7 +2,7 @@
  "airline": "lufthansa",
  "name": "Lufthansa",
  "month": "2026-10",
- "fetchedAt": "2026-10-29T17:11:24.509Z",
+ "fetchedAt": "2026-10-29T15:58:00.927Z",
  "count": 405,
  "films": [
   {
@@ -524,7 +524,7 @@
    ],
    "imdbId": "tt26931994",
    "imdbConfidence": "medium",
-   "tmdbId": null,
+   "tmdbId": 1435734,
    "versions": 1
   },
   {
@@ -1394,7 +1394,7 @@
    ],
    "imdbId": "tt36120484",
    "imdbConfidence": "medium",
-   "tmdbId": null,
+   "tmdbId": 1446912,
    "versions": 1
   },
   {
@@ -1474,7 +1474,7 @@
    ],
    "imdbId": "tt37438659",
    "imdbConfidence": "medium",
-   "tmdbId": null,
+   "tmdbId": 1548008,
    "versions": 1
   },
   {
@@ -1563,7 +1563,7 @@
    ],
    "imdbId": "tt39104671",
    "imdbConfidence": "medium",
-   "tmdbId": null,
+   "tmdbId": 1427836,
    "versions": 1
   },
   {
@@ -2214,7 +2214,7 @@
    ],
    "imdbId": "tt38208849",
    "imdbConfidence": "medium",
-   "tmdbId": null,
+   "tmdbId": 1320018,
    "versions": 1
   },
   {
@@ -3670,7 +3670,7 @@
    ],
    "imdbId": "tt32599496",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1566986,
    "versions": 1
   },
   {
@@ -3847,7 +3847,7 @@
    ],
    "imdbId": "tt26935954",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1133008,
    "versions": 1
   },
   {
@@ -5803,7 +5803,7 @@
    ],
    "imdbId": "tt39645434",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1614368,
    "versions": 1
   },
   {
@@ -6222,7 +6222,7 @@
    ],
    "imdbId": "tt38573838",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1553472,
    "versions": 1
   },
   {
@@ -8778,7 +8778,7 @@
    ],
    "imdbId": "tt37629310",
    "imdbConfidence": "high",
-   "tmdbId": null,
+   "tmdbId": 1513656,
    "versions": 1
   },
   {
