@@ -7,6 +7,7 @@ import { downloadImdb, loadImdb } from "./imdb.ts";
 import { matchAll } from "./match.ts";
 import { loadTaste, picks } from "./rank.ts";
 import { exportAll } from "./export.ts";
+import { syncIds } from "./ratings/ids.ts";
 
 const USAGE = `usage: bun run cli <command>
   fetch <airline|all> [--month YYYY-MM] [--refresh]  fetch (or reuse cached) monthly catalogue
@@ -16,6 +17,7 @@ const USAGE = `usage: bun run cli <command>
   search <title> [--airline X]                       find a film in the latest catalogue of each airline
   stats [--airline X] [--month YYYY-MM]
   export [--month YYYY-MM]                           write public/data/<airline>/<month>.json + index.json
+  ids sync [--airline X] [--limit N]                 Wikidata crosswalk (TMDB/Letterboxd/RT/MC ids) for new matched films
 airlines: ${Object.keys(adapters).join(", ")}`;
 
 const { values: opt, positionals: pos } = parseArgs({
@@ -23,6 +25,7 @@ const { values: opt, positionals: pos } = parseArgs({
   options: {
     month: { type: "string" }, refresh: { type: "boolean" }, force: { type: "boolean" }, airline: { type: "string" },
     top: { type: "string" }, genre: { type: "string" }, "min-rating": { type: "string" }, language: { type: "string" },
+    limit: { type: "string" }, source: { type: "string" },
   },
 });
 
@@ -57,6 +60,7 @@ function numberOpt(name: string, value: string | undefined, fallback: number | u
   if (value.trim() === "" || !ok(n)) throw new Error(`--${name} must be ${rule} (got "${value}")`);
   return n;
 }
+const limitOpt = () => numberOpt("limit", opt.limit, undefined, (n) => Number.isInteger(n) && n > 0, "a positive integer");
 const pct = (n: number, d: number) => (d ? `${((100 * n) / d).toFixed(1)}%` : "-");
 /** Newest mtime of the cached raw files: when the data was really fetched, even if reused from cache. */
 function rawFetchedAt(dir: string): string {
@@ -179,6 +183,13 @@ async function main(): Promise<void> {
       const r = exportAll(db, { month: opt.month ? validMonth(opt.month) : undefined });
       for (const f of r.files) console.log(`wrote ${f.path} (${f.films} films)`);
       console.log(`wrote ${r.index}`);
+      return;
+    }
+    case "ids": {
+      if (arg !== "sync") throw new Error("usage: ids sync [--airline X] [--limit N]");
+      const r = await syncIds(db, { airline: airlineOpt(opt.airline), limit: limitOpt(), log: console.log });
+      console.log(`ids sync: ${r.queried} tconsts queried, ${r.known} known to Wikidata (${pct(r.known, r.queried)}), ${r.failedBatches} failed batches`);
+      if (r.failedBatches) process.exitCode = 1;
       return;
     }
     default:

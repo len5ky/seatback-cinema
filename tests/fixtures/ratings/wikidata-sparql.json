@@ -1,0 +1,2970 @@
+{
+  "head" : {
+    "vars" : [ "imdb", "r", "m", "l", "t" ]
+  },
+  "results" : {
+    "bindings" : [ {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt1182345"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/moon"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/moon"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "moon"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "17431"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt1772341"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/wreck_it_ralph"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/wreck-it-ralph"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "wreck-it-ralph"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "82690"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0047396"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/1017289-rear_window"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/rear-window"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "rear-window"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "567"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0258463"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/bourne_identity"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-bourne-identity"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-bourne-identity-2002"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "2501"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0064757"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/on_her_majestys_secret_service"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/on-her-majestys-secret-service"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "on-her-majestys-secret-service"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "668"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0094226"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/untouchables"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-untouchables"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-untouchables"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "117"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0087332"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/ghostbusters"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/ghostbusters"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "ghostbusters"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "620"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt1205489"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/gran_torino"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/gran-torino"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "gran-torino"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "13223"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0109830"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/forrest_gump"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/forrest-gump"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "forrest-gump"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "13"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0120915"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/star_wars_episode_i_the_phantom_menace"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/star-wars-episode-i---the-phantom-menace"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "star-wars-episode-i-the-phantom-menace"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1893"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0061418"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/bonnie_and_clyde"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/bonnie-and-clyde"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "bonnie-and-clyde"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "475"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0097576"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/indiana_jones_and_the_last_crusade"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/indiana-jones-and-the-last-crusade"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "indiana-jones-and-the-last-crusade"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "89"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0086879"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/amadeus"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/amadeus"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "amadeus"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "279"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0371746"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/iron_man"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/iron-man"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "iron-man-2008"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1726"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0043014"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/sunset_boulevard"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/sunset-boulevard"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "sunset-boulevard"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "599"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0083987"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/gandhi"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/gandhi"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "gandhi"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "783"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0240772"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/oceans_eleven"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/oceans-eleven"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "oceans-eleven-2001"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "161"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0242653"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/matrix_revolutions"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-matrix-revolutions"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-matrix-revolutions"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "605"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0215750"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/enemy_at_the_gates"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/enemy-at-the-gates"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "enemy-at-the-gates"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "853"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0477347"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/night_at_the_museum"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/night-at-the-museum"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "night-at-the-museum"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1593"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0065207"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/where_eagles_dare"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/where-eagles-dare"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "where-eagles-dare"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "11046"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0072890"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/dog_day_afternoon"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/dog-day-afternoon"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "dog-day-afternoon"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "968"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0118617"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/1079818-anastasia"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/anastasia"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "anastasia-1997"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "9444"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0410297"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/lake_house"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-lake-house"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-lake-house"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "2044"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0097428"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/ghostbusters_2"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/ghostbusters-ii"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "ghostbusters-ii"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "2978"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0094012"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/spaceballs"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/spaceballs"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "spaceballs"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "957"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0044079"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/strangers_on_a_train"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/strangers-on-a-train"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "strangers-on-a-train"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "845"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt1570728"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/crazy_stupid_love_2011"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/crazy-stupid-love"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "crazy-stupid-love"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "50646"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt1853728"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/django_unchained_2012"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/django-unchained"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "django-unchained"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "68718"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0079833"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/lupin_iii_the_castle_of_cagliostro"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/lupin-iii-the-castle-of-cagliostro"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "lupin-the-third-the-castle-of-cagliostro"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "15371"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0243155"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/bridget_jones_diary"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/bridget-joness-diary"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "bridget-joness-diary"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "634"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0115798"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/cable_guy"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-cable-guy"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-cable-guy"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "9894"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0104952"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/my_cousin_vinny"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/my-cousin-vinny"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "my-cousin-vinny"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "10377"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0104348"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/glengarry_glen_ross"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/glengarry-glen-ross"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "glengarry-glen-ross"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "9504"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0069947"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/day_of_the_jackal"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-day-of-the-jackal"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-day-of-the-jackal"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "4909"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0070903"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/way_we_were"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-way-we-were"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-way-we-were"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "10236"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0104454"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/howards_end"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/howards-end"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "howards-end"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "8293"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0068327"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/cabaret"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/cabaret"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "cabaret"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "10784"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0378194"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/kill_bill_volume_2"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/kill-bill-vol-2"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "kill-bill-vol-2"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "393"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0092804"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/cry_freedom"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "cry-freedom"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "12506"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0106226"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/age_of_innocence"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-age-of-innocence"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-age-of-innocence"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "10436"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0042593"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/in_a_lonely_place"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "in-a-lonely-place"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "17057"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0107166"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "hum-hain-rahi-pyar-ke"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "54814"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0069671"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/abhimaan"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "abhimaan"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "75352"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt1839596"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/rockstar_2011"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "rockstar"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "79464"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0369610"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/jurassic_world"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/jurassic-world"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "jurassic-world"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "135397"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt2015381"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/guardians_of_the_galaxy"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/guardians-of-the-galaxy"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "guardians-of-the-galaxy"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "118340"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0478970"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/antman"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/ant-man"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "ant-man"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "102899"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0903657"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/love_and_mercy"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/love-mercy"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "love-mercy"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "271714"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt2980648"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/the_hundred_foot_journey"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-hundred-foot-journey"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-hundred-foot-journey"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "228194"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt3397884"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/sicario_2015"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/sicario"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "sicario-2015"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "273481"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt4123432"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/fantastic_beasts_the_secrets_of_dumbledore"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/fantastic-beasts-the-secrets-of-dumbledore"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "fantastic-beasts-the-secrets-of-dumbledore"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "338953"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt1979376"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/toy_story_4"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/toy-story-4"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "toy-story-4"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "301528"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt3659388"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/the_martian"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-martian"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-martian"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "286217"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt3076658"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/creed_2015"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/creed"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "creed"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "312221"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt2140479"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/the_accountant"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-accountant"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-accountant-2016"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "302946"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt2543164"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/arrival_2016"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/arrival"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "arrival-2016"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "329865"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt4052882"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/the_shallows"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-shallows"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-shallows"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "332567"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt1856101"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/blade_runner_2049"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/blade-runner-2049"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "blade-runner-2049"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "335984"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt4640206"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "sachin-a-billion-dreams"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "401552"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt1485796"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/the_greatest_showman_2017"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-greatest-showman"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-greatest-showman"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "316029"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt4555426"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/darkest_hour_2017"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/darkest-hour"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "darkest-hour"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "399404"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt1977894"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "queen-days-of-our-lives-2011"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "74406"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt0087825"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-oasis"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "255669"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt10365912"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/becoming_led_zeppelin"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/becoming-led-zeppelin"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "becoming-led-zeppelin"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "857800"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt15398776"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/oppenheimer_2023"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/oppenheimer"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "oppenheimer-2023"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "872585"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt9340916"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/she_will"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/she-will"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "she-will"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "852485"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt12241936"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "playing-through-2022"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "961138"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt14513804"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/captain_america_brave_new_world"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/captain-america-brave-new-world"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "captain-america-brave-new-world"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "822119"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt15789038"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/elemental_2023"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/elemental-2023"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "elemental-2023"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "976573"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt29355505"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/toy_story_5"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/toy-story-5"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "toy-story-5"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1084244"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt16311594"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/f1_the_movie"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/f1-the-movie"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "f1"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "911430"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt16526770"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-nana-project"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1173490"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt14412446"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/moloch_2022"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "moloch-2022"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "959558"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt8814476"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/supergirl_2026"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/supergirl-2026"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "supergirl-2026"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1081003"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt14362112"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/trolls_band_together"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/trolls-band-together"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "trolls-band-together"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "901362"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt26940053"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/the_summer_book"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-summer-book"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1073112"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt2396431"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/dear_santa_2024"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/dear-santa-2024"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "dear-santa-2"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1097870"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt18161082"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/turn_me_on_2024"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "turn-me-on-2024"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "937086"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt28309594"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/nonnas"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/nonnas"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "nonnas"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1151039"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt26439764"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "kantara-a-legend-chapter-1"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1083637"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt28682323"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/the_strangers_chapter_3"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-strangers-chapter-3"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-strangers-chapter-3"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1010755"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt29567402"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/rabbit_trap"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/rabbit-trap"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "rabbit-trap-2025"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1193824"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt27812086"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/cleaner_2025"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/cleaner-2025"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "cleaner-2025"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1125899"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt23149780"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/eden_2024_2"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/eden-2024"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "eden-2024"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1042834"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt30521172"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/elbow"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "elbow"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "543596"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt12706836"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "shell-2"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "787747"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt22022784"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/my_dead_friend_zoe"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/my-dead-friend-zoe"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "my-dead-friend-zoe"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1128505"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt31189315"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/father_mother_sister_brother"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/father-mother-sister-brother"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "father-mother-sister-brother"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1159206"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt31036941"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/jurassic_world_rebirth"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/jurassic-world-rebirth"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "jurassic-world-rebirth"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1234821"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt27902121"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/super_man_the_christopher_reeve_story"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/superman-the-christopher-reeve-story"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "super-man-the-christopher-reeve-story"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1128559"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt28252563"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/madharasi"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "madharaasi"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1297181"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt27714946"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/the_monkey"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-monkey"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-monkey-2025"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1124620"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt30835291"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "swamp-dogg-gets-his-pool-painted"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1234400"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt15907380"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/i_love_you_forever"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/i-love-you-forever"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "i-love-you-forever-2024"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1229893"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt21221386"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/secret_mall_apartment"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "secret-mall-apartment-2024"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1237871"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt31314296"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/the_woman_in_the_yard"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-woman-in-the-yard"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-woman-in-the-yard"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1244944"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt28996126"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/nobody_2"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/nobody-2"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "nobody-2"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1007734"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt31184028"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/together_2025"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/together-2025"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "together-2025"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1242011"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt31052469"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-light-of-aisha"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1297962"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt5884784"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/the_super"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-super-2017"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "463022"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt8354344"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/witches_in_the_woods"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "witches-in-the-woods"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "614204"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt35724928"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "my-first-of-may"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1071646"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt7574556"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/dead_of_winter_2025"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/dead-of-winter-2025"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "dead-of-winter-2025"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1235746"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt31844586"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/sisu_road_to_revenge"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/sisu-road-to-revenge"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "sisu-2"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1223601"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt32133006"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "a-break-of-happy-moments"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1224392"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt28070202"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/queen_of_the_ring"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/queen-of-the-ring"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "queen-of-the-ring-2024"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1144932"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt26452616"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/giant_2025"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "giant-2025"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1078581"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt13964560"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/the_astronaut_2025"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-astronaut"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-astronaut-2"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1086260"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt30253473"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/materialists"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/materialists"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "materialists"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1136867"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt32386654"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/the_wizard_of_the_kremlin"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-wizard-of-the-kremlin"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-wizard-of-the-kremlin"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1291659"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt31425731"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/playdate_2025"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/playdate"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "playdate-1"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1248226"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt32537777"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "ullozhukku"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "985439"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt27441481"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/coolie_2025"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "coolie-2"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1153399"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt6614198"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/and_mrs"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "and-mrs"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1036921"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt26677014"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/the_penguin_lessons"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-penguin-lessons"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-penguin-lessons"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1086497"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt26443616"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/hoppers"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/hoppers"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "hoppers"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1327819"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt13650814"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/borderline_2025"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/borderline"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "borderline-6"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1013482"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt33455099"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/the_mastermind"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-mastermind"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-mastermind-2025"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1352624"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt11662534"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "flavia-2026"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1129104"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt34685692"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/over_your_dead_body_2026"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/over-your-dead-body"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "over-your-dead-body-2026"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1390300"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt34370951"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/frontier_crucible"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "frontier-crucible"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1379413"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt32831759"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "laila-2025"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1403735"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt35114460"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/scarlet_2025"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/scarlet-2025"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "scarlet-2025"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1406657"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt33562917"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/mad_bills_to_pay_or_destiny_dile_que_no_soy_malo"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/mad-bills-to-pay-or-destiny-dile-que-no-soy-malo"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "mad-bills-to-pay-or-destiny-dile-que-no-soy"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1400756"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt21349688"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/east_of_wall"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/east-of-wall"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "east-of-wall"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1398911"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt27693622"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "roses-on-the-vine"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1223169"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt28083456"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/is_this_thing_on"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/is-this-thing-on"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "is-this-thing-on-2025"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1140498"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt22892942"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/lollipop_2024"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "lollipop-2024"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1111872"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt14013222"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/a_hundred_lies"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1301000"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt35616060"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/hans_zimmer_and_friends_diamond_in_the_desert"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "hans-zimmer-friends-diamond-in-the-desert"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1425725"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt35519509"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "sea-of-hope"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1443594"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt34460889"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt35616783"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt32210485"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "second-victims"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1395177"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt35317668"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "day-of-reckoning-2025"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1414048"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt32298285"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/sirat"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/sirat"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "sirat-2025"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1151272"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt33335204"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/peak_everything"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "peak-everything"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1283671"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt36266270"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "henry-johnson"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1418220"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt32411272"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/3bhk"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "3bhk"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1293849"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt14260876"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "heidi-rescue-of-the-lynx"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "944931"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt31614921"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/under_the_stars_2025_2"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "under-the-stars-2025"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1278983"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt16426570"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/barrons_cove"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/barrons-cove"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "barrons-cove"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1128546"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt33372494"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/lokah_chapter_1_chandra"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "lokah-chapter-1-chandra"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1290190"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt37038410"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "bhuto-purbo"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1433098"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt35115962"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "home-2025-1"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1342315"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt30068605"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "junior-2025-1"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1446056"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt36639400"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/the_last_blossom_2025"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1294972"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt35237771"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/ghost_elephants"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/ghost-elephants"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "ghost-elephants"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1451867"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt30954952"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "safe-house-2025-1"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1522923"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt32338670"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "road-wars-max-fury"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1288104"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt12824390"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/the_pout_pout_fish"
+      },
+      "m" : {
+        "type" : "literal",
+        "value" : "movie/the-pout-pout-fish"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "the-pout-pout-fish"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1146058"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt20355310"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/moss_and_freud"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "moss-freud"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1086247"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt33818053"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "roads-of-fire"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1456655"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt34896026"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1445070"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt1742179"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "starbright"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "662707"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt32085559"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt38631437"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "finding-harmony-a-kings-vision"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1559456"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt29458284"
+      },
+      "l" : {
+        "type" : "literal",
+        "value" : "everybody-loves-sohrab-handa"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1198380"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt37670940"
+      },
+      "r" : {
+        "type" : "literal",
+        "value" : "m/memory_of_princess_mumbi"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1520504"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt37719558"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1483325"
+      }
+    }, {
+      "imdb" : {
+        "type" : "literal",
+        "value" : "tt39510102"
+      },
+      "t" : {
+        "type" : "literal",
+        "value" : "1306820"
+      }
+    } ]
+  }
+}
