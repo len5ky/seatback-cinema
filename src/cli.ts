@@ -8,6 +8,7 @@ import { matchAll } from "./match.ts";
 import { loadTaste, picks } from "./rank.ts";
 import { exportAll } from "./export.ts";
 import { syncIds } from "./ratings/ids.ts";
+import { SOURCES, syncRatings, type Source } from "./ratings/sync.ts";
 import { importExport, loadExport, parseExport } from "./ratings/letterboxd-export.ts";
 
 const USAGE = `usage: bun run cli <command>
@@ -20,6 +21,8 @@ const USAGE = `usage: bun run cli <command>
   export [--month YYYY-MM]                           write public/data/<airline>/<month>.json + index.json
   taste import [export.zip|dir]                      import a Letterboxd export (default: newest zip in data/letterboxd/)
   ids sync [--airline X] [--limit N]                 Wikidata crosswalk (TMDB/Letterboxd/RT/MC ids) for new matched films
+  ratings sync [--source tmdb|letterboxd|rt|mc|all] [--airline X] [--limit N]
+                                                     fetch ratings for matched films (30-day cache; RT/MC need ids sync)
 airlines: ${Object.keys(adapters).join(", ")}`;
 
 const { values: opt, positionals: pos } = parseArgs({
@@ -195,6 +198,17 @@ async function main(): Promise<void> {
       console.log(`${path}: ${r.films} films (${r.rated} rated, ${r.watched} watched, ${r.watchlist} on watchlist)`);
       console.log(`matched to IMDb: ${ok} (${pct(ok, r.films)}; high ${r.matched.high}, medium ${r.matched.medium}), unmatched ${r.unmatched.length}`);
       if (r.unmatched.length) console.log(`unmatched (ignored for taste): ${r.unmatched.slice(0, 20).join("; ")}${r.unmatched.length > 20 ? "; ..." : ""}`);
+      return;
+    }
+    case "ratings": {
+      if (arg !== "sync") throw new Error("usage: ratings sync [--source tmdb|letterboxd|rt|mc|all] [--airline X] [--limit N]");
+      const src = opt.source ?? "all";
+      if (src !== "all" && !(SOURCES as readonly string[]).includes(src)) throw new Error(`--source must be one of ${SOURCES.join(", ")}, all`);
+      const sources = src === "all" ? [...SOURCES] : [src as Source];
+      const r = await syncRatings(db, { sources, airline: airlineOpt(opt.airline), limit: limitOpt(), tmdbKey: process.env.TMDB_API_KEY || undefined, log: console.log });
+      for (const [s, x] of Object.entries(r)) {
+        console.log(`${s}: ${x.checked} films, ${x.cached} cached, ${x.noSlug} without a slug, ${x.fetched} fetched (${x.found} with a score), ${x.failed} failed${x.aborted ? ` [${x.aborted}]` : ""}`);
+      }
       return;
     }
     case "ids": {
