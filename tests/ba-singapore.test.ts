@@ -21,11 +21,11 @@ test("BA: field mapping and section categories", () => {
   const t = parseBa(baRaw as BaRaw).find((f) => f.title === "Toy Story 5")!;
   expect(t).toMatchObject({
     sourceId: "a33cc7ef-33f6-4623-ac0e-a9df44abbb80", year: 2026, runtime: 120, directors: ["Andrew Stanton"],
-    cast: ["Tom Hanks", "Tim Allen", "Joan Cusack"], genres: ["Adventure", "Animation", "Comedy", "Family"], rating: "PG",
+    cast: ["Actor 1", "Actor 2", "Actor 3"], genres: ["Adventure", "Animation", "Comedy", "Family"], rating: "PG",
     subtitles: ["Arabic", "Chinese"],
   });
   expect(t.languages.slice(0, 3)).toEqual(["English", "French", "German"]);
-  expect(t.poster).toEndWith("BAM_2610_ToyStory5.webp");
+  expect(t.poster).toBeUndefined(); // fixture image URLs stripped
   expect(t.categories).toContain("Hollywood Arrivals");
   expect(t.categories.length).toBe(4);
 });
@@ -43,10 +43,9 @@ test("Singapore: 1,152 keys dedupe to 384 movies", () => {
 test("Singapore: field mapping", () => {
   const n = parseSingapore(krisRaw as KrisRaw).find((f) => f.sourceId === "m052683476")!;
   expect(n).toMatchObject({
-    title: "Nobody", year: 2025, runtime: 118, directors: ["Yu Shui"], cast: ["Chen Ziping", "Lu Yang", "Dong Wenliang"],
+    title: "Nobody", year: 2025, runtime: 118, directors: ["Yu Shui"], cast: ["Actor 1", "Actor 2", "Actor 3"],
     genres: ["Fantasy"], rating: "G", languages: ["Mandarin"], subtitles: ["English", "Chinese (Simplified)"],
     categories: ["Chinese 中文", "Kids & Family", "Leaving Soon"],
-    poster: "https://krisworld.singaporeair.com/content/dam/krisworld/mediacatalogue/movie/posters/poster-nobody.jpg",
   });
   expect(krisLanguage("EnS / ChT")).toBe("EnS / ChT"); // split happens before mapping
   expect(krisLanguage("FreS")).toBe("French");

@@ -13,7 +13,7 @@ test("drops yearless partner tiles and promos, merges detail custom fields", () 
   const acu = films.find((f) => f.title === "A Complete Unknown")!;
   expect(acu).toMatchObject({
     sourceId: "6abc7182e09936158e0c97f4", year: 2024, runtime: 141, rating: "R", directors: ["James Mangold"],
-    cast: ["Timothée Chalamet", "Edward Norton", "Elle Fanning"], genres: ["Biography", "Drama", "Musical"],
+    cast: ["Actor 1", "Actor 2", "Actor 3"], genres: ["Biography", "Drama", "Musical"],
     languages: ["English", "French", "German", "Spanish", "Italian"], subtitles: ["Japanese", "Vietnamese"],
     categories: ["Biography", "Drama", "Musical"], // no shelves on CineSend: genres stand in
   });

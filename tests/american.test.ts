@@ -15,7 +15,7 @@ test("parse: one film per record with IMDb id, year from release date, shelves a
     sourceId: "a106cd2c-aa0a-4683-868b-8642a0824023", imdbId: "tt8814476", year: 2026, runtime: 107,
     directors: ["Craig Gillespie"], genres: ["Action", "Adventure", "Drama"],
   });
-  expect(sg.cast).toEqual(["Milly Alcock", "Matthias Schoenaerts", "Eve Ridley", "David Krumholtz"]);
+  expect(sg.cast).toEqual(["Actor 1", "Actor 2", "Actor 3", "Actor 4"]);
   expect(sg.languages).toContain("Japanese");
   expect(sg.subtitles).toContain("Spanish (Latin)");
   expect(sg.categories).toEqual(expect.arrayContaining(["New Releases", "Superpowered Cinema", "Heroes & Villains", "New This Month"]));

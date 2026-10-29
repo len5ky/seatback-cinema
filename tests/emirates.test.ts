@@ -6,7 +6,7 @@ import { openDb, storeFilms } from "../src/db.ts";
 import movies from "./fixtures/emirates-movies.json";
 import taxonomy from "./fixtures/emirates-taxonomy.json";
 
-const raw = { taxonomy, movies } as EmiratesRaw;
+const raw = { taxonomy, movies } as unknown as EmiratesRaw; // fixture rows have summary and image fields stripped
 const films = parseEmirates(raw);
 
 test("dedupes on trackList and drops the placeholder", () => {
@@ -22,7 +22,7 @@ test("dedupes on trackList and drops the placeholder", () => {
 test("maps fields onto the adapter contract", () => {
   const dd = films.find((f) => f.title === "Disclosure Day")!;
   expect(dd).toMatchObject({
-    sourceId: "1370023", runtime: 146, directors: ["Steven Spielberg"], cast: ["Emily Blunt", "Josh O'Connor", "Colin Firth"],
+    sourceId: "1370023", runtime: 146, directors: ["Steven Spielberg"], cast: ["Actor 1", "Actor 2", "Actor 3"],
     genres: ["Sci-Fi", "Thriller"], rating: "PG13", subtitles: [],
   });
   expect(dd.languages[0]).toBe("English");

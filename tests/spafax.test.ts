@@ -16,13 +16,13 @@ test("lufthansa: merges list and detail, drops promos, dedupes on id", () => {
   const dd = films.find((f) => f.sourceId === "14407")!;
   expect(dd).toMatchObject({
     title: "Disclosure Day", year: 2026, runtime: 146, rating: "12", directors: ["Steven Spielberg"],
-    cast: ["Emily Blunt", "Josh O'Connor", "Colin Firth"], genres: ["Science Fiction", "Thriller"],
+    cast: ["Actor 1", "Actor 2", "Actor 3"], genres: ["Science Fiction", "Thriller"],
     categories: ["Latest Releases", "Action & Thriller", "Sci-Fi & Fantasy", "New on Board"],
   });
   expect(dd.languages).toContain("German");
   expect(dd.languages).not.toContain("English Audio Description");
   expect(dd.subtitles).toEqual(["Chinese", "English (Closed Captions)"]);
-  expect(dd.poster).toContain("width=280");
+  expect(dd.poster).toBeUndefined(); // fixture image URLs stripped
 });
 
 test("lufthansa: a film without a detail response keeps its list fields", () => {
@@ -34,7 +34,7 @@ test("jal: splits packed cast, cleans zero-width genres, reads rating from the s
   const films = jal.parse(jalRaw);
   expect(films.map((f) => f.sourceId).sort()).toEqual(["9016", "9025", "9125"]); // 9010 is a 2-minute promo
   const sg = films.find((f) => f.sourceId === "9025")!;
-  expect(sg.cast).toEqual(["Milly Alcock", "Eve Ridley"]);
+  expect(sg.cast).toEqual(["Actor 1", "Actor 2"]);
   expect(sg.directors).toEqual(["Craig Gillespie"]);
   expect(sg.genres).toEqual(["Action / Adventure", "Hollywood", "New"]);
   expect(sg.rating).toBe("PG13");

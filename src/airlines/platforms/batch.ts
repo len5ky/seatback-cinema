@@ -38,7 +38,7 @@ export function cleanList(values: readonly (string | null | undefined)[] | null 
   return [...new Set((values ?? []).map(clean).filter(Boolean))];
 }
 
-/** Flatten name lists where some entries pack several names ("Emily Blunt, Josh O'Connor"); keeps "Jr." attached. */
+/** Flatten name lists where some entries pack several names ("Ann Lee, Bo Ray"); keeps "Jr." attached. */
 export function nameList(values: readonly (string | null | undefined)[] | string | null | undefined): string[] {
   const list = typeof values === "string" ? [values] : (values ?? []);
   const out: string[] = [];

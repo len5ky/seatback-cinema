@@ -29,11 +29,11 @@ test("United: field mapping", () => {
   const b = parseAirtime(unitedRaw as AirtimeTree).find((f) => f.sourceId === "24096987")!;
   expect(b).toMatchObject({
     title: "Backrooms", year: 2026, runtime: 110, directors: ["Kane Parsons"],
-    cast: ["Chiwetel Ejiofor", "Renate Reinsve", "Mark Duplass"], genres: ["Thriller", "Drama"], rating: "R",
+    cast: ["Actor 1", "Actor 2", "Actor 3"], genres: ["Thriller", "Drama"], rating: "R",
     languages: ["English", "French", "Italian", "Spanish"], subtitles: ["Arabic", "Chinese", "Korean", "English", "Castilian Spanish"],
   });
-  expect(b.poster).toStartWith("https://");
-  expect(b.synopsis).toStartWith("When a furniture salesman");
+  expect(b.poster).toBeUndefined(); // fixture image URLs and synopses stripped
+  expect(b.synopsis).toBeUndefined();
   // placed in three carousels; categories are carousel titles, not the root "Movies" section
   expect(b.categories.length).toBe(3);
   expect(b.categories).toContain("New releases");
