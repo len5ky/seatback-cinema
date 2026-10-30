@@ -228,6 +228,38 @@ test(`fetchImdbProfile (API): a profile past ${MAX_PAGES} pages stops at the lim
   expect(requests).toBe(1 + Math.ceil((MAX_PAGES - 1) / API_PAGES_PER_REQUEST) + 1);
 });
 
+test("fetchImdbProfile (API): a missing alias in a later batch, a missing later watchlist page and the watchlist cap are notes", async () => {
+  const edge = (id: string) => ({ node: { title: { id, titleText: { text: id } } } });
+  const wlEdge = (id: string) => ({ listItem: { id, titleText: { text: id } } });
+  const f = async (_url: string, init?: RequestInit): Promise<Response> => {
+    const b = JSON.parse(String(init?.body)) as { query?: string; operationName?: string };
+    if (b.operationName) return new Response(JSON.stringify({ data: { titles: [] } }));
+    const q = b.query ?? "";
+    if (q.includes("p0:")) return new Response(JSON.stringify({ data: {
+      p0: { total: 1000, pageInfo: { hasNextPage: true }, edges: [edge("tt8000001")] },
+      wl: { titleListItemSearch: { total: 9, pageInfo: { hasNextPage: true, endCursor: "c1" }, edges: [wlEdge("tt8100001")] } } } }));
+    if (q.includes("p1:")) return new Response(JSON.stringify({ errors: [{ message: "boom" }], data: { p1: null } }));
+    return new Response(JSON.stringify({ errors: [{ message: "boom" }], data: { wl: null } }));
+  };
+  const p = await fetchImdbProfile("ur10000001", { fetch: f, delayMs: 0 });
+  expect(p.seen).toEqual(["tt8000001"]);
+  expect(p.watchlist).toEqual(["tt8100001"]);
+  expect(p.notes).toContain("IMDb ratings: stopped at page 2 (IMDb's API returned no data for it); kept the first 1");
+  expect(p.notes).toContain("IMDb watchlist: stopped at page 2 (IMDb's API returned no data for it); kept the first 1");
+
+  let n = 0;
+  const long = async (_url: string, init?: RequestInit): Promise<Response> => {
+    const b = JSON.parse(String(init?.body)) as { query?: string; operationName?: string };
+    if (b.operationName) return new Response(JSON.stringify({ data: { titles: [] } }));
+    const wl = { titleListItemSearch: { total: 60, pageInfo: { hasNextPage: true, endCursor: `c${++n}` }, edges: [wlEdge(`tt81${String(n).padStart(5, "0")}`)] } };
+    if (b.query?.includes("p0:")) return new Response(JSON.stringify({ data: { p0: { total: 1, pageInfo: { hasNextPage: false }, edges: [edge("tt8000001")] }, wl } }));
+    return new Response(JSON.stringify({ data: { wl } }));
+  };
+  const q = await fetchImdbProfile("ur10000001", { fetch: long, delayMs: 0 });
+  expect(q.watchlist).toHaveLength(MAX_PAGES);
+  expect(q.notes).toContain(`IMDb watchlist: stopped at the ${MAX_PAGES}-page limit; kept the first ${MAX_PAGES} of 60`);
+});
+
 test("fetchLetterboxdProfile: slugs map to IMDb ids through ids.json, the rest stay for the title join", async () => {
   const calls: string[] = [];
   const f = async (url: string): Promise<Response> => {

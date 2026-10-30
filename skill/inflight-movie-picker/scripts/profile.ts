@@ -366,9 +366,10 @@ export async function imdbViaApi(id: string, o: FetchOpts, notes: string[]): Pro
     catch (e) { notes.push(`IMDb ratings: stopped at page ${page + 1} (${e instanceof Error ? e.message : String(e)}); kept the first ${rated.length}`); more = false; break; }
     for (const n of pages) {
       const r = apiRatings(d[`p${n}`]);
-      const fresh = r ? add(r.items, rated, seen) : 0;
+      if (!r) { notes.push(`IMDb ratings: stopped at page ${n + 1} (IMDb's API returned no data for it); kept the first ${rated.length}`); more = false; break; }
+      const fresh = add(r.items, rated, seen);
       page = n + 1;
-      if (!r || !r.hasNext || !fresh || (total !== null && rated.length >= total)) { more = false; break; }
+      if (!r.hasNext || !fresh || (total !== null && rated.length >= total)) { more = false; break; }
     }
     o.log?.(`IMDb ratings (API): ${rated.length}${total ? ` of ${total}` : ""}`);
   }
@@ -377,13 +378,16 @@ export async function imdbViaApi(id: string, o: FetchOpts, notes: string[]): Pro
   const watch: ImdbItem[] = [];
   const wseen = new Set<string>();
   let wl = apiWatchlist(first.wl);
+  if (!wl) notes.push("watchlist skipped (IMDb's API returned none; it may be private)");
   for (let wpage = 1; wl; wpage++) {
     add(wl.items, watch, wseen);
-    if (!wl.hasNext || !wl.cursor || !wl.items.length || wpage >= MAX_PAGES) break;
+    if (!wl.hasNext || !wl.cursor || !wl.items.length) break;
+    if (wpage >= MAX_PAGES) { notes.push(`IMDb watchlist: stopped at the ${MAX_PAGES}-page limit; kept the first ${watch.length}${wl.total ? ` of ${wl.total}` : ""}`); break; }
+    const stop = (why: string) => notes.push(`IMDb watchlist: stopped at page ${wpage + 1} (${why}); kept the first ${watch.length}`);
     try { wl = apiWatchlist((await call({ query: `query { ${watchlistField(userId, wl.cursor)} }` }, "watchlist")).wl); }
-    catch (e) { notes.push(`IMDb watchlist: stopped at page ${wpage + 1} (${e instanceof Error ? e.message : String(e)}); kept the first ${watch.length}`); break; }
+    catch (e) { stop(e instanceof Error ? e.message : String(e)); break; }
+    if (!wl) stop("IMDb's API returned no data for it");
   }
-  if (!apiWatchlist(first.wl)) notes.push("watchlist skipped (IMDb's API returned none; it may be private)");
   return { userId, rated, watch };
 }
 
