@@ -118,16 +118,13 @@ test("profile_from_text: Letterboxd CSVs become title-year keys", () => {
   expect(() => profileFromText("a,b\n1,2\n", "letterboxd_csv", {})).toThrow(/Letterboxd/);
 });
 
-test("profile_from_text: IMDb page from the data blob or from title links", () => {
-  const blob = { props: { pageProps: { items: [{ id: "tt0111161", userRating: { value: 9 } }, { titleId: "tt0468569", node: { authorRating: 7 } }, { id: "tt0050083" }] } } };
-  const html = `<html><script id="__NEXT_DATA__" type="application/json">${JSON.stringify(blob)}</script></html>`;
-  const p = profileFromText(html, "imdb_page", {});
-  expect(p.seen).toEqual(["tt0111161", "tt0468569", "tt0050083"]);
-  expect(p.ratings).toEqual({ tt0111161: 9, tt0468569: 7 });
+test("profile_from_text: IMDb page falls back to title links and never invents scores", () => {
   const links = '<a href="/title/tt0111161/">Shawshank</a> IMDb 9.3 <span aria-label="Your rating: 8">8</span> <a href="/title/tt0468569/?ref=x">TDK</a>';
   const q = profileFromText(links, "imdb_page", {});
   expect(q.seen).toEqual(["tt0111161", "tt0468569"]);
-  expect(q.ratings).toEqual({ tt0111161: 8 });
+  expect(q.ratings).toBeUndefined();
+  expect(q.note).toContain("seen only");
+  expect(profileFromText(links, "imdb_page", {}, "watchlist")).toMatchObject({ seen: [], watchlist: ["tt0111161", "tt0468569"] });
   expect(() => profileFromText("<html>blocked</html>", "imdb_page", {})).toThrow(/CSV/);
 });
 
@@ -182,10 +179,10 @@ test("GET /mcp 405, DELETE 200, OPTIONS has CORS, /healthz ok, / falls through t
   expect(await (await app.fetch(new Request("https://x/"), env)).text()).toBe("asset");
 });
 
-test("tools/list has the five contract tools plus profile_from_text, no em dashes in copy", async () => {
+test("tools/list has the five contract tools plus the two profile builders, no em dashes in copy", async () => {
   const { body } = await rpc("tools/list");
   const tools = body.result?.tools as { name: string; description: string }[];
-  expect(tools.map((t) => t.name)).toEqual(["list_airlines", "catalogue", "picks", "save_profile", "get_profile", "profile_from_text"]);
+  expect(tools.map((t) => t.name)).toEqual(["list_airlines", "catalogue", "picks", "save_profile", "get_profile", "profile_from_imdb_url", "profile_from_text"]);
   expect(JSON.stringify(tools)).not.toContain("—");
 });
 

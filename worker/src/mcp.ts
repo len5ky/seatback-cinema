@@ -6,7 +6,8 @@ export const SERVER_INFO = { name: "seatback-cinema", title: "Seatback Cinema", 
 const INSTRUCTIONS =
   "In-flight film catalogues for this month, by airline. Start with list_airlines, then picks for recommendations " +
   "(pass flight_minutes and a profile when you have them) or catalogue to browse or check a title. " +
-  "Build a profile with profile_from_text from an IMDb or Letterboxd export or page you have fetched; save_profile returns a token for next time.";
+  "For a public IMDb profile URL, call profile_from_imdb_url and pass profile: { imdb_user } to picks. " +
+  "Otherwise build a profile with profile_from_text from an IMDb or Letterboxd export or page you have fetched; save_profile returns a token for next time.";
 
 export type Id = string | number | null;
 interface RpcRequest { jsonrpc: "2.0"; id?: Id; method: string; params?: unknown }

@@ -57,7 +57,7 @@ export const TOKEN_RE = /^[a-z2-7]{20}$/;
 export const titleKey = (title: string, year: number | null) => (year ? `${title} (${year})` : title);
 
 /** Genre and director preferences learned from ratings that carry them (IMDb's export has Genres and Directors columns). */
-function preferences(films: { rating: number; genres: string[]; directors: string[] }[]): Pick<Profile, "liked_genres" | "disliked_genres" | "liked_directors"> {
+export function preferences(films: { rating: number; genres: string[]; directors: string[] }[]): Pick<Profile, "liked_genres" | "disliked_genres" | "liked_directors"> {
   if (films.length < 5) return {};
   const m = learnAffinities(films);
   const top = (map: Map<string, { value: number; n: number }>, ok: (a: { value: number; n: number }) => boolean, n: number, dir: 1 | -1) =>
@@ -103,45 +103,48 @@ function walk(v: unknown, visit: (o: Record<string, unknown>) => void): void {
   if (Array.isArray(v)) for (const x of v) walk(x, visit);
   else if (isObj(v)) { visit(v); for (const x of Object.values(v)) walk(x, visit); }
 }
-const RATING_KEYS = ["userRating", "authorRating", "otherUserRating"];
-function nestedRating(o: Record<string, unknown>): number | null {
-  let found: number | null = null;
-  walk(o, (x) => {
-    for (const k of RATING_KEYS) {
-      const r = x[k];
-      const n = isObj(r) ? r.value : r;
-      if (found === null && typeof n === "number" && n >= 1 && n <= 10) found = n;
-    }
-  });
+/** The page owner's ur id, when the page data carries it (IMDb profile pages: aboveTheFoldData.authorId). */
+function imdbAuthor(data: unknown): string | null {
+  let found: string | null = null;
+  walk(data, (o) => { if (!found && typeof o.authorId === "string" && /^ur\d+$/.test(o.authorId)) found = o.authorId; });
   return found;
 }
 
-/** IMDb ratings / watchlist / list page: the Next.js data blob when present (ids with their user rating), else every /title/tt link in order. */
-function fromImdbPage(html: string): Profile {
-  const seen: string[] = [], ratings: Record<string, number> = {};
-  const add = (id: string, rating: number | null) => {
-    if (!seen.includes(id)) seen.push(id);
-    if (rating !== null) ratings[id] = rating;
-  };
+const NO_SCORES_NOTE =
+  "IMDb pages do not include the owner's scores, so these films count as seen only. For taste ranking, call profile_from_imdb_url " +
+  "with the profile URL, or ask for the IMDb ratings CSV export and pass it with kind \"imdb_csv\".";
+
+/**
+ * IMDb ratings / watchlist / list page. Ids come from the Next.js data blob (ratings: advancedTitleSearch edges; watchlist:
+ * predefinedList items), else from every /title/tt link. The owner's scores are never on the page, so no ratings are returned.
+ */
+function fromImdbPage(html: string, list: "watched" | "watchlist"): ProfileResult {
+  const ids: string[] = [];
+  const add = (id: unknown) => { if (typeof id === "string" && /^tt\d+$/.test(id) && !ids.includes(id)) ids.push(id); };
+  let isWatchlist = list === "watchlist";
+  let author: string | null = null;
   const blob = html.match(/<script[^>]*id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/)?.[1];
   if (blob) {
     try {
-      walk(JSON.parse(blob), (o) => {
-        const id = [o.id, o.const, o.tconst, o.titleId].find((x): x is string => typeof x === "string" && /^tt\d+$/.test(x));
-        if (id) add(id, nestedRating(o));
+      const data: unknown = JSON.parse(blob);
+      author = imdbAuthor(data);
+      walk(data, (o) => {
+        const wl = o.predefinedList;
+        if (isObj(wl) && isObj(wl.titleListItemSearch)) {
+          isWatchlist = true;
+          for (const e of Array.isArray(wl.titleListItemSearch.edges) ? wl.titleListItemSearch.edges : []) if (isObj(e) && isObj(e.listItem)) add(e.listItem.id);
+        }
+        const ats = o.advancedTitleSearch;
+        if (isObj(ats)) for (const e of Array.isArray(ats.edges) ? ats.edges : []) if (isObj(e) && isObj(e.node) && isObj(e.node.title)) add(e.node.title.id);
       });
+      if (!ids.length) walk(data, (o) => add([o.id, o.const, o.tconst, o.titleId].find((x) => typeof x === "string" && /^tt\d+$/.test(x))));
     } catch { /* fall through to links */ }
   }
-  if (!seen.length) {
-    const links = [...html.matchAll(/\/title\/(tt\d{7,9})/g)];
-    links.forEach((m, i) => {
-      const seg = html.slice(m.index, links[i + 1]?.index ?? m.index + 3000);
-      const r = seg.match(/(?:Your rating|User rating|rated)\D{0,40}?\b(10|[1-9])\b(?![.,]\d)/i);
-      add(m[1]!, r ? Number(r[1]) : null);
-    });
-  }
-  if (!seen.length) throw new Error("no IMDb title ids found: was the page blocked or empty? Ask the user for their IMDb ratings CSV export instead.");
-  return { seen, ratings, source: "imdb_page" };
+  if (!ids.length) for (const m of html.matchAll(/\/title\/(tt\d{7,9})/g)) add(m[1]);
+  if (!ids.length) throw new Error("no IMDb title ids found: was the page blocked or empty? Ask the user for their IMDb ratings CSV export instead.");
+  const extra = author ? { imdb_user: author } : {};
+  if (isWatchlist) return { seen: [], watchlist: ids, source: "imdb_page", ...extra };
+  return { seen: ids, source: "imdb_page", note: NO_SCORES_NOTE, ...extra };
 }
 
 const decode = (s: string) => s.replace(/&amp;/g, "&").replace(/&#0?39;|&apos;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">");
@@ -171,12 +174,15 @@ function fromLetterboxdPage(html: string, slugs: Record<string, string>, list: "
 
 export const TEXT_MAX = 4_000_000;
 
-export function profileFromText(text: string, kind: ProfileKind, slugs: Record<string, string>, list: "watched" | "watchlist" = "watched"): Profile {
+/** A parsed profile plus what the model should know about it (not stored by save_profile). */
+export type ProfileResult = Profile & { note?: string; imdb_user?: string };
+
+export function profileFromText(text: string, kind: ProfileKind, slugs: Record<string, string>, list: "watched" | "watchlist" = "watched"): ProfileResult {
   if (text.length > TEXT_MAX) throw new Error("text is over 4 MB: send one page or one CSV file at a time");
   switch (kind) {
     case "imdb_csv": return fromImdbCsv(text);
     case "letterboxd_csv": return fromLetterboxdCsv(text, list);
-    case "imdb_page": return fromImdbPage(text);
+    case "imdb_page": return fromImdbPage(text, list);
     case "letterboxd_page": return fromLetterboxdPage(text, slugs, list);
   }
 }
