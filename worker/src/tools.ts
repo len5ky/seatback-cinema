@@ -285,7 +285,10 @@ export async function callTool(ctx: ToolContext, name: string, args: Json): Prom
       const list = args.list === "watchlist" ? "watchlist" : "watched";
       let parsed: ReturnType<typeof profileFromText>;
       try { parsed = profileFromText(args.text, kind, cat.bundle.letterboxd, list); } catch (e) { throw new ToolError((e as Error).message); }
-      const { note, imdb_user, ...profile } = parsed;
+      const { note, ...profile } = parsed;
+      const prior = isObj(args.add_to) && typeof args.add_to.imdb_user === "string" && /^ur\d+$/.test(args.add_to.imdb_user) ? args.add_to.imdb_user : undefined;
+      const imdb_user = parsed.imdb_user ?? prior;
+      delete profile.imdb_user;
       const merged = args.add_to !== undefined ? mergeProfiles(profileArg(args.add_to), profile) : profile;
       // Pages carry no scores: keep saying so after a merge, as long as nothing in the result has a score.
       const keepNote = note ?? (kind === "imdb_page" && merged.seen.length && !Object.keys(merged.ratings ?? {}).length ? NO_SCORES_NOTE : undefined);

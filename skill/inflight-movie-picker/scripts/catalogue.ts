@@ -308,8 +308,11 @@ async function loadProfile(site: "imdb" | "letterboxd", url: string, refresh: bo
     if (e instanceof ProfileBlocked) { console.error(blockedHelp(e.site, e.message)); process.exit(1); }
     return fail(e instanceof Error ? e.message : String(e));
   }
-  mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, JSON.stringify(p));
+  // A partial profile (a block partway, scores missing) is not cached, so the next run tries again.
+  if (!p.notes.length) {
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, JSON.stringify(p));
+  }
   return p;
 }
 

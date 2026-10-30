@@ -251,6 +251,7 @@ async function imdbList(base: string, kind: "ratings" | "watchlist", o: FetchOpt
     for (const i of fresh) { seen.add(i.tconst); items.push(i); }
     o.log?.(`IMDb ${kind}: page ${page}, ${items.length}${p.total ? ` of ${p.total}` : ""}`);
     if (!p.hasNext || !fresh.length || (p.total !== null && items.length >= p.total)) break;
+    if (page === MAX_PAGES) notes.push(`IMDb ${kind}: stopped at the ${MAX_PAGES}-page limit; kept the first ${items.length}${p.total ? ` of ${p.total}` : ""}`);
   }
   return { items, userId };
 }
@@ -270,8 +271,9 @@ async function imdbOwnerRatings(userId: string, ids: string[], o: FetchOpts): Pr
       headers: { ...BROWSER_HEADERS, Accept: "application/json", "Content-Type": "application/json", Origin: "https://www.imdb.com", Referer: "https://www.imdb.com/" },
       body: JSON.stringify(body),
     });
-    if (!res.ok) throw new Error(`IMDb rating lookup -> HTTP ${res.status}`);
-    for (const [k, v] of parseImdbOwnerRatings(await res.text())) out.set(k, v);
+    const text = await res.text();
+    if (!res.ok || isChallenge(res.status, res.headers, text)) throw new Error(`IMDb rating lookup -> HTTP ${res.status}${res.headers.get("x-amzn-waf-action") ? ", bot check" : ""}`);
+    for (const [k, v] of parseImdbOwnerRatings(text)) out.set(k, v);
     if (o.delayMs && i + 250 < ids.length) await sleep(o.delayMs);
   }
   return out;
@@ -289,9 +291,10 @@ export async function fetchImdbProfile(url: string, o: FetchOpts = {}): Promise<
   const userId = rated.userId ?? (id.startsWith("ur") ? id : null);
   let ratings = new Map<string, number>();
   if (userId && rated.items.length) {
+    let failed = false;
     try { ratings = await imdbOwnerRatings(userId, rated.items.map((i) => i.tconst), o); }
-    catch (e) { notes.push(`could not read the scores themselves (${e instanceof Error ? e.message : String(e)}); rated films still count as seen`); }
-    if (!ratings.size && !notes.length) notes.push("IMDb returned no scores for the rated films; they still count as seen");
+    catch (e) { failed = true; notes.push(`could not read the scores themselves (${e instanceof Error ? e.message : String(e)}); rated films still count as seen`); }
+    if (!ratings.size && !failed) notes.push("IMDb returned no scores for the rated films; they still count as seen");
   }
   const titles: Record<string, TitleRef> = {};
   for (const i of [...rated.items, ...watch]) titles[i.tconst] = { title: i.title, year: i.year, ...(ratings.has(i.tconst) ? { rating: ratings.get(i.tconst)! } : {}) };
@@ -320,6 +323,7 @@ async function letterboxdList(base: string, path: "films" | "watchlist", o: Fetc
     for (const i of fresh) { seen.add(i.slug); items.push(i); }
     o.log?.(`Letterboxd ${path}: page ${page} of ${p.lastPage}, ${items.length} films`);
     if (!p.hasNext || !fresh.length || page >= p.lastPage) break;
+    if (page === MAX_PAGES) notes.push(`Letterboxd ${path}: stopped at the ${MAX_PAGES}-page limit of ${p.lastPage}; kept the first ${items.length}`);
   }
   return items;
 }

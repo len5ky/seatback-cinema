@@ -123,6 +123,9 @@ test("fetchImdbProfile: a failed score lookup keeps the seen list and says so; a
   expect(noScores.seen).toHaveLength(80);
   expect(noScores.ratings).toBeUndefined();
   expect(noScores.notes[0]).toContain("HTTP 403");
+  const challenged = await fetchImdbProfile(IMDB_URL, { fetch: imdbMock({ graphqlStatus: 202 }).f, delayMs: 0 });
+  expect(challenged.ratings).toBeUndefined();
+  expect(challenged.notes.some((n) => n.includes("could not read the scores") && n.includes("HTTP 202"))).toBe(true);
   const err = await fetchImdbProfile(IMDB_URL, { fetch: imdbMock({ block: true }).f, delayMs: 0 }).catch((e: unknown) => e);
   expect(err).toBeInstanceOf(ProfileBlocked);
   expect((err as ProfileBlocked).message).toContain("HTTP 202, challenge");

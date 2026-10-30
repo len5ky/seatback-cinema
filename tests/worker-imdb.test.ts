@@ -230,3 +230,10 @@ test("profile_from_text: the no-scores note survives the watchlist merge; a bad 
   expect(w.note).toContain("seen only");
   await expect(callTool(ctx, "profile_from_text", { text: "Name,Year\nX,2025\n", kind: "letterboxd_csv", list: "Watchlist" })).rejects.toThrow(/list must be/);
 });
+
+test("profile_from_text: an earlier imdb_user survives a merge with a page that has none", async () => {
+  const ctx = ctxWith(fakeImdb().deps);
+  const r = await callTool(ctx, "profile_from_text", { text: '<a href="/title/tt0111161/">x</a>', kind: "imdb_page", list: "watchlist", add_to: { seen: ["tt0468569"], imdb_user: "ur00000001" } });
+  expect(r.imdb_user).toBe("ur00000001");
+  expect(r.watchlist).toEqual(["tt0111161"]);
+});
