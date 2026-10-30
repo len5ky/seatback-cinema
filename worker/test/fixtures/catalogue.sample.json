@@ -1,0 +1,1867 @@
+{
+ "generatedAt": "2026-10-30T00:00:00.000Z",
+ "airlines": [
+  {
+   "id": "ba",
+   "name": "British Airways",
+   "month": "2026-10",
+   "fetchedAt": "2026-10-29T15:54:38.070Z",
+   "health": "ok",
+   "films": [
+    {
+     "sourceId": "a154cc24-9546-471e-8f9b-ab461029e6d3",
+     "title": "Project Hail Mary",
+     "year": 2026,
+     "runtime": 156,
+     "genres": [
+      "Action",
+      "Adventure",
+      "Comedy",
+      "Drama",
+      "SciFi"
+     ],
+     "cert": "PG13",
+     "languages": [
+      "English",
+      "French",
+      "Italian",
+      "German",
+      "Spanish",
+      "Latin American Spanish",
+      "Hindi"
+     ],
+     "categories": [
+      "Comedy",
+      "Hollywood Arrivals"
+     ],
+     "directors": [
+      "Phil Lord",
+      "Chris Miller"
+     ],
+     "versions": 1,
+     "imdbId": "tt12042730",
+     "confidence": "high",
+     "tmdbId": 687163,
+     "imdbTitle": "Project Hail Mary",
+     "imdbYear": 2026,
+     "imdbGenres": [
+      "Adventure",
+      "Comedy",
+      "Sci-Fi"
+     ],
+     "directorIds": [
+      "nm0520488",
+      "nm0588087"
+     ],
+     "imdb": 8.2,
+     "votes": 588804,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.31,
+       "votes": 4694676
+      },
+      "mc_critics": {
+       "value": 77,
+       "votes": 60
+      },
+      "rt_audience": {
+       "value": 95,
+       "votes": 8312
+      }
+     },
+     "blended": 8.44,
+     "synopsis": "Synthetic synopsis 1 for ba: a test film about a long journey.",
+     "cast": [
+      "Ryan Gosling",
+      "Sandra Hüller",
+      "James Ortiz"
+     ]
+    },
+    {
+     "sourceId": "bf62fe29-1e1f-4cad-ba11-a61412e739f4",
+     "title": "Sinners",
+     "year": 2025,
+     "runtime": 138,
+     "genres": [
+      "Drama"
+     ],
+     "cert": "R",
+     "languages": [
+      "English",
+      "French",
+      "German",
+      "Italian",
+      "Spanish",
+      "Latin American Spanish",
+      "Brazilian Portuguese",
+      "Thai"
+     ],
+     "categories": [
+      "Celebrating Black Cinema",
+      "Critically Acclaimed"
+     ],
+     "directors": [
+      "Ryan Coogler"
+     ],
+     "versions": 1,
+     "imdbId": "tt31193180",
+     "confidence": "high",
+     "tmdbId": 1233413,
+     "imdbTitle": "Sinners",
+     "imdbYear": 2025,
+     "imdbGenres": [
+      "Horror"
+     ],
+     "directorIds": [
+      "nm3363032"
+     ],
+     "imdb": 7.5,
+     "votes": 537045,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.1,
+       "votes": 5024458
+      },
+      "mc_critics": {
+       "value": 84,
+       "votes": 55
+      },
+      "rt_audience": {
+       "value": 96,
+       "votes": 9547
+      }
+     },
+     "blended": 8.16,
+     "synopsis": "Synthetic synopsis 2 for ba: a test film about a long journey.",
+     "cast": [
+      "Michael B. Jordan",
+      "Hailee Steinfield"
+     ]
+    },
+    {
+     "sourceId": "c4e87688-06ec-4b89-b291-0e2422eb7939",
+     "title": "Superman",
+     "year": 2025,
+     "runtime": 129,
+     "genres": [
+      "Action"
+     ],
+     "cert": "PG13",
+     "languages": [
+      "English",
+      "French",
+      "German",
+      "Italian",
+      "Japanese",
+      "Latin American Spanish",
+      "Brazilian Portuguese",
+      "Spanish"
+     ],
+     "categories": [
+      "Action"
+     ],
+     "directors": [
+      "James Gunn"
+     ],
+     "versions": 1,
+     "imdbId": "tt5950044",
+     "confidence": "high",
+     "tmdbId": 1061474,
+     "imdbTitle": "Superman",
+     "imdbYear": 2025,
+     "imdbGenres": [
+      "Action",
+      "Adventure",
+      "Sci-Fi"
+     ],
+     "directorIds": [
+      "nm0348181"
+     ],
+     "imdb": 7,
+     "votes": 452715,
+     "ratings": {
+      "letterboxd": {
+       "value": 3.82,
+       "votes": 3454175
+      },
+      "mc_critics": {
+       "value": 68,
+       "votes": 58
+      },
+      "rt_audience": {
+       "value": 90,
+       "votes": 4408
+      }
+     },
+     "blended": 7.46,
+     "synopsis": "Synthetic synopsis 3 for ba: a test film about a long journey.",
+     "cast": [
+      "David Corenswet",
+      "Rachel Brosnahan"
+     ]
+    },
+    {
+     "sourceId": "11b869f8-41c9-4d31-b55d-ef44f1da8f55",
+     "title": "Weapons",
+     "year": 2025,
+     "runtime": 128,
+     "genres": [
+      "Action"
+     ],
+     "cert": "R",
+     "languages": [
+      "English",
+      "French",
+      "German",
+      "Italian",
+      "Latin American Spanish",
+      "Brazilian Portuguese",
+      "Spanish",
+      "Thai"
+     ],
+     "categories": [
+      "Halloween Hits",
+      "Thriller"
+     ],
+     "directors": [
+      "Zach Cregger"
+     ],
+     "versions": 1,
+     "imdbId": "tt26581740",
+     "confidence": "high",
+     "tmdbId": 1078605,
+     "imdbTitle": "Weapons",
+     "imdbYear": 2025,
+     "imdbGenres": [
+      "Horror",
+      "Mystery"
+     ],
+     "directorIds": [
+      "nm1199107"
+     ],
+     "imdb": 7.4,
+     "votes": 418141,
+     "ratings": {
+      "letterboxd": {
+       "value": 3.58,
+       "votes": 3428466
+      },
+      "mc_critics": {
+       "value": 81,
+       "votes": 48
+      },
+      "rt_audience": {
+       "value": 85,
+       "votes": 3265
+      }
+     },
+     "blended": 7.6,
+     "synopsis": "Synthetic synopsis 4 for ba: a test film about a long journey.",
+     "cast": [
+      "Josh Brolin",
+      "Julia Garner"
+     ]
+    },
+    {
+     "sourceId": "f4bccd87-970f-476e-af65-e29d0092e507",
+     "title": "A Minecraft Movie",
+     "year": 2025,
+     "runtime": 101,
+     "genres": [
+      "Action",
+      "Family"
+     ],
+     "cert": "PG",
+     "languages": [
+      "English",
+      "French",
+      "German",
+      "Latin American Spanish",
+      "Italian",
+      "Spanish",
+      "Japanese",
+      "Korean"
+     ],
+     "categories": [
+      "Action"
+     ],
+     "directors": [
+      "Jared Hess"
+     ],
+     "versions": 1,
+     "imdbId": "tt3566834",
+     "confidence": "high",
+     "tmdbId": 950387,
+     "imdbTitle": "A Minecraft Movie",
+     "imdbYear": 2025,
+     "imdbGenres": [
+      "Action",
+      "Adventure",
+      "Comedy"
+     ],
+     "directorIds": [
+      "nm0381478"
+     ],
+     "imdb": 5.5,
+     "votes": 170002,
+     "ratings": {
+      "letterboxd": {
+       "value": 2.42,
+       "votes": 1673274
+      },
+      "mc_critics": {
+       "value": 45,
+       "votes": 40
+      },
+      "rt_audience": {
+       "value": 84,
+       "votes": 3750
+      }
+     },
+     "blended": 5.59,
+     "synopsis": "Synthetic synopsis 5 for ba: a test film about a long journey.",
+     "cast": [
+      "Jason Momoa",
+      "Jack Black",
+      "Emma Myers"
+     ]
+    },
+    {
+     "sourceId": "0d251307-c6de-4978-ac5e-8686a7d67f8c",
+     "title": "Back to the Future",
+     "year": 1985,
+     "runtime": 116,
+     "genres": [
+      "Comedy",
+      "Adventure"
+     ],
+     "cert": "PG",
+     "languages": [
+      "English",
+      "French",
+      "German",
+      "Italian",
+      "Brazilian Portuguese",
+      "Latin American Spanish",
+      "Russian"
+     ],
+     "categories": [
+      "Action"
+     ],
+     "directors": [
+      "Robert Zemeckis"
+     ],
+     "versions": 1,
+     "imdbId": "tt0088763",
+     "confidence": "high",
+     "tmdbId": 105,
+     "imdbTitle": "Back to the Future",
+     "imdbYear": 1985,
+     "imdbGenres": [
+      "Adventure",
+      "Comedy",
+      "Sci-Fi"
+     ],
+     "directorIds": [
+      "nm0000709"
+     ],
+     "imdb": 8.5,
+     "votes": 1484914,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.22,
+       "votes": 3023027
+      },
+      "mc_critics": {
+       "value": 88,
+       "votes": 27
+      },
+      "rt_audience": {
+       "value": 95,
+       "votes": 40123
+      }
+     },
+     "blended": 8.68,
+     "synopsis": "Synthetic synopsis 6 for ba: a test film about a long journey.",
+     "cast": [
+      "Michael J. Fox",
+      "Christopher Lloyd",
+      "Lea Thompson"
+     ]
+    },
+    {
+     "sourceId": "0bb9cdcd-3612-459f-b448-81d2a8969723",
+     "title": "Interstellar",
+     "year": 2014,
+     "runtime": 169,
+     "genres": [
+      "SciFi",
+      "Adventure",
+      "Drama"
+     ],
+     "cert": "PG13",
+     "languages": [
+      "English",
+      "French",
+      "German",
+      "Italian",
+      "Japanese",
+      "Latin American Spanish",
+      "Brazilian Portuguese",
+      "Spanish"
+     ],
+     "categories": [
+      "Drama"
+     ],
+     "directors": [
+      "Christopher Nolan"
+     ],
+     "versions": 1,
+     "imdbId": "tt0816692",
+     "confidence": "high",
+     "tmdbId": 157336,
+     "imdbTitle": "Interstellar",
+     "imdbYear": 2014,
+     "imdbGenres": [
+      "Adventure",
+      "Sci-Fi"
+     ],
+     "directorIds": [
+      "nm0634240"
+     ],
+     "imdb": 8.7,
+     "votes": 2627230,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.46,
+       "votes": 6596985
+      },
+      "mc_critics": {
+       "value": 74,
+       "votes": 46
+      },
+      "rt_audience": {
+       "value": 87,
+       "votes": 14255
+      }
+     },
+     "blended": 8.57,
+     "synopsis": "Synthetic synopsis 7 for ba: a test film about a long journey.",
+     "cast": [
+      "Matthew McConaughey",
+      "Anne Hathaway",
+      "Jessica Chastain"
+     ]
+    },
+    {
+     "sourceId": "ba7896d5-95de-4848-9dbc-4cccc9b161a2",
+     "title": "The Lord of the Rings: The Fellowship of the Ring",
+     "year": 2001,
+     "runtime": 178,
+     "genres": [
+      "Action",
+      "Adventure",
+      "Fantasy",
+      "SciFi",
+      "PreSchool"
+     ],
+     "cert": "PG13",
+     "languages": [
+      "English",
+      "French",
+      "German",
+      "Italian",
+      "Spanish",
+      "Brazilian Portuguese",
+      "Korean"
+     ],
+     "categories": [
+      "Action"
+     ],
+     "directors": [
+      "Peter Jackson"
+     ],
+     "versions": 1,
+     "imdbId": "tt0120737",
+     "confidence": "high",
+     "tmdbId": 120,
+     "imdbTitle": "The Lord of the Rings: The Fellowship of the Ring",
+     "imdbYear": 2001,
+     "imdbGenres": [
+      "Adventure",
+      "Drama",
+      "Fantasy"
+     ],
+     "directorIds": [
+      "nm0001392"
+     ],
+     "imdb": 8.9,
+     "votes": 2248701,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.39,
+       "votes": 3352771
+      },
+      "mc_critics": {
+       "value": 92,
+       "votes": 34
+      },
+      "rt_audience": {
+       "value": 95,
+       "votes": 80557
+      }
+     },
+     "blended": 9,
+     "synopsis": "Synthetic synopsis 8 for ba: a test film about a long journey.",
+     "cast": [
+      "Elijah Wood",
+      "Ian McKellen",
+      "Liv Tyler"
+     ]
+    },
+    {
+     "sourceId": "2dabb491-8f1f-46de-90c3-690a3dee11b9",
+     "title": "The Lord of the Rings: The Return of the King",
+     "year": 2003,
+     "runtime": 201,
+     "genres": [
+      "Action",
+      "Adventure",
+      "Fantasy",
+      "SciFi"
+     ],
+     "cert": "PG13",
+     "languages": [
+      "English",
+      "French",
+      "German",
+      "Italian",
+      "Spanish",
+      "Brazilian Portuguese",
+      "Korean"
+     ],
+     "categories": [
+      "Action"
+     ],
+     "directors": [
+      "Peter Jackson"
+     ],
+     "versions": 1,
+     "imdbId": "tt0167260",
+     "confidence": "high",
+     "tmdbId": 122,
+     "imdbTitle": "The Lord of the Rings: The Return of the King",
+     "imdbYear": 2003,
+     "imdbGenres": [
+      "Adventure",
+      "Drama",
+      "Fantasy"
+     ],
+     "directorIds": [
+      "nm0001392"
+     ],
+     "imdb": 9,
+     "votes": 2204618,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.56,
+       "votes": 2550695
+      },
+      "mc_critics": {
+       "value": 94,
+       "votes": 41
+      },
+      "rt_audience": {
+       "value": 86,
+       "votes": 2050091
+      }
+     },
+     "blended": 9.04,
+     "synopsis": "Synthetic synopsis 9 for ba: a test film about a long journey.",
+     "cast": [
+      "Elijah Wood",
+      "Ian McKellan",
+      "Liv Tyler"
+     ]
+    },
+    {
+     "sourceId": "9bb5928a-d522-4ad6-9ff6-9f59befd2b6b",
+     "title": "6 Ayyam",
+     "year": 2025,
+     "runtime": 105,
+     "genres": [
+      "Drama",
+      "Romance"
+     ],
+     "cert": "PG13",
+     "languages": [
+      "Arabic"
+     ],
+     "categories": [
+      "Romance",
+      "World Cinema"
+     ],
+     "directors": [
+      "Karim Shaaban"
+     ],
+     "versions": 1,
+     "imdbId": null,
+     "confidence": "none",
+     "tmdbId": null,
+     "imdbTitle": null,
+     "imdbYear": null,
+     "imdbGenres": [],
+     "directorIds": [],
+     "imdb": null,
+     "votes": null,
+     "ratings": {},
+     "blended": null,
+     "synopsis": "Synthetic synopsis 10 for ba: a test film about a long journey.",
+     "cast": [
+      "Ahmed Malik",
+      "Aya Samaha"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "emirates",
+   "name": "Emirates",
+   "month": "2026-10",
+   "fetchedAt": "2026-10-22T01:42:52.101Z",
+   "health": "ok",
+   "films": [
+    {
+     "sourceId": "1369485",
+     "title": "Project Hail Mary",
+     "year": null,
+     "runtime": 156,
+     "genres": [
+      "Sci-Fi",
+      "Action"
+     ],
+     "cert": "PG13",
+     "languages": [
+      "English",
+      "French",
+      "German",
+      "Italian",
+      "Castilian Spanish",
+      "Brazilian Portuguese",
+      "Russian"
+     ],
+     "categories": [
+      "Action & Adventure",
+      "Arabic عربي"
+     ],
+     "directors": [
+      "Christopher Miller",
+      "Phil Lord"
+     ],
+     "versions": 1,
+     "imdbId": "tt12042730",
+     "confidence": "high",
+     "tmdbId": 687163,
+     "imdbTitle": "Project Hail Mary",
+     "imdbYear": 2026,
+     "imdbGenres": [
+      "Adventure",
+      "Comedy",
+      "Sci-Fi"
+     ],
+     "directorIds": [
+      "nm0520488",
+      "nm0588087"
+     ],
+     "imdb": 8.2,
+     "votes": 588804,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.31,
+       "votes": 4694676
+      },
+      "mc_critics": {
+       "value": 77,
+       "votes": 60
+      },
+      "rt_audience": {
+       "value": 95,
+       "votes": 8312
+      }
+     },
+     "blended": 8.44,
+     "synopsis": "Synthetic synopsis 1 for emirates: a test film about a long journey.",
+     "cast": [
+      "Ryan Gosling",
+      "Sandra Hüller",
+      "James Ortiz"
+     ]
+    },
+    {
+     "sourceId": "1370313",
+     "title": "Sinners",
+     "year": 2025,
+     "runtime": 137,
+     "genres": [
+      "Thriller",
+      "Horror"
+     ],
+     "cert": "R",
+     "languages": [
+      "English",
+      "French",
+      "German",
+      "Italian",
+      "Castilian Spanish",
+      "Brazilian Portuguese"
+     ],
+     "categories": [
+      "Arabic عربي",
+      "Award Winners"
+     ],
+     "directors": [
+      "Ryan Coogler"
+     ],
+     "versions": 1,
+     "imdbId": "tt31193180",
+     "confidence": "high",
+     "tmdbId": 1233413,
+     "imdbTitle": "Sinners",
+     "imdbYear": 2025,
+     "imdbGenres": [
+      "Horror"
+     ],
+     "directorIds": [
+      "nm3363032"
+     ],
+     "imdb": 7.5,
+     "votes": 537045,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.1,
+       "votes": 5024458
+      },
+      "mc_critics": {
+       "value": 84,
+       "votes": 55
+      },
+      "rt_audience": {
+       "value": 96,
+       "votes": 9547
+      }
+     },
+     "blended": 8.16,
+     "synopsis": "Synthetic synopsis 2 for emirates: a test film about a long journey.",
+     "cast": [
+      "Michael B. Jordan",
+      "Hailee Steinfield",
+      "Miles Caton"
+     ]
+    },
+    {
+     "sourceId": "1348666",
+     "title": "One Battle After Another",
+     "year": null,
+     "runtime": 161,
+     "genres": [
+      "Drama",
+      "Thriller"
+     ],
+     "cert": "R",
+     "languages": [
+      "English",
+      "French",
+      "German",
+      "Italian",
+      "Castilian Spanish",
+      "Brazilian Portuguese",
+      "Russian"
+     ],
+     "categories": [
+      "Acclaimed Dramas",
+      "Arabic عربي"
+     ],
+     "directors": [
+      "Paul Thomas Anderson"
+     ],
+     "versions": 1,
+     "imdbId": "tt30144839",
+     "confidence": "high",
+     "tmdbId": 1054867,
+     "imdbTitle": "One Battle After Another",
+     "imdbYear": 2025,
+     "imdbGenres": [
+      "Crime",
+      "Thriller"
+     ],
+     "directorIds": [
+      "nm0000759"
+     ],
+     "imdb": 7.6,
+     "votes": 454412,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.12,
+       "votes": 2913777
+      },
+      "mc_critics": {
+       "value": 95,
+       "votes": 63
+      },
+      "rt_audience": {
+       "value": 85,
+       "votes": 2057
+      }
+     },
+     "blended": 8.21,
+     "synopsis": "Synthetic synopsis 3 for emirates: a test film about a long journey.",
+     "cast": [
+      "Leonardo DiCaprio",
+      "Sean Penn",
+      "Benicio del Toro"
+     ]
+    },
+    {
+     "sourceId": "1329787",
+     "title": "Superman",
+     "year": null,
+     "runtime": 129,
+     "genres": [
+      "Action",
+      "Sci-Fi"
+     ],
+     "cert": "PG13",
+     "languages": [
+      "English",
+      "French",
+      "German",
+      "Italian",
+      "Castilian Spanish",
+      "Brazilian Portuguese",
+      "Japanese",
+      "Russian"
+     ],
+     "categories": [
+      "Action & Adventure",
+      "Arabic عربي"
+     ],
+     "directors": [
+      "James Gunn"
+     ],
+     "versions": 1,
+     "imdbId": "tt5950044",
+     "confidence": "high",
+     "tmdbId": 1061474,
+     "imdbTitle": "Superman",
+     "imdbYear": 2025,
+     "imdbGenres": [
+      "Action",
+      "Adventure",
+      "Sci-Fi"
+     ],
+     "directorIds": [
+      "nm0348181"
+     ],
+     "imdb": 7,
+     "votes": 452715,
+     "ratings": {
+      "letterboxd": {
+       "value": 3.82,
+       "votes": 3454175
+      },
+      "mc_critics": {
+       "value": 68,
+       "votes": 58
+      },
+      "rt_audience": {
+       "value": 90,
+       "votes": 4408
+      }
+     },
+     "blended": 7.46,
+     "synopsis": "Synthetic synopsis 4 for emirates: a test film about a long journey.",
+     "cast": [
+      "David Corenswet",
+      "Rachel Brosnahan",
+      "Nicholas Hoult"
+     ]
+    },
+    {
+     "sourceId": "1325812",
+     "title": "12 Angry Men",
+     "year": 1957,
+     "runtime": 96,
+     "genres": [
+      "Drama",
+      "Crime"
+     ],
+     "cert": "PG",
+     "languages": [
+      "English"
+     ],
+     "categories": [
+      "Acclaimed Dramas",
+      "Nostalgic Cinema"
+     ],
+     "directors": [
+      "Sidney Lumet"
+     ],
+     "versions": 1,
+     "imdbId": "tt0050083",
+     "confidence": "high",
+     "tmdbId": 389,
+     "imdbTitle": "12 Angry Men",
+     "imdbYear": 1957,
+     "imdbGenres": [
+      "Crime",
+      "Drama"
+     ],
+     "directorIds": [
+      "nm0001486"
+     ],
+     "imdb": 9,
+     "votes": 1009996,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.63,
+       "votes": 1792912
+      },
+      "mc_critics": {
+       "value": 97,
+       "votes": 18
+      },
+      "rt_audience": {
+       "value": 97,
+       "votes": 6776
+      }
+     },
+     "blended": 9.29,
+     "synopsis": "Synthetic synopsis 5 for emirates: a test film about a long journey.",
+     "cast": [
+      "Henry Fonda",
+      "Lee J. Cobb",
+      "Ed Begley"
+     ]
+    },
+    {
+     "sourceId": "1191117",
+     "title": "2001: A Space Odyssey",
+     "year": 1968,
+     "runtime": 122,
+     "genres": [
+      "Sci-Fi",
+      "Action"
+     ],
+     "cert": "G",
+     "languages": [
+      "English",
+      "German",
+      "Japanese"
+     ],
+     "categories": [
+      "Deutsch",
+      "Japanese 日本語"
+     ],
+     "directors": [
+      "Stanley Kubrick"
+     ],
+     "versions": 1,
+     "imdbId": "tt0062622",
+     "confidence": "high",
+     "tmdbId": 62,
+     "imdbTitle": "2001: A Space Odyssey",
+     "imdbYear": 1968,
+     "imdbGenres": [
+      "Adventure",
+      "Sci-Fi"
+     ],
+     "directorIds": [
+      "nm0000040"
+     ],
+     "imdb": 8.3,
+     "votes": 796129,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.23,
+       "votes": 1640748
+      },
+      "mc_critics": {
+       "value": 84,
+       "votes": 25
+      },
+      "rt_audience": {
+       "value": 88,
+       "votes": 17103
+      }
+     },
+     "blended": 8.44,
+     "synopsis": "Synthetic synopsis 6 for emirates: a test film about a long journey.",
+     "cast": [
+      "Keir Dullea",
+      "Gary Lockwood",
+      "William Sylvester"
+     ]
+    },
+    {
+     "sourceId": "1253361",
+     "title": "The Shawshank Redemption",
+     "year": 1994,
+     "runtime": 120,
+     "genres": [
+      "Drama"
+     ],
+     "cert": "R",
+     "languages": [
+      "English",
+      "French",
+      "German",
+      "Japanese"
+     ],
+     "categories": [
+      "Acclaimed Dramas",
+      "Deutsch"
+     ],
+     "directors": [
+      "Frank Darabont"
+     ],
+     "versions": 1,
+     "imdbId": "tt0111161",
+     "confidence": "high",
+     "tmdbId": 278,
+     "imdbTitle": "The Shawshank Redemption",
+     "imdbYear": 1994,
+     "imdbGenres": [
+      "Drama"
+     ],
+     "directorIds": [
+      "nm0001104"
+     ],
+     "imdb": 9.3,
+     "votes": 3259082,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.6,
+       "votes": 3211839
+      },
+      "mc_critics": {
+       "value": 82,
+       "votes": 22
+      },
+      "rt_audience": {
+       "value": 98,
+       "votes": 53485
+      }
+     },
+     "blended": 9.18,
+     "synopsis": "Synthetic synopsis 7 for emirates: a test film about a long journey.",
+     "cast": [
+      "Tim Robbins",
+      "Morgan Freeman",
+      "Bob Gunton"
+     ]
+    },
+    {
+     "sourceId": "1218196",
+     "title": "The Dark Knight",
+     "year": 2008,
+     "runtime": 152,
+     "genres": [
+      "Action",
+      "Drama"
+     ],
+     "cert": "PG13",
+     "languages": [
+      "English",
+      "French",
+      "German",
+      "Brazilian Portuguese",
+      "Latin Spanish",
+      "Japanese"
+     ],
+     "categories": [
+      "Arabic عربي",
+      "Cantonese 粵語"
+     ],
+     "directors": [
+      "Christopher Nolan"
+     ],
+     "versions": 1,
+     "imdbId": "tt0468569",
+     "confidence": "high",
+     "tmdbId": 155,
+     "imdbTitle": "The Dark Knight",
+     "imdbYear": 2008,
+     "imdbGenres": [
+      "Crime",
+      "Thriller"
+     ],
+     "directorIds": [
+      "nm0634240"
+     ],
+     "imdb": 9.1,
+     "votes": 3244961,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.5,
+       "votes": 4969481
+      },
+      "mc_critics": {
+       "value": 85,
+       "votes": 41
+      },
+      "rt_audience": {
+       "value": 94,
+       "votes": 173380
+      }
+     },
+     "blended": 9.02,
+     "synopsis": "Synthetic synopsis 8 for emirates: a test film about a long journey.",
+     "cast": [
+      "Christian Bale",
+      "Michael Caine",
+      "Heath Ledger"
+     ]
+    },
+    {
+     "sourceId": "1253357",
+     "title": "Inception",
+     "year": 2010,
+     "runtime": 148,
+     "genres": [
+      "Drama",
+      "Sci-Fi"
+     ],
+     "cert": "PG13",
+     "languages": [
+      "English",
+      "Brazilian Portuguese",
+      "Castilian Spanish",
+      "French",
+      "Russian",
+      "Italian",
+      "Japanese",
+      "Turkish"
+     ],
+     "categories": [
+      "Arabic عربي",
+      "Cantonese 粵語"
+     ],
+     "directors": [
+      "Christopher Nolan"
+     ],
+     "versions": 1,
+     "imdbId": "tt1375666",
+     "confidence": "high",
+     "tmdbId": 27205,
+     "imdbTitle": "Inception",
+     "imdbYear": 2010,
+     "imdbGenres": [
+      "Adventure",
+      "Sci-Fi",
+      "Thriller"
+     ],
+     "directorIds": [
+      "nm0634240"
+     ],
+     "imdb": 8.8,
+     "votes": 2884544,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.24,
+       "votes": 4564001
+      },
+      "mc_critics": {
+       "value": 74,
+       "votes": 42
+      },
+      "rt_audience": {
+       "value": 91,
+       "votes": 41614
+      }
+     },
+     "blended": 8.54,
+     "synopsis": "Synthetic synopsis 9 for emirates: a test film about a long journey.",
+     "cast": [
+      "Leonardo DiCaprio",
+      "Ken Watanabe",
+      "Joseph Gordon-Levitt"
+     ]
+    },
+    {
+     "sourceId": "1287488",
+     "title": "300",
+     "year": 2007,
+     "runtime": 110,
+     "genres": [
+      "Action",
+      "History"
+     ],
+     "cert": "R",
+     "languages": [
+      "English"
+     ],
+     "categories": [
+      "Action & Adventure",
+      "Arabic عربي"
+     ],
+     "directors": [
+      "Zack Snyder"
+     ],
+     "versions": 1,
+     "imdbId": null,
+     "confidence": "low",
+     "tmdbId": null,
+     "imdbTitle": null,
+     "imdbYear": null,
+     "imdbGenres": [],
+     "directorIds": [],
+     "imdb": null,
+     "votes": null,
+     "ratings": {},
+     "blended": null,
+     "synopsis": "Synthetic synopsis 10 for emirates: a test film about a long journey.",
+     "cast": [
+      "Gerard Butler",
+      "Lena Headey",
+      "Dominic West"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "qantas",
+   "name": "Qantas",
+   "month": "2026-10",
+   "fetchedAt": "2026-10-29T15:57:14.014Z",
+   "health": "ok",
+   "films": [
+    {
+     "sourceId": "515228",
+     "title": "Obsession",
+     "year": 2026,
+     "runtime": 108,
+     "genres": [
+      "Thriller"
+     ],
+     "cert": "MA15+",
+     "languages": [
+      "English",
+      "Latin Spanish",
+      "Brazilian Portuguese",
+      "German",
+      "Italian"
+     ],
+     "categories": [
+      "New Releases"
+     ],
+     "directors": [
+      "Curry Barker"
+     ],
+     "versions": 1,
+     "imdbId": "tt37287335",
+     "confidence": "medium",
+     "tmdbId": 1339713,
+     "imdbTitle": "Obsession",
+     "imdbYear": 2025,
+     "imdbGenres": [
+      "Fantasy",
+      "Horror",
+      "Thriller"
+     ],
+     "directorIds": [
+      "nm10533874"
+     ],
+     "imdb": 7.8,
+     "votes": 414367,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.06,
+       "votes": 5372511
+      },
+      "mc_critics": {
+       "value": 77,
+       "votes": 38
+      },
+      "rt_audience": {
+       "value": 94,
+       "votes": 3925
+      }
+     },
+     "blended": 8.12,
+     "synopsis": "Synthetic synopsis 1 for qantas: a test film about a long journey.",
+     "cast": [
+      "Michael Johnston",
+      "Andy Richter",
+      "Megan Lawless"
+     ]
+    },
+    {
+     "sourceId": "515004",
+     "title": "Thunderbolts*",
+     "year": 2025,
+     "runtime": 126,
+     "genres": [
+      "Action"
+     ],
+     "cert": "PG",
+     "languages": [
+      "English"
+     ],
+     "categories": [
+      "Franchises"
+     ],
+     "directors": [
+      "Jake Schreier"
+     ],
+     "versions": 1,
+     "imdbId": "tt20969586",
+     "confidence": "high",
+     "tmdbId": 986056,
+     "imdbTitle": "Thunderbolts*",
+     "imdbYear": 2025,
+     "imdbGenres": [
+      "Action",
+      "Adventure",
+      "Crime"
+     ],
+     "directorIds": [
+      "nm1500577"
+     ],
+     "imdb": 7.1,
+     "votes": 311142,
+     "ratings": {
+      "letterboxd": {
+       "value": 3.56,
+       "votes": 2152933
+      },
+      "mc_critics": {
+       "value": 68,
+       "votes": 53
+      },
+      "rt_audience": {
+       "value": 93,
+       "votes": 5151
+      }
+     },
+     "blended": 7.39,
+     "synopsis": "Synthetic synopsis 2 for qantas: a test film about a long journey.",
+     "cast": [
+      "Florence Pugh",
+      "Sebastian Stan",
+      "Julia Louis-Dreyfus"
+     ]
+    },
+    {
+     "sourceId": "515226",
+     "title": "Backrooms",
+     "year": 2026,
+     "runtime": 110,
+     "genres": [
+      "Thriller"
+     ],
+     "cert": "M",
+     "languages": [
+      "English",
+      "French",
+      "Latin Spanish",
+      "Italian"
+     ],
+     "categories": [
+      "Arthouse",
+      "Genre"
+     ],
+     "directors": [
+      "Kane Parsons"
+     ],
+     "versions": 1,
+     "imdbId": "tt26657236",
+     "confidence": "high",
+     "tmdbId": 1083381,
+     "imdbTitle": "Backrooms",
+     "imdbYear": 2026,
+     "imdbGenres": [
+      "Horror",
+      "Sci-Fi",
+      "Thriller"
+     ],
+     "directorIds": [
+      "nm10735410"
+     ],
+     "imdb": 6.7,
+     "votes": 239008,
+     "ratings": {
+      "letterboxd": {
+       "value": 3.3,
+       "votes": 3390404
+      },
+      "mc_critics": {
+       "value": 76,
+       "votes": 47
+      },
+      "rt_audience": {
+       "value": 74,
+       "votes": 2804
+      }
+     },
+     "blended": 6.91,
+     "synopsis": "Synthetic synopsis 3 for qantas: a test film about a long journey.",
+     "cast": [
+      "Chiwetel Ejiofor",
+      "Renate Reinsve",
+      "Mark Duplass"
+     ]
+    },
+    {
+     "sourceId": "509947",
+     "title": "Bugonia",
+     "year": 2025,
+     "runtime": 118,
+     "genres": [
+      "Sci-Fi"
+     ],
+     "cert": "MA15+",
+     "languages": [
+      "English",
+      "Japanese",
+      "French",
+      "Latin Spanish",
+      "Brazilian Portuguese",
+      "German"
+     ],
+     "categories": [
+      "Arthouse",
+      "Captions / Subs"
+     ],
+     "directors": [
+      "Yorgos Lanthimos"
+     ],
+     "versions": 1,
+     "imdbId": "tt12300742",
+     "confidence": "high",
+     "tmdbId": 701387,
+     "imdbTitle": "Bugonia",
+     "imdbYear": 2025,
+     "imdbGenres": [
+      "Comedy",
+      "Crime",
+      "Sci-Fi"
+     ],
+     "directorIds": [
+      "nm0487166"
+     ],
+     "imdb": 7.4,
+     "votes": 231889,
+     "ratings": {
+      "letterboxd": {
+       "value": 3.83,
+       "votes": 2153985
+      },
+      "mc_critics": {
+       "value": 72,
+       "votes": 61
+      },
+      "rt_audience": {
+       "value": 84,
+       "votes": 404
+      }
+     },
+     "blended": 7.6,
+     "synopsis": "Synthetic synopsis 4 for qantas: a test film about a long journey.",
+     "cast": [
+      "Jesse Plemons",
+      "Emma Stone",
+      "Aidan Delbis"
+     ]
+    },
+    {
+     "sourceId": "515262",
+     "title": "Barbie",
+     "year": 2023,
+     "runtime": 114,
+     "genres": [
+      "Fantasy"
+     ],
+     "cert": "PG",
+     "languages": [
+      "English",
+      "Japanese",
+      "French",
+      "Latin Spanish",
+      "Brazilian Portuguese",
+      "German"
+     ],
+     "categories": [
+      "Award Winners",
+      "Captions / Subs"
+     ],
+     "directors": [
+      "Greta Gerwig"
+     ],
+     "versions": 1,
+     "imdbId": "tt1517268",
+     "confidence": "high",
+     "tmdbId": 346698,
+     "imdbTitle": "Barbie",
+     "imdbYear": 2023,
+     "imdbGenres": [
+      "Adventure",
+      "Comedy",
+      "Fantasy"
+     ],
+     "directorIds": [
+      "nm1950086"
+     ],
+     "imdb": 6.8,
+     "votes": 709748,
+     "ratings": {
+      "letterboxd": {
+       "value": 3.67,
+       "votes": 6250595
+      },
+      "mc_critics": {
+       "value": 80,
+       "votes": 67
+      },
+      "rt_audience": {
+       "value": 83,
+       "votes": 6745
+      }
+     },
+     "blended": 7.37,
+     "synopsis": "Synthetic synopsis 5 for qantas: a test film about a long journey.",
+     "cast": [
+      "Margot Robbie",
+      "Ryan Gosling",
+      "America Ferrera"
+     ]
+    },
+    {
+     "sourceId": "508757",
+     "title": "Bride of Frankenstein",
+     "year": 1935,
+     "runtime": 75,
+     "genres": [
+      "Thriller"
+     ],
+     "cert": "PG",
+     "languages": [
+      "English"
+     ],
+     "categories": [
+      "Classics"
+     ],
+     "directors": [
+      "James Whale"
+     ],
+     "versions": 1,
+     "imdbId": "tt0026138",
+     "confidence": "high",
+     "tmdbId": 229,
+     "imdbTitle": "Bride of Frankenstein",
+     "imdbYear": 1935,
+     "imdbGenres": [
+      "Drama",
+      "Horror",
+      "Sci-Fi"
+     ],
+     "directorIds": [
+      "nm0001843"
+     ],
+     "imdb": 7.8,
+     "votes": 60110,
+     "ratings": {
+      "letterboxd": {
+       "value": 3.95,
+       "votes": 149125
+      },
+      "mc_critics": {
+       "value": 95,
+       "votes": 16
+      },
+      "rt_audience": {
+       "value": 88,
+       "votes": 1156
+      }
+     },
+     "blended": 8.23,
+     "synopsis": "Synthetic synopsis 6 for qantas: a test film about a long journey.",
+     "cast": [
+      "Boris Karloff",
+      "Colin Clive",
+      "Valerie Hobson"
+     ]
+    },
+    {
+     "sourceId": "508795",
+     "title": "The Shawshank ...",
+     "year": 1994,
+     "runtime": 142,
+     "genres": [
+      "Drama"
+     ],
+     "cert": "MA15+",
+     "languages": [
+      "English",
+      "Japanese",
+      "French",
+      "Latin Spanish",
+      "Brazilian Portuguese",
+      "Italian"
+     ],
+     "categories": [
+      "Award Winners"
+     ],
+     "directors": [
+      "Frank Darabont"
+     ],
+     "versions": 1,
+     "imdbId": "tt0111161",
+     "confidence": "medium",
+     "tmdbId": 278,
+     "imdbTitle": "The Shawshank Redemption",
+     "imdbYear": 1994,
+     "imdbGenres": [
+      "Drama"
+     ],
+     "directorIds": [
+      "nm0001104"
+     ],
+     "imdb": 9.3,
+     "votes": 3259082,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.6,
+       "votes": 3211839
+      },
+      "mc_critics": {
+       "value": 82,
+       "votes": 22
+      },
+      "rt_audience": {
+       "value": 98,
+       "votes": 53485
+      }
+     },
+     "blended": 9.18,
+     "synopsis": "Synthetic synopsis 7 for qantas: a test film about a long journey.",
+     "cast": [
+      "Tim Robbins",
+      "Morgan Freeman",
+      "Bob Gunton"
+     ]
+    },
+    {
+     "sourceId": "485913",
+     "title": "Fellowship Of The Ring",
+     "year": 2001,
+     "runtime": 179,
+     "genres": [
+      "Fantasy"
+     ],
+     "cert": "M",
+     "languages": [
+      "English",
+      "Japanese",
+      "French",
+      "Spanish",
+      "Portuguese",
+      "Korean"
+     ],
+     "categories": [
+      "Award Winners",
+      "Franchises"
+     ],
+     "directors": [
+      "Peter Jackson"
+     ],
+     "versions": 1,
+     "imdbId": "tt0120737",
+     "confidence": "high",
+     "tmdbId": 120,
+     "imdbTitle": "The Lord of the Rings: The Fellowship of the Ring",
+     "imdbYear": 2001,
+     "imdbGenres": [
+      "Adventure",
+      "Drama",
+      "Fantasy"
+     ],
+     "directorIds": [
+      "nm0001392"
+     ],
+     "imdb": 8.9,
+     "votes": 2248701,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.39,
+       "votes": 3352771
+      },
+      "mc_critics": {
+       "value": 92,
+       "votes": 34
+      },
+      "rt_audience": {
+       "value": 95,
+       "votes": 80557
+      }
+     },
+     "blended": 9,
+     "synopsis": "Synthetic synopsis 8 for qantas: a test film about a long journey.",
+     "cast": [
+      "Elijah Wood",
+      "Ian McKellen",
+      "Viggo Mortensen"
+     ]
+    },
+    {
+     "sourceId": "472382",
+     "title": "Return Of The King",
+     "year": 2003,
+     "runtime": 201,
+     "genres": [
+      "Fantasy"
+     ],
+     "cert": "M",
+     "languages": [
+      "English",
+      "French",
+      "Spanish",
+      "Portuguese",
+      "Korean",
+      "Italian"
+     ],
+     "categories": [
+      "Award Winners",
+      "Franchises"
+     ],
+     "directors": [
+      "Peter Jackson"
+     ],
+     "versions": 1,
+     "imdbId": "tt0167260",
+     "confidence": "high",
+     "tmdbId": 122,
+     "imdbTitle": "The Lord of the Rings: The Return of the King",
+     "imdbYear": 2003,
+     "imdbGenres": [
+      "Adventure",
+      "Drama",
+      "Fantasy"
+     ],
+     "directorIds": [
+      "nm0001392"
+     ],
+     "imdb": 9,
+     "votes": 2204618,
+     "ratings": {
+      "letterboxd": {
+       "value": 4.56,
+       "votes": 2550695
+      },
+      "mc_critics": {
+       "value": 94,
+       "votes": 41
+      },
+      "rt_audience": {
+       "value": 86,
+       "votes": 2050091
+      }
+     },
+     "blended": 9.04,
+     "synopsis": "Synthetic synopsis 9 for qantas: a test film about a long journey.",
+     "cast": [
+      "Elijah Wood",
+      "Ian McKellen",
+      "Viggo Mortensen"
+     ]
+    },
+    {
+     "sourceId": "507778",
+     "title": "A New Era",
+     "year": 2022,
+     "runtime": 125,
+     "genres": [
+      "Drama"
+     ],
+     "cert": "PG",
+     "languages": [
+      "English",
+      "Japanese",
+      "French",
+      "Latin Spanish",
+      "Brazilian Portuguese",
+      "Italian"
+     ],
+     "categories": [
+      "Classics",
+      "Franchises"
+     ],
+     "directors": [
+      "Simon Curtis"
+     ],
+     "versions": 1,
+     "imdbId": null,
+     "confidence": "low",
+     "tmdbId": null,
+     "imdbTitle": null,
+     "imdbYear": null,
+     "imdbGenres": [],
+     "directorIds": [],
+     "imdb": null,
+     "votes": null,
+     "ratings": {},
+     "blended": null,
+     "synopsis": "Synthetic synopsis 10 for qantas: a test film about a long journey.",
+     "cast": [
+      "Hugh Bonneville",
+      "Maggie Smith",
+      "Jim Carter"
+     ]
+    }
+   ]
+  }
+ ],
+ "names": {
+  "nm0381478": "Jared Hess",
+  "nm1950086": "Greta Gerwig",
+  "nm0634240": "Christopher Nolan",
+  "nm3363032": "Ryan Coogler",
+  "nm0487166": "Yorgos Lanthimos",
+  "nm0000709": "Robert Zemeckis",
+  "nm0000040": "Stanley Kubrick",
+  "nm0348181": "James Gunn",
+  "nm10533874": "Curry Barker",
+  "nm0000759": "Paul Thomas Anderson",
+  "nm0520488": "Phil Lord",
+  "nm0588087": "Christopher Miller",
+  "nm0001392": "Peter Jackson",
+  "nm0001104": "Frank Darabont",
+  "nm1500577": "Jake Schreier",
+  "nm1199107": "Zach Cregger",
+  "nm10735410": "Kane Parsons",
+  "nm0001486": "Sidney Lumet",
+  "nm0001843": "James Whale"
+ },
+ "letterboxd": {
+  "minecraft-2025": "tt3566834",
+  "barbie": "tt1517268",
+  "bugonia": "tt12300742",
+  "inception": "tt1375666",
+  "interstellar": "tt0816692",
+  "obsession-2025": "tt37287335",
+  "one-battle-after-another": "tt30144839",
+  "project-hail-mary": "tt12042730",
+  "superman-2025": "tt5950044",
+  "the-dark-knight": "tt0468569",
+  "the-lord-of-the-rings-the-fellowship-of-the-ring": "tt0120737",
+  "the-lord-of-the-rings-the-return-of-the-king": "tt0167260",
+  "the-shawshank-redemption": "tt0111161",
+  "thunderbolts": "tt20969586",
+  "weapons-2025": "tt26581740",
+  "backrooms-2026": "tt26657236",
+  "back-to-the-future": "tt0088763",
+  "sinners-2025": "tt31193180",
+  "2001-a-space-odyssey": "tt0062622",
+  "12-angry-men": "tt0050083",
+  "bride-of-frankenstein": "tt0026138"
+ }
+}

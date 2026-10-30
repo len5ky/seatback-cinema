@@ -1,0 +1,15 @@
+name = "seatback"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+workers_dev = false
+routes = [{ pattern = "seatback.len5ky.com", custom_domain = true }]
+
+# public/ is the same dataset folder GitHub serves; / falls through to public/index.html.
+[assets]
+directory = "../public"
+binding = "ASSETS"
+
+# Saved taste profiles (namespace "seatback-PROFILES", created by scripts/deploy-worker.sh).
+[[kv_namespaces]]
+binding = "PROFILES"
+id = "2ffa086638fb48ff9c628fc9c7697e7d"

@@ -1,0 +1,167 @@
+// Scoring core: blend of rating sources plus taste. Pure (no DB, no Bun APIs), shared by the CLI and the Worker.
+import { normalizeTitle, splitNames } from "./text.ts";
+import { directorsMatch } from "./directors.ts";
+
+export interface Taste {
+  liked_genres: string[]; disliked_genres: string[]; min_rating: number; min_votes: number;
+  seen: string[]; favourites: string[];
+}
+export interface PickRow {
+  source_id: string; title: string; directors: string | null; genres: string | null; runtime: number | null;
+  year: number | null; primary_language: string | null; synopsis: string | null; tconst: string; confidence: string;
+  imdb_title: string; start_year: number | null; imdb_genres: string | null; rating: number; votes: number; imdb_directors: string | null;
+}
+export interface Pick { row: PickRow; score: number; reasons: string[]; sources: string[]; ratings: FilmRatings }
+
+const PRIOR_MEAN = 6.5;
+
+/** Ratings stored by `ratings sync`, native scales (letterboxd 0.5-5, rt_audience 0-100, mc_critics 0-100). */
+export type FilmRatings = Partial<Record<"letterboxd" | "rt_audience" | "mc_critics", { value: number; votes: number | null }>>;
+
+/** Blend weights before re-normalisation; IMDb and Letterboxd are further scaled by how many votes back them. */
+export const BLEND_WEIGHTS = { imdb: 0.4, letterboxd: 0.3, rt_audience: 0.15, mc_critics: 0.15 } as const;
+/** 0.2 at 1 vote, 1.0 from 100k votes: a rating backed by few votes counts less in the blend. */
+export const voteWeight = (votes: number | null) => Math.min(1, Math.max(0.2, Math.log10((votes ?? 0) + 1) / 5));
+
+export interface BlendPart { source: string; value: number; weight: number }
+/** Weighted mean of 10-point values; missing sources simply drop out and the rest re-normalise. */
+export function blend(parts: BlendPart[]): number {
+  const w = parts.reduce((s, p) => s + p.weight, 0);
+  return w ? parts.reduce((s, p) => s + p.value * p.weight, 0) / w : PRIOR_MEAN;
+}
+
+/** Blend parts for one film: IMDb (Bayesian-shrunk toward 6.5 by min_votes) plus whichever other sources have a score. */
+export function blendParts(r: { rating: number; votes: number }, ratings: FilmRatings, minVotes: number): BlendPart[] {
+  const m = Math.max(minVotes, 1);
+  const imdb = (r.votes / (r.votes + m)) * r.rating + (m / (r.votes + m)) * PRIOR_MEAN;
+  const parts: BlendPart[] = [{ source: "imdb", value: imdb, weight: BLEND_WEIGHTS.imdb * voteWeight(r.votes) }];
+  const lb = ratings.letterboxd, rt = ratings.rt_audience, mc = ratings.mc_critics;
+  if (lb) parts.push({ source: "letterboxd", value: lb.value * 2, weight: BLEND_WEIGHTS.letterboxd * voteWeight(lb.votes) });
+  if (rt) parts.push({ source: "rt_audience", value: rt.value / 10, weight: BLEND_WEIGHTS.rt_audience });
+  if (mc) parts.push({ source: "mc_critics", value: mc.value / 10, weight: BLEND_WEIGHTS.mc_critics });
+  return parts;
+}
+
+export interface Affinity { value: number; n: number }
+export interface TasteModel {
+  mean: number; rated: number;
+  genres: Map<string, Affinity>; directors: Map<string, Affinity>;
+  watched: Set<string>; watchlist: Set<string>;
+}
+export interface RatedFilm { rating: number; genres: string[]; directors: string[] }
+/** Pseudo-count pulling affinities toward 0: one 9/10 film says little, ten say a lot. */
+export const SHRINK = 3;
+export const WATCHLIST_BOOST = 1.5;
+
+/** Affinity of a genre or director = sum of (your rating - your mean) over the films that have it, divided by (count + SHRINK). */
+export function learnAffinities(films: RatedFilm[]): Omit<TasteModel, "watched" | "watchlist"> {
+  const mean = films.length ? films.reduce((s, f) => s + f.rating, 0) / films.length : 0;
+  const acc = (key: (f: RatedFilm) => string[]) => {
+    const sums = new Map<string, { d: number; n: number }>();
+    for (const f of films) for (const k of new Set(key(f))) {
+      const e = sums.get(k) ?? { d: 0, n: 0 };
+      e.d += f.rating - mean; e.n++;
+      sums.set(k, e);
+    }
+    return new Map([...sums].map(([k, e]) => [k, { value: e.d / (e.n + SHRINK), n: e.n }]));
+  };
+  return { mean, rated: films.length, genres: acc((f) => f.genres.map((g) => g.toLowerCase())), directors: acc((f) => f.directors) };
+}
+
+/** Taste adjustment: mean genre affinity over the film's genres plus mean director affinity; reasons for the (up to 3) strongest. */
+export function tasteAdjustment(model: TasteModel, genres: string[], directors: string[], nameOf: (nconst: string) => string = (n) => n): { delta: number; reasons: string[] } {
+  const notable: { v: number; text: string }[] = [];
+  const term = (keys: string[], map: Map<string, Affinity>, label: (k: string) => string) => {
+    if (!keys.length) return 0;
+    let sum = 0;
+    for (const k of keys) {
+      const a = map.get(k);
+      if (!a) continue;
+      sum += a.value;
+      if (Math.abs(a.value) >= 0.3) notable.push({ v: a.value, text: `you rate ${label(k)} ${a.value > 0 ? "+" : ""}${a.value.toFixed(1)} (${a.n} film${a.n === 1 ? "" : "s"})` });
+    }
+    return sum / keys.length;
+  };
+  const g = term(genres.map((x) => x.toLowerCase()), model.genres, (k) => k);
+  const d = term(directors, model.directors, nameOf);
+  const reasons = notable.sort((a, b) => Math.abs(b.v) - Math.abs(a.v)).slice(0, 3).map((n) => n.text);
+  return { delta: g + d, reasons };
+}
+
+export const genreSet = (r: PickRow) =>
+  new Set([...(r.imdb_genres?.split(",") ?? []), ...(r.genres?.split(/[,/]/) ?? [])].map((g) => g.trim().toLowerCase()).filter(Boolean));
+
+export interface ScoreExtras { ratings?: FilmRatings; model?: TasteModel | null; nameOf?: (nconst: string) => string }
+
+/**
+ * Blend of IMDb (Bayesian-shrunk), Letterboxd, RT audience and Metacritic, then taste: affinities learned from your
+ * Letterboxd ratings, a watchlist boost, and taste.json genre/favourite overrides. With IMDb alone this is the v1 score.
+ */
+export function scorePick(r: PickRow, taste: Taste, favouriteDirectors: string[] = [], x: ScoreExtras = {}): Pick {
+  const ratings = x.ratings ?? {};
+  const parts = blendParts(r, ratings, taste.min_votes);
+  let score = blend(parts);
+  const reasons: string[] = []; // rating sources live in Pick.ratings, shown on the card's first line
+  if (x.model) {
+    if (x.model.watchlist.has(r.tconst)) { score += WATCHLIST_BOOST; reasons.push("on your watchlist"); }
+    const t = tasteAdjustment(x.model, r.imdb_genres?.split(",") ?? [], r.imdb_directors?.split(",") ?? [], x.nameOf);
+    score += t.delta;
+    reasons.push(...t.reasons);
+  }
+  const genres = genreSet(r);
+  const liked = taste.liked_genres.filter((g) => genres.has(g.toLowerCase()));
+  const disliked = taste.disliked_genres.filter((g) => genres.has(g.toLowerCase()));
+  if (liked.length) { score += Math.min(liked.length, 2) * 0.4; reasons.push(`+${liked.join("/")}`); }
+  if (disliked.length) { score -= disliked.length * 1.0; reasons.push(`-${disliked.join("/")}`); }
+  if (favouriteDirectors.length && directorsMatch(splitNames(r.directors), favouriteDirectors)) {
+    score += 0.5; reasons.push(`director of a favourite (${r.directors})`);
+  }
+  return { row: r, score: Math.round(score * 100) / 100, reasons, sources: parts.map((p) => p.source), ratings };
+}
+
+/** Votes in short form: 414,367 -> "414k", 1,234,567 -> "1.2M". */
+export function abbreviateVotes(n: number): string {
+  if (n >= 999_500) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${Math.round(n / 1_000)}k`;
+  return String(n);
+}
+
+/** Whitespace collapsed; text longer than max is cut at the last word boundary that fits, plus an ellipsis (length <= max). */
+export function truncateAtWord(text: string, max: number): string {
+  const s = text.replace(/\s+/g, " ").trim();
+  if (s.length <= max) return s;
+  const cut = s.slice(0, max - 1);
+  const end = cut.lastIndexOf(" ");
+  return `${(end > 0 ? cut.slice(0, end) : cut).replace(/[\s,;:]+$/, "")}…`;
+}
+
+/** The three-line card `picks` prints for one pick: ratings line, synopsis, reasons. */
+export function formatPickCard(p: Pick, rank: number, full = false): string {
+  const x = p.row;
+  const r = p.ratings;
+  const head = [
+    `${String(rank).padStart(2)}. ${x.title} (${x.start_year ?? x.year ?? "?"})`,
+    x.genres ?? x.imdb_genres,
+    `${x.runtime ?? "?"} min`,
+    `IMDb ${x.rating.toFixed(1)} (${abbreviateVotes(x.votes)})`,
+    ...(r.letterboxd ? [`LB ${r.letterboxd.value.toFixed(1)}`] : []),
+    ...(r.rt_audience ? [`RT ${r.rt_audience.value}%`] : []),
+    ...(r.mc_critics ? [`MC ${r.mc_critics.value}`] : []),
+    `score ${p.score.toFixed(2)}`,
+  ].filter((s): s is string => !!s).join("  ");
+  const syn = (x.synopsis ?? "").replace(/\s+/g, " ").trim();
+  const synLine = !syn ? "(no synopsis)" : full ? syn : truncateAtWord(syn, 180);
+  const why = [...p.reasons, x.directors ?? "?", x.primary_language ?? "?", `https://www.imdb.com/title/${x.tconst}/ (${x.confidence})`];
+  return [head, `    ${synLine}`, `    why: ${why.join("; ")}`].join("\n");
+}
+
+export function isSeen(r: PickRow, taste: Taste): boolean {
+  const keys = new Set(taste.seen.map((s) => (/^tt\d+$/.test(s) ? s : normalizeTitle(s))));
+  return keys.has(r.tconst) || keys.has(normalizeTitle(r.title)) || keys.has(normalizeTitle(r.imdb_title));
+}
+
+/** Catalogue year, falling back to the IMDb start year. Films with neither are outside any year range. */
+export function inYears(r: PickRow, minYear: number | undefined, maxYear: number | undefined): boolean {
+  const y = r.year ?? r.start_year;
+  return y !== null && (minYear === undefined || y >= minYear) && (maxYear === undefined || y <= maxYear);
+}
