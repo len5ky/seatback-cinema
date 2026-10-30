@@ -3,6 +3,8 @@ import { existsSync, readdirSync, statSync } from "node:fs";
 import { inflateRawSync } from "node:zlib";
 import { findCandidates, pickMatch, type Candidate, type Confidence, type MatchResult } from "../match.ts";
 import { normalizeTitle } from "../text.ts";
+import { parseCsv } from "../csv.ts";
+export { parseCsv, parseCsvRows } from "../csv.ts";
 
 /** Minimal zip reader (stored + deflate), enough for a Letterboxd export. Returns entry name -> UTF-8 text. */
 export function readZip(buf: Uint8Array): Map<string, string> {
@@ -29,38 +31,6 @@ export function readZip(buf: Uint8Array): Map<string, string> {
     else throw new Error(`${name}: unsupported zip compression method ${method}`);
   }
   return out;
-}
-
-/** RFC 4180 CSV: quoted fields, doubled quotes, CRLF, leading BOM. Returns raw rows, header first, blank lines dropped. */
-export function parseCsvRows(text: string): string[][] {
-  const rows: string[][] = [];
-  let row: string[] = [], field = "", quoted = false;
-  const s = text.replace(/^﻿/, "");
-  for (let i = 0; i < s.length; i++) {
-    const c = s[i]!;
-    if (quoted) {
-      if (c === '"' && s[i + 1] === '"') { field += '"'; i++; }
-      else if (c === '"') quoted = false;
-      else field += c;
-    } else if (c === '"') quoted = true;
-    else if (c === ",") { row.push(field); field = ""; }
-    else if (c === "\n" || c === "\r") {
-      if (c === "\r" && s[i + 1] === "\n") i++;
-      row.push(field); field = "";
-      if (row.some((f) => f !== "")) rows.push(row);
-      row = [];
-    } else field += c;
-  }
-  row.push(field);
-  if (row.some((f) => f !== "")) rows.push(row);
-  return rows;
-}
-
-/** CSV as header-keyed records (see parseCsvRows). */
-export function parseCsv(text: string): Record<string, string>[] {
-  const [header, ...body] = parseCsvRows(text);
-  if (!header) return [];
-  return body.map((r) => Object.fromEntries(header.map((h, i) => [h.trim(), r[i] ?? ""])));
 }
 
 export interface ExportFilm { name: string; year: number | null; uri: string | null; rating: number | null; watched: boolean; watchlist: boolean }

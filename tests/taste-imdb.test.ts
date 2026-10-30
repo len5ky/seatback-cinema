@@ -22,7 +22,7 @@ test("detects IMDb exports by header; Letterboxd and other CSVs are not IMDb", a
 test("parses ratings: BOM, quoted title with a comma, 1-10 kept as-is", () => {
   const { kind, films, skipped } = parseImdbExport(ratingsCsv);
   expect([kind, films.length, skipped]).toEqual(["ratings", 15, 0]);
-  expect(films[0]).toEqual({ tconst: "tt0111161", title: "The Shawshank Redemption", year: 1994, titleType: "Movie", rating: 10 });
+  expect(films[0]).toEqual({ tconst: "tt0111161", title: "The Shawshank Redemption", year: 1994, titleType: "Movie", rating: 10, genres: ["Drama"], directors: ["Frank Darabont"] });
   expect(films.find((f) => f.tconst === "tt0190332")).toMatchObject({ title: "Crouching Tiger, Hidden Dragon", year: 2000, rating: 8 });
   expect(films.find((f) => f.tconst === "tt0332280")?.rating).toBe(3);
   expect(films.filter((f) => !isFilmType(f.titleType)).map((f) => f.tconst)).toEqual(["tt0903747", "tt2301451", "tt0108778"]);
