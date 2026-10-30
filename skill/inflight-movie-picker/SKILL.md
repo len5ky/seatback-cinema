@@ -48,7 +48,7 @@ on one signal, such as runtime alone, so treat it as probably right. `-` means n
 the plane, but you can't vouch for which film it is.
 
 Other options: `--matched` (only films with an IMDb id), `--tmdb` (adds TMDB score and vote count; needs
-`TMDB_API_KEY`), `--taste <path>` (below), `--json`, `--refresh`. Emirates lists about 2,000 films and Cathay
+`TMDB_API_KEY`), `--taste <path>`, `--imdb-url <url>` and `--letterboxd-url <url>` (below), `--json`, `--refresh`. Emirates lists about 2,000 films and Cathay
 about 1,500, so filter by genre or runtime, or read the full list once and shortlist from it.
 
 If the flight month isn't published yet, use the latest month and tell the person the line-up may change.
@@ -64,7 +64,23 @@ bun $S emirates --taste data/imdb-ratings
 bun $S united --taste ~/Downloads/letterboxd-export     # unzip the Letterboxd zip first
 ```
 
-The script then hides every film they've rated or logged, adds a `you` column that says `watchlist` for films on
+No export, but a public profile? Pass its URL. The script fetches it from this machine, page by page (IMDb: 250
+titles a page, up to 50 pages, then the watchlist; Letterboxd: 72 films a page, then the watchlist), and caches it
+for 24 hours:
+
+```bash
+bun $S emirates --imdb-url https://www.imdb.com/user/p.xxxxxxxx/ratings/
+bun $S ba --letterboxd-url https://letterboxd.com/<username>/
+```
+
+The IMDb ratings and watchlist have to be public (IMDb, Settings, Privacy). IMDb blocks scripted requests from a
+lot of networks with an empty HTTP 202; Letterboxd sometimes answers 403. When that happens the script prints the
+export route in two lines and exits 1. Pass that on: the CSV export from https://www.imdb.com/list/ratings/export,
+or Letterboxd's Settings, Data, Export your data, then `--taste`. If it stops partway (a block after page 1), it
+keeps the pages it read and adds a `note:` line saying so. Letterboxd pages carry no IMDb id, so those films join
+through the dataset's Letterboxd links where it has them and on title and year otherwise.
+
+With any of these the script hides every film they've rated or logged, adds a `you` column that says `watchlist` for films on
 their watchlist, and prints their 9-10/10 films and their 1-4/10 films above the table. The join: IMDb rows match on
 the IMDb id (`Const`), exactly. Letterboxd rows have no IMDb id, so they match on title (lowercased, accents,
 punctuation and a leading "The" dropped) with the year within one; a catalogue row with no year (most of
@@ -121,12 +137,13 @@ international seatback set), and airlines swap some titles mid-month.
 
 ## Setup and troubleshooting
 
-- The data comes from `https://raw.githubusercontent.com/len5ky/seatback-cinema/main/public`. `--base <url|dir>` or
+- The data comes from `https://seatback.len5ky.com`, the same files as the repo's `public/`. `--base <url|dir>` or
   `SEATBACK_DATASET_URL` points the script elsewhere: a mirror, `http://localhost:4173` (`bun run serve` in a
   checkout of the repo), a local `public/` folder or a `file://` URL. Local folders are read in place, never cached.
 - Downloads are cached in `~/.cache/inflight-movie-picker/` (`$XDG_CACHE_HOME` respected). The index refreshes
   every 12 hours; a finished month is cached for good.
-- `HTTP 404` on the index means nothing is published at that address: the repo may still be private, or the URL is
-  wrong. A missing month means it isn't published yet.
+- `HTTP 404` on the index means nothing is published at that address, or the URL is wrong. A missing month means
+  it isn't published yet.
+- Fetched profiles are cached in `~/.cache/inflight-movie-picker/profiles/` for 24 hours; `--refresh` fetches again.
 - `TMDB_API_KEY` is optional (free at themoviedb.org, Settings, API; a v3 key or a v4 read token). The first
   `--tmdb` run on a big catalogue makes one request per film; after that it's cached for 30 days.

@@ -10,16 +10,21 @@
 //          --max-runtime <m> only films up to m minutes        --matched       only films with an IMDb id
 //          --family          only family, kids and animation films (each airline names these genres differently)
 //          --taste <path>    IMDb / Letterboxd CSV export (file or folder): hide seen films, flag the watchlist
+//          --imdb-url <url>  public IMDb profile (https://www.imdb.com/user/p.xxxx/ratings/): ratings + watchlist
+//          --letterboxd-url <url>  public Letterboxd profile (https://letterboxd.com/<user>/): films + watchlist
+//                            (both fetched from this machine, cached 24 h; combine freely with --taste)
 //          --tmdb            add TMDB vote average / count (needs TMDB_API_KEY; cached 30 days)
-//          --base <url|dir>  dataset location (also SEATBACK_DATASET_URL): https://..., http://localhost:4173,
-//                            a local public/ folder or file:///.../public
+//          --base <url|dir>  dataset location (also SEATBACK_DATASET_URL; default https://seatback.len5ky.com):
+//                            https://..., http://localhost:4173, a local public/ folder or file:///.../public
 //          --json            raw JSON films instead of the table   --refresh  ignore the cache
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { blockedHelp, fetchImdbProfile, fetchLetterboxdProfile, type FetchedProfile, type FetchOpts, imdbUserId, letterboxdUser, PROFILE_TTL_MS,
+  ProfileBlocked } from "./profile.ts";
 
-const DEFAULT_BASE_URL = "https://raw.githubusercontent.com/len5ky/seatback-cinema/main/public";
+const DEFAULT_BASE_URL = "https://seatback.len5ky.com";
 const CACHE_ROOT = join(process.env.XDG_CACHE_HOME ?? join(homedir(), ".cache"), "inflight-movie-picker");
 let BASE = DEFAULT_BASE_URL; // set in main(): a URL, or a local directory when LOCAL
 let LOCAL = false;
@@ -47,7 +52,7 @@ function fail<T>(msg: string, fallback?: T): T {
 
 function parseArgs(argv: string[]) {
   const flags = new Set(["list", "matched", "family", "tmdb", "json", "refresh", "help"]);
-  const valued = new Set(["search", "genre", "max-runtime", "base", "taste"]);
+  const valued = new Set(["search", "genre", "max-runtime", "base", "taste", "imdb-url", "letterboxd-url"]);
   const opts: Record<string, string | boolean> = {};
   const pos: string[] = [];
   for (let i = 0; i < argv.length; i++) {
@@ -109,7 +114,7 @@ async function cachedJson<T>(url: string, file: string, ttlMs: number | null, re
   }
   if (!res.ok) {
     const hint = res.status === 404 || res.status === 403
-      ? " (nothing is published at this address: the repo may be private, or the path is wrong. Point --base or" +
+      ? " (nothing is published at this address, or the path is wrong. Point --base or" +
         " SEATBACK_DATASET_URL at another copy: a local public/ folder, or http://localhost:4173 from `bun run serve`" +
         " in a checkout)"
       : "";
@@ -211,12 +216,13 @@ function csvFiles(path: string): string[] {
   return out;
 }
 
-function loadTaste(path: string): Taste {
-  const t: Taste = { seenIds: new Set(), watchIds: new Set(), seenKeys: new Map(), watchKeys: new Map(), rated: [], files: [], seen: 0, watchlist: 0 };
-  const addKey = (m: Map<string, (number | null)[]>, title: string, year: number | null) => {
-    const k = titleKey(title); if (!k) return;
-    m.set(k, [...(m.get(k) ?? []), year]);
-  };
+const emptyTaste = (): Taste => ({ seenIds: new Set(), watchIds: new Set(), seenKeys: new Map(), watchKeys: new Map(), rated: [], files: [], seen: 0, watchlist: 0 });
+function addKey(m: Map<string, (number | null)[]>, title: string, year: number | null): void {
+  const k = titleKey(title); if (!k) return;
+  m.set(k, [...(m.get(k) ?? []), year]);
+}
+
+function loadTaste(path: string, t: Taste = emptyTaste()): Taste {
   for (const file of csvFiles(path)) {
     const [head, ...rows] = parseCsv(readFileSync(file, "utf8").replace(/^\uFEFF/, ""));
     if (!head) continue;
@@ -250,6 +256,63 @@ function loadTaste(path: string): Taste {
   return t;
 }
 
+/** Fold a fetched IMDb / Letterboxd profile into the taste: ids join exactly, unmatched Letterboxd films on title. */
+function addProfile(t: Taste, p: FetchedProfile): void {
+  for (const id of p.seen) t.seenIds.add(id);
+  for (const id of p.watchlist ?? []) t.watchIds.add(id);
+  for (const r of p.unmatched.seen) addKey(t.seenKeys, r.title, r.year);
+  for (const r of p.unmatched.watchlist) addKey(t.watchKeys, r.title, r.year);
+  for (const [id, rating] of Object.entries(p.ratings ?? {})) {
+    const ref = p.titles[id];
+    if (ref) t.rated.push({ title: ref.title, year: ref.year, rating });
+  }
+  for (const r of p.unmatched.seen) if (r.rating) t.rated.push({ title: r.title, year: r.year, rating: r.rating });
+  t.seen += p.seen.length + p.unmatched.seen.length;
+  t.watchlist += (p.watchlist?.length ?? 0) + p.unmatched.watchlist.length;
+  t.files.push(p.source ?? "profile");
+}
+
+/** Test hooks (undocumented): serve fixtures from a loopback server instead of imdb.com / letterboxd.com. */
+function profileFetchOpts(): FetchOpts {
+  const env = process.env;
+  return {
+    delayMs: env.INFLIGHT_PROFILE_DELAY_MS !== undefined ? Number(env.INFLIGHT_PROFILE_DELAY_MS) : 1000,
+    ...(env.INFLIGHT_IMDB_ORIGIN ? { imdbOrigin: env.INFLIGHT_IMDB_ORIGIN } : {}),
+    ...(env.INFLIGHT_IMDB_GRAPHQL ? { imdbGraphql: env.INFLIGHT_IMDB_GRAPHQL } : {}),
+    ...(env.INFLIGHT_LETTERBOXD_ORIGIN ? { letterboxdOrigin: env.INFLIGHT_LETTERBOXD_ORIGIN } : {}),
+    log: (m) => console.error(m),
+  };
+}
+
+/** A profile fetched in the last 24 h is reused; a refusal prints the export route and exits. */
+async function loadProfile(site: "imdb" | "letterboxd", url: string, refresh: boolean): Promise<FetchedProfile> {
+  let key: string;
+  try { key = site === "imdb" ? imdbUserId(url) : letterboxdUser(url).toLowerCase(); }
+  catch (e) { return fail(e instanceof Error ? e.message : String(e)); }
+  const path = join(CACHE_ROOT, "profiles", `${site}-${key.replace(/[^\w.-]+/g, "_")}.json`);
+  if (!refresh && existsSync(path) && Date.now() - statSync(path).mtimeMs < PROFILE_TTL_MS) {
+    const hit = readCache<FetchedProfile>(path);
+    if (hit?.seen) return hit;
+  }
+  const opts = profileFetchOpts();
+  let p: FetchedProfile;
+  try {
+    if (site === "imdb") p = await fetchImdbProfile(url, opts);
+    else {
+      const ids = await datasetJson<Record<string, { letterboxd?: string }>>("data/ids.json", "ids.json", INDEX_TTL_MS, refresh);
+      const slugs = new Map<string, string>();
+      for (const [tt, x] of Object.entries(ids)) if (x.letterboxd) slugs.set(x.letterboxd, tt);
+      p = await fetchLetterboxdProfile(url, slugs, opts);
+    }
+  } catch (e) {
+    if (e instanceof ProfileBlocked) { console.error(blockedHelp(e.site, e.message)); process.exit(1); }
+    return fail(e instanceof Error ? e.message : String(e));
+  }
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, JSON.stringify(p));
+  return p;
+}
+
 /** Joined on the IMDb id where we have one, else on title key with years within 1 (or a missing year: Emirates). */
 function tasteHit(f: Film, ids: Set<string>, keys: Map<string, (number | null)[]>): boolean {
   if (f.imdbId && ids.has(f.imdbId)) return true;
@@ -263,7 +326,7 @@ async function main(): Promise<void> {
   const { opts, pos } = parseArgs(process.argv.slice(2));
   const refresh = opts.refresh === true;
   if (opts.help) {
-    console.log(readFileSync(new URL(import.meta.url), "utf8").split("\n").filter((l) => l.startsWith("//")).slice(0, 15).map((l) => l.slice(3)).join("\n"));
+    console.log(readFileSync(new URL(import.meta.url), "utf8").split("\n").filter((l) => l.startsWith("//")).slice(0, 18).map((l) => l.slice(3)).join("\n"));
     return;
   }
   resolveBase(typeof opts.base === "string" ? opts.base : undefined);
@@ -273,7 +336,7 @@ async function main(): Promise<void> {
     console.log(`dataset ${BASE} (generated ${index.generatedAt})`);
     console.log("airline | name | months (films)");
     for (const a of index.airlines) console.log(`${a.id} | ${a.name} | ${a.months.map((m) => `${m.month} (${m.count})`).join(", ")}`);
-    if (!pos[0] && !opts.list) console.log("\nusage: catalogue.ts <airline> [YYYY-MM] [--search t] [--genre g] [--max-runtime m] [--family] [--matched] [--taste path] [--tmdb] [--base url|dir] [--json]");
+    if (!pos[0] && !opts.list) console.log("\nusage: catalogue.ts <airline> [YYYY-MM] [--search t] [--genre g] [--max-runtime m] [--family] [--matched] [--taste path] [--imdb-url url] [--letterboxd-url url] [--tmdb] [--base url|dir] [--json]");
     return;
   }
 
@@ -300,7 +363,16 @@ async function main(): Promise<void> {
   }
   if (opts.matched) films = films.filter((f) => f.imdbId);
   if (opts.family) films = films.filter((f) => f.genres.some((g) => /famil|kid|child|anim|cartoon/i.test(g)));
-  const taste = typeof opts.taste === "string" ? loadTaste(opts.taste) : null;
+  let taste: Taste | null = typeof opts.taste === "string" ? loadTaste(opts.taste) : null;
+  const notes: string[] = [];
+  for (const [flag, site] of [["imdb-url", "imdb"], ["letterboxd-url", "letterboxd"]] as const) {
+    const url = opts[flag];
+    if (typeof url !== "string") continue;
+    const p = await loadProfile(site, url, refresh);
+    taste ??= emptyTaste();
+    addProfile(taste, p);
+    notes.push(...p.notes.map((n) => `${p.source}: ${n}`));
+  }
   let hidden = 0;
   if (taste) {
     const before = films.length;
@@ -327,6 +399,7 @@ async function main(): Promise<void> {
     console.log(`taste (${taste.files.join(", ")}): ${taste.seen} seen, ${taste.watchlist} on the watchlist; hid ${hidden} seen films`);
     if (loved.length) console.log(`loved (9-10/10): ${loved.map(fmt).join("; ")}`);
     if (hated.length) console.log(`disliked (1-4/10): ${hated.map(fmt).join("; ")}`);
+    for (const n of notes) console.log(`note: ${n}`);
   }
   // imdb is the id, with "(medium)" when the match rests on one signal; cert is the airline's own age rating
   console.log(`title | year | min | genres | cert | imdb${taste ? " | you" : ""}${tmdb ? " | tmdb (votes)" : ""}`);
