@@ -2,8 +2,9 @@
 
 Seatback Cinema is a GitHub dataset of the in-flight entertainment (IFE) catalogs of 11 airlines, Emirates ice,
 United and British Airways among them, with every film matched to IMDb, plus an agent skill that ranks what's on
-your flight by IMDb and Letterboxd ratings and your own taste. Ask Claude Code, Codex or Cursor "what should I
-watch on my Emirates flight?" and it answers from the films Emirates is actually showing that month.
+your flight by IMDb and Letterboxd ratings and your own taste. Ask Claude (in the app, or Claude Code), Codex or
+Cursor "what should I watch on my Emirates flight?" and it answers from the films Emirates is actually showing that
+month.
 
 Also searched as: seatback-cinema, flightflix, skyflix, planeflix, inflight movie finder, airline movie ranker,
 mile-high movies, cabin cinema, airline movie list ranked by IMDb.
@@ -28,6 +29,32 @@ per audio track. "IMDb id" is the share matched with high or medium confidence.
 | Japan Airlines | `jal` | 124 | 88.7% |
 
 7,331 films in all, 6,862 of them with an IMDb id.
+
+## Use it in the Claude app (web and mobile)
+
+This needs a Claude plan that allows custom connectors and skills. Set it up once on claude.ai in a browser:
+
+1. **Add the connector.** Settings, Connectors, Add custom connector. Name it Seatback Cinema and paste
+   `https://seatback.len5ky.com/mcp`. It asks for no login.
+2. **Add the skill.** In a checkout of this repo, `scripts/package-web-skill.sh` builds
+   `tmp/inflight-movie-picker-web.zip`. Upload it at Settings, Capabilities, Skills, as it is: the skill folder
+   has to sit at the root of the zip.
+
+After that, start a chat, on the web or in the mobile app, and say where you're flying:
+
+> I'm on Emirates from Dubai to Sydney next Tuesday, about 14 hours. My IMDb is
+> https://www.imdb.com/user/p.xxxxxxxx/ratings/ - what should I watch?
+
+Claude reads your ratings, drops what you've seen, and answers with three films and a backup, each with its ratings,
+a one-line synopsis, why it suits you and an IMDb link. It offers to save your taste as a token, so next time you
+paste the token in place of the URL.
+
+**Make your IMDb lists public first.** On IMDb go to Settings, Privacy and set your ratings and watchlist to
+public. Your profile URL looks like `https://www.imdb.com/user/p.xxxxxxxx/ratings/`: open your ratings while signed
+in and copy it from the address bar. IMDb sometimes blocks Claude's fetch. When it does, Claude asks for the CSV
+export from https://www.imdb.com/list/ratings/export instead; attach the file to the chat. A Letterboxd profile
+URL (`https://letterboxd.com/<username>/`) or Letterboxd's export zip works the same way, and with nothing at all
+Claude asks for five films you loved and two you hated.
 
 ## Quick start: the skill
 
@@ -69,8 +96,9 @@ taste: 938 ratings (mean 7.3/10), 938 watched, 103 on watchlist; taste.json as o
     why: Kirk Jones; English; https://www.imdb.com/title/tt31514146/ (high)
 ```
 
-The skill presents its picks in the same card shape. It has no scraped ratings, so its numbers come from the
-model's knowledge of the film and, when `TMDB_API_KEY` is set, from TMDB.
+The skills present picks in the same card shape. In the Claude app the ratings come from the connector. The
+coding-agent skill has no scraped ratings, so its numbers come from the model's knowledge of the film and, when
+`TMDB_API_KEY` is set, from TMDB.
 
 ### Add your taste
 
@@ -82,6 +110,9 @@ loved and hated.
   same from your Watchlist. Put the files in `data/imdb-ratings/` in the folder you start the agent from.
 - **Letterboxd:** letterboxd.com, Settings, the Data tab, Export your data. Unzip the download anywhere and tell
   the agent where it is.
+- **No export:** give the agent your public profile URL. The script reads it with `--imdb-url` or
+  `--letterboxd-url` from your own machine. IMDb often refuses scripted requests, and the script then points you
+  back to the export.
 
 IMDb rows join on the IMDb id, so they never mismatch. Letterboxd exports carry no IMDb id, so those join on title
 and year, which can miss a retitled film.
@@ -221,5 +252,7 @@ runtime.
 
 - `skill/inflight-movie-picker/` is the public skill described above. It reads the published dataset, so nobody
   needs the pipeline.
+- `skill/inflight-movie-picker-web/` is the Claude app version: no script, it calls the connector at
+  `https://seatback.len5ky.com/mcp`. `scripts/package-web-skill.sh` zips it for upload.
 - `.claude/skills/inflight-movie-picker/` is the maintainer's skill for a checkout: it drives the CLI and the local
   SQLite database, scraped ratings included.
