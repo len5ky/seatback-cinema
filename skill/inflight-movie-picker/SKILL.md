@@ -64,7 +64,11 @@ bun $S emirates --taste data/imdb-ratings
 bun $S united --taste ~/Downloads/letterboxd-export     # unzip the Letterboxd zip first
 ```
 
-No export, but a public profile? Pass its URL. The script fetches it from this machine, page by page (IMDb: 250
+No export, but a public IMDb profile? If the Seatback Cinema connector is added in this session (its tools are
+`list_airlines`, `picks`, `profile_from_imdb_url` and so on), call `profile_from_imdb_url` with the URL first: it
+reads ratings, scores and watchlist on the server, where IMDb's bot check doesn't get in the way, and `picks` takes
+`profile: { imdb_user }` from its answer. Without the connector, or for a Letterboxd profile, pass the URL to the
+script. The script fetches it from this machine, page by page (IMDb: 250
 titles a page, up to 50 pages, then the watchlist; Letterboxd: 72 films a page, then the watchlist), and caches it
 for 24 hours:
 

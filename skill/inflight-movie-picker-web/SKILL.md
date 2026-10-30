@@ -9,7 +9,8 @@ The `seatback` connector holds every film in eleven airlines' seatback catalogue
 IMDb ids, ratings and a short synopsis. You recommend from what its tools return and from nothing else. If a film
 isn't in a tool result, it isn't on the plane as far as you know, however well it would fit.
 
-The tools: `list_airlines`, `catalogue`, `picks`, `profile_from_text`, `save_profile`, `get_profile`. If none of
+The tools: `list_airlines`, `catalogue`, `picks`, `profile_from_imdb_url`, `profile_from_text`, `save_profile`,
+`get_profile`. If none of
 them is available, the connector isn't added. Say so and give the fix in one line: Settings, Connectors, Add custom
 connector, URL `https://seatback.len5ky.com/mcp`. Don't fall back to recommending from memory.
 
@@ -44,17 +45,27 @@ tell them, and move on to one of the other routes.
 It looks like `https://www.imdb.com/user/p.xxxxxxxx/ratings/` (older ones use `ur1234567` in place of `p.xxx`).
 The ratings and the watchlist must be public: IMDb, Settings, Privacy.
 
-1. Fetch `https://www.imdb.com/user/<id>/ratings/` with your web fetch tool. Each page holds up to 250 titles, and
-   the top of the page gives the total ("941 titles"). Fetch `?page=2`, `?page=3` and so on until you have them all
-   or a page adds nothing new. Stop at 10 pages and say you used the most recent 2,500.
-2. Pass each page's content, unchanged, to `profile_from_text` with `kind: "imdb_page"`. From page 2 onward, pass
-   the profile you have so far as `add_to`.
-3. Do the same for `https://www.imdb.com/user/<id>/watchlist/` (one page covers 250 films) with
-   `list: "watchlist"`, so those films count as wanted, not seen.
+Call `profile_from_imdb_url` with the URL as they gave it. The connector reads their ratings, their scores and
+their watchlist straight from IMDb, which takes a few seconds (up to half a minute for thousands of ratings). It
+answers with counts, the genres and directors it learned, and an `imdb_user` id. Pass `profile: { imdb_user: "ur..." }`
+to `picks`. The import is kept for 24 hours; after that, call the tool again with the same URL. Read out anything in
+`notes`: a profile over 5,000 ratings is cut to the most recent 5,000, and a private watchlist is skipped.
 
-IMDb loads the person's own scores with a script after the page arrives, so a fetched page often gives you the
-films without the numbers. That still works: every title on the ratings page is a film they've seen, and `picks`
-hides it. Don't invent scores to fill the gap.
+When the tool returns an error, do what it says:
+
+- It couldn't turn a `p.` id into a user id: fetch `https://www.imdb.com/user/<p.id>/ratings/` with your web fetch
+  tool, find the id that starts with `ur` (it sits in the page data as `authorId`, or in links like
+  `/user/ur12345678/`), and call `profile_from_imdb_url` again with `https://www.imdb.com/user/<ur id>/ratings/`.
+- IMDb refused the connector, or its API changed: fall back to fetching the pages yourself, below, or ask for the
+  CSV export.
+
+The fallback, when the connector can't read IMDb: fetch `https://www.imdb.com/user/<id>/ratings/` with your web
+fetch tool. Each page holds up to 250 titles; fetch `?page=2`, `?page=3` and so on until a page adds nothing new,
+stopping at 10 pages. Pass each page, unchanged, to `profile_from_text` with `kind: "imdb_page"`, and from page 2
+onward pass the profile so far as `add_to`. Do the same for `/watchlist/` with `list: "watchlist"`. The pages carry
+the film list but not the scores, so every title counts as seen and `picks` hides it; the result's `note` says so.
+Don't invent scores to fill the gap. If `profile_from_text` returns an `imdb_user`, try `profile_from_imdb_url`
+with that id once before you go on.
 
 IMDb often blocks automated fetches. An empty page, HTTP 202 or 403, or a page with no titles on it means it said
 no. Tell them it was blocked and offer two ways round it:
@@ -96,7 +107,8 @@ profile.
 
 ## 3. Save the profile (offer once)
 
-When the profile came from a URL or a file, offer once to save it so next time they can skip this step. If they
+An IMDb import through `profile_from_imdb_url` needs no token: next time they paste the same URL. When the profile
+came from fetched pages or a file, offer once to save it so next time they can skip this step. If they
 say yes, call `save_profile` and give them the token on its own line. Tell them to keep it somewhere they'll find
 it: it's the only way back to the profile, it lasts a year, and anyone who has it can load the film list (ids and
 ratings, nothing else). Don't offer again in the same chat, and don't save a profile they built from five titles in
