@@ -9,7 +9,7 @@ routes = [{ pattern = "seatback.len5ky.com", custom_domain = true }]
 directory = "../public"
 binding = "ASSETS"
 
-# Saved taste profiles. scripts/deploy-worker.sh creates the namespace and fills in the id.
+# Saved taste profiles (namespace "seatback-PROFILES", created by scripts/deploy-worker.sh).
 [[kv_namespaces]]
 binding = "PROFILES"
-id = "REPLACE_WITH_KV_ID"
+id = "2ffa086638fb48ff9c628fc9c7697e7d"
