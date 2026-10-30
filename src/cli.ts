@@ -7,6 +7,7 @@ import { downloadImdb, loadImdb } from "./imdb.ts";
 import { matchAll } from "./match.ts";
 import { formatPickCard, loadTaste, picks } from "./rank.ts";
 import { PUBLIC_DIR, exportAll } from "./export.ts";
+import { WORKER_BUNDLE, writeWorkerBundle } from "./export-worker.ts";
 import { syncIds } from "./ratings/ids.ts";
 import { SOURCES, syncRatings, type Source } from "./ratings/sync.ts";
 import { findLetterboxdExport, importExport, loadExport, parseExport } from "./ratings/letterboxd-export.ts";
@@ -21,6 +22,7 @@ const USAGE = `usage: bun run cli <command>
   search <title> [--airline X]                       find a film in the latest catalogue of each airline
   stats [--airline X] [--month YYYY-MM]
   export [--month YYYY-MM] [--airline X]             write public/data/<airline>/<month>.json, ids.json, index.json
+  export --worker [--out path]                       write the private Worker bundle (default worker/generated/catalogue.json)
   taste import [file ...]                            import IMDb ratings/watchlist CSVs and/or a Letterboxd export zip|dir
                                                      (default: newest of each in data/imdb-ratings/ and data/letterboxd/)
   ids sync [--airline X] [--limit N]                 Wikidata crosswalk (TMDB/Letterboxd/RT/MC ids) for new matched films;
@@ -35,7 +37,7 @@ const { values: opt, positionals: pos } = parseArgs({
     month: { type: "string" }, refresh: { type: "boolean" }, force: { type: "boolean" }, airline: { type: "string" },
     top: { type: "string" }, genre: { type: "string" }, "min-rating": { type: "string" }, language: { type: "string" },
     "min-year": { type: "string" }, "max-year": { type: "string" }, year: { type: "string" }, full: { type: "boolean" },
-    limit: { type: "string" }, source: { type: "string" },
+    limit: { type: "string" }, source: { type: "string" }, worker: { type: "boolean" }, out: { type: "string" },
   },
 });
 
@@ -194,6 +196,11 @@ async function main(): Promise<void> {
       return;
     }
     case "export": {
+      if (opt.worker) {
+        const w = writeWorkerBundle(db, opt.out ?? WORKER_BUNDLE);
+        console.log(`wrote ${w.path} (${w.airlines} airlines, ${w.films} films, ${(w.bytes / 1e6).toFixed(1)} MB)`);
+        return;
+      }
       const r = exportAll(db, { month: opt.month ? validMonth(opt.month) : undefined, airline: airlineOpt(opt.airline) });
       for (const f of r.files) console.log(`wrote ${f.path} (${f.films} films)`);
       console.log(`wrote ${r.ids.path} (${r.ids.count} ids)`);
