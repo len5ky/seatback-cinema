@@ -10,6 +10,7 @@ export const MAX_TITLES = 5_000;
 export const MAX_WATCHLIST = 1_000;
 export const GAP_MS = 300;
 export const CACHE_TTL_SECONDS = 24 * 3600;
+export const DEGRADED_TTL_SECONDS = 3600;
 
 const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
 const CSV_HELP =
@@ -21,6 +22,9 @@ export const liveDeps: ImdbDeps = { fetch: (url, init) => fetch(url, init), slee
 
 /** A failure the model can act on; the message says what to do next. */
 export class ImdbError extends Error {}
+/** IMDb's bot check: no point in trying further calls in this import. */
+export class ImdbRefusal extends ImdbError {}
+const isRefusal = (e: unknown) => e instanceof ImdbRefusal;
 
 export type ImdbUserRef = { kind: "ur"; id: string } | { kind: "p"; id: string };
 
@@ -39,7 +43,7 @@ const obj = (v: unknown): Obj => (typeof v === "object" && v !== null && !Array.
 const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
 const str = (v: unknown): string | null => (typeof v === "string" ? v : null);
 
-class Client {
+export class ImdbClient {
   private calls = 0;
   constructor(private deps: ImdbDeps) {}
 
@@ -57,7 +61,7 @@ class Client {
       throw new ImdbError(`Could not reach IMDb while reading the ${what}. ${CSV_HELP}`);
     }
     const challenged = res.headers.get("x-amzn-waf-action") !== null || res.status === 202 || res.status === 403 || res.status === 429;
-    if (challenged) throw new ImdbError(`IMDb refused the request for the ${what} (HTTP ${res.status}, bot check). ${CSV_HELP}`);
+    if (challenged) throw new ImdbRefusal(`IMDb refused the request for the ${what} (HTTP ${res.status}, bot check). ${CSV_HELP}`);
     let json: Obj;
     try { json = obj(await res.json()); } catch { throw new ImdbError(`IMDb sent an unreadable answer for the ${what} (HTTP ${res.status}). ${CSV_HELP}`); }
     if (!res.ok && !("data" in json)) {
@@ -69,13 +73,10 @@ class Client {
 
   async resolveProfileId(profileId: string): Promise<string | null> {
     const q = `query { userProfile(input: { profileId: ${JSON.stringify(profileId)} }) { userId } }`;
-    try {
-      const r = await this.post({ query: q }, "profile id");
-      const id = str(obj(obj(r.data).userProfile).userId);
-      return id && /^ur\d+$/.test(id) ? id : null;
-    } catch {
-      return null;
-    }
+    let r: Obj;
+    try { r = await this.post({ query: q }, "profile id"); } catch (e) { if (isRefusal(e)) throw e; return null; }
+    const id = str(obj(obj(r.data).userProfile).userId);
+    return id && /^ur\d+$/.test(id) ? id : null;
   }
 
   async ratingsPage(userId: string, position: number) {
@@ -84,7 +85,7 @@ class Client {
     const s = obj(obj(r.data).advancedTitleSearch);
     if (!("edges" in s)) throw new ImdbError(`IMDb returned no ratings list${apiError(r)}; the ratings may be private (IMDb, Settings, Privacy) or the API changed. ${CSV_HELP}`);
     const titles = arr(s.edges).map((e) => titleOf(obj(obj(e).node).title)).filter((t): t is Title => t !== null);
-    return { total: typeof s.total === "number" ? s.total : titles.length, titles, hasNext: obj(s.pageInfo).hasNextPage === true };
+    return { total: typeof s.total === "number" ? s.total : null, titles, hasNext: obj(s.pageInfo).hasNextPage === true };
   }
 
   async watchlistPage(userId: string, after: string | null) {
@@ -94,10 +95,10 @@ class Client {
     if (!("edges" in s)) return null;
     const ids = arr(s.edges).map((e) => str(obj(obj(e).listItem).id)).filter((x): x is string => !!x && /^tt\d+$/.test(x));
     const info = obj(s.pageInfo);
-    return { ids, next: info.hasNextPage === true ? str(info.endCursor) : null };
+    return { ids, total: typeof s.total === "number" ? s.total : null, next: info.hasNextPage === true ? str(info.endCursor) : null };
   }
 
-  /** The owner's scores for up to 250 ids, through the persisted query imdb.com uses. null when it stopped working. */
+  /** The owner's scores for up to 250 ids, through the persisted query imdb.com uses. null when it failed or carried no scores. */
   async scores(userId: string, ids: string[]): Promise<Map<string, number> | null> {
     const body = {
       operationName: "PersonalizedUserData",
@@ -105,7 +106,7 @@ class Client {
       extensions: { persistedQuery: { version: 1, sha256Hash: SCORES_QUERY_HASH } },
     };
     let r: Obj;
-    try { r = await this.post(body, "scores"); } catch (e) { if (e instanceof ImdbError && /refused/.test(e.message)) throw e; return null; }
+    try { r = await this.post(body, "scores"); } catch (e) { if (isRefusal(e)) throw e; return null; }
     const titles = arr(obj(r.data).titles);
     if (!titles.length) return null;
     const out = new Map<string, number>();
@@ -113,7 +114,7 @@ class Client {
       const id = str(obj(t).id), v = obj(obj(t).otherUserRating).value;
       if (id && typeof v === "number" && v >= 1 && v <= 10) out.set(id, v);
     }
-    return out;
+    return out.size ? out : null;
   }
 }
 
@@ -137,69 +138,78 @@ const apiError = (r: Obj) => {
 
 export interface ImdbImport {
   imdb_user: string; profile: Profile; rated: number; total_ratings: number; watchlist: number; truncated: boolean;
+  /** Scores could not be read: cache briefly so a retry can pick them up. */
+  degraded: boolean;
   fetched_at: string; notes: string[];
 }
 
+const WATCHLIST_PAGES = Math.ceil(MAX_WATCHLIST / PAGE_SIZE);
+
+/** The ur id for a URL's user: as given, or resolved from a p. profile id. */
+export async function resolveImdbUser(c: ImdbClient, ref: ImdbUserRef): Promise<string> {
+  if (ref.kind === "ur") return ref.id;
+  const ur = await c.resolveProfileId(ref.id);
+  if (ur) return ur;
+  throw new ImdbError(
+    `Could not turn the profile id ${ref.id} into an IMDb user id. Fetch https://www.imdb.com/user/${ref.id}/ratings/ with your web fetch tool and ` +
+    `look for an id that starts with "ur" (authorId in the page data, or a link like /user/ur12345678/), then call profile_from_imdb_url again ` +
+    `with https://www.imdb.com/user/<that id>/ratings/. If the page is blocked or has no ur id, ${CSV_HELP.charAt(0).toLowerCase()}${CSV_HELP.slice(1)}`,
+  );
+}
+
 /** Ratings (most recent first, up to 5,000) with the owner's scores, plus the watchlist (up to 1,000). */
-export async function importImdbProfile(ref: ImdbUserRef, deps: ImdbDeps): Promise<ImdbImport> {
-  const c = new Client(deps);
-  let userId = ref.id;
-  if (ref.kind === "p") {
-    const ur = await c.resolveProfileId(ref.id);
-    if (!ur)
-      throw new ImdbError(
-        `Could not turn the profile id ${ref.id} into an IMDb user id. Fetch https://www.imdb.com/user/${ref.id}/ratings/ with your web fetch tool and ` +
-        `look for an id that starts with "ur" (authorId in the page data, or a link like /user/ur12345678/), then call profile_from_imdb_url again ` +
-        `with https://www.imdb.com/user/<that id>/ratings/. If the page is blocked or has no ur id, ${CSV_HELP.charAt(0).toLowerCase()}${CSV_HELP.slice(1)}`,
-      );
-    userId = ur;
-  }
+export async function importImdbProfile(c: ImdbClient, userId: string): Promise<ImdbImport> {
   const notes: string[] = [];
   const titles: Title[] = [];
-  let total = 0;
+  let total: number | null = null, more = false;
   for (let pos = 1; pos <= MAX_TITLES; pos += PAGE_SIZE) {
     const page = await c.ratingsPage(userId, pos);
-    total = page.total;
+    total = page.total ?? total;
     titles.push(...page.titles);
-    if (!page.hasNext || !page.titles.length || titles.length >= Math.min(total, MAX_TITLES)) break;
+    more = page.hasNext && page.titles.length > 0;
+    if (!more || (total !== null && titles.length >= total)) { more = false; break; }
   }
   if (!titles.length)
     throw new ImdbError(`${userId} has no public ratings. The person can make them public (IMDb, Settings, Privacy) and try again. ${CSV_HELP}`);
-  const truncated = total > titles.length;
-  if (truncated) notes.push(`Read the ${titles.length.toLocaleString("en-US")} most recent of ${total.toLocaleString("en-US")} ratings.`);
+  const n = (x: number) => x.toLocaleString("en-US");
+  const truncated = more || (total !== null && total > titles.length);
+  if (truncated) notes.push(`Read the ${n(titles.length)} most recent of ${total !== null ? n(total) : "more"} ratings.`);
 
   const ratings: Record<string, number> = {};
   let scoresOk = true;
-  for (let i = 0; i < titles.length && scoresOk; i += PAGE_SIZE) {
+  for (let i = 0; i < titles.length; i += PAGE_SIZE) {
     const m = await c.scores(userId, titles.slice(i, i + PAGE_SIZE).map((t) => t.id));
     if (!m) { scoresOk = false; break; }
     for (const [id, v] of m) ratings[id] = v;
   }
   if (!scoresOk)
-    notes.push("IMDb's score lookup stopped working, so these films count as seen but carry no scores and taste ranking is weaker. " +
-      "For full taste ranking, ask for the IMDb ratings CSV export and pass it to profile_from_text.");
+    notes.push("IMDb's score lookup failed, so some or all of these films count as seen without scores and taste ranking is weaker. " +
+      "Try again in an hour, or ask for the IMDb ratings CSV export and pass it to profile_from_text.");
 
-  const watchlist: string[] = [];
-  let after: string | null = null;
-  let watchlistOk = true;
-  do {
-    const page: { ids: string[]; next: string | null } | null = await c.watchlistPage(userId, after).catch((e: unknown) => {
-      if (e instanceof ImdbError && /refused/.test(e.message)) throw e;
-      return null;
-    });
+  const watchlist = new Set<string>();
+  let after: string | null = null, wlTotal: number | null = null, wlMore = false, watchlistOk = true;
+  for (let i = 0; i < WATCHLIST_PAGES; i++) {
+    let page: Awaited<ReturnType<ImdbClient["watchlistPage"]>>;
+    try { page = await c.watchlistPage(userId, after); } catch (e) { if (isRefusal(e)) throw e; page = null; }
     if (!page) { watchlistOk = false; break; }
-    watchlist.push(...page.ids);
+    const before = watchlist.size;
+    for (const id of page.ids) if (watchlist.size < MAX_WATCHLIST) watchlist.add(id);
+    wlTotal = page.total ?? wlTotal;
+    wlMore = page.next !== null && page.next !== after && watchlist.size > before;
+    if (!wlMore) break;
     after = page.next;
-  } while (after && watchlist.length < MAX_WATCHLIST);
+  }
   if (!watchlistOk) notes.push("The watchlist could not be read (it may be private); only ratings were imported.");
+  else if (wlMore || (wlTotal !== null && wlTotal > watchlist.size))
+    notes.push(`Read ${n(watchlist.size)} of ${wlTotal !== null ? n(wlTotal) : "more"} watchlist titles.`);
 
   const rated = titles.filter((t) => ratings[t.id] !== undefined).map((t) => ({ rating: ratings[t.id]!, genres: t.genres, directors: t.directors }));
   const profile: Profile = {
-    seen: titles.map((t) => t.id), ratings, ...(watchlist.length ? { watchlist: [...new Set(watchlist)].slice(0, MAX_WATCHLIST) } : {}),
+    seen: titles.map((t) => t.id), ratings, ...(watchlist.size ? { watchlist: [...watchlist] } : {}),
     ...preferences(rated), source: "imdb_profile",
   };
   return {
-    imdb_user: userId, profile, rated: Object.keys(ratings).length, total_ratings: total, watchlist: profile.watchlist?.length ?? 0,
-    truncated, fetched_at: new Date().toISOString(), notes,
+    imdb_user: userId, profile, rated: Object.keys(ratings).length, total_ratings: total ?? titles.length, watchlist: watchlist.size,
+    truncated, degraded: !scoresOk, fetched_at: new Date().toISOString(), notes,
   };
 }

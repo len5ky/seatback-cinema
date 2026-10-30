@@ -44,6 +44,9 @@ test("profile URLs: IMDb p.* and ur ids, Letterboxd usernames", () => {
   expect(letterboxdUser("letterboxd.com/some_user")).toBe("some_user");
   expect(letterboxdUser("dave")).toBe("dave");
   expect(() => letterboxdUser("https://letterboxd.com/film/wildwood-2026/")).toThrow("not a Letterboxd profile URL");
+  expect(() => imdbUserId("https://evil.example/user/ur00000001/ratings/")).toThrow("not an IMDb profile URL");
+  expect(() => letterboxdUser("https://notletterboxd.com/dave/films/")).toThrow("not a Letterboxd profile URL");
+  expect(() => letterboxdUser("https://evil.com/letterboxd.com/dave")).toThrow("not a Letterboxd profile URL");
 });
 
 test("IMDb ratings page: 250-per-page __NEXT_DATA__, owner id, total and next-page flag", () => {

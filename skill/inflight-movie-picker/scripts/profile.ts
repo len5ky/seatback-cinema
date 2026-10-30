@@ -64,7 +64,7 @@ const num = (v: Json | undefined): number | null => (typeof v === "number" && Nu
 
 /** "https://www.imdb.com/user/p.xxxx/ratings/", ".../user/ur123/", or a bare p.xxxx / ur123 -> the user id. */
 export function imdbUserId(input: string): string {
-  const m = input.trim().match(/(?:^|\/user\/)((?:p\.[a-z0-9]+)|(?:ur\d+))(?:[/?#]|$)/i);
+  const m = input.trim().match(/^(?:(?:https?:\/\/)?(?:www\.|m\.)?imdb\.com\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?user\/)?((?:p\.[a-z0-9]+)|(?:ur\d+))(?:[/?#]|$)/i);
   if (!m) throw new Error(`not an IMDb profile URL: ${input} (expected https://www.imdb.com/user/p.xxxx/ratings/ or .../user/ur1234567/)`);
   const id = m[1]!;
   return /^ur/i.test(id) ? id.toLowerCase() : id;
@@ -74,7 +74,7 @@ const LB_RESERVED = new Set(["film", "films", "list", "lists", "search", "settin
 /** "https://letterboxd.com/dave/films/ratings/" or a bare "dave" -> "dave". */
 export function letterboxdUser(input: string): string {
   const raw = input.trim();
-  const m = /^[A-Za-z0-9_]+$/.test(raw) ? [raw, raw] : raw.match(/letterboxd\.com\/([A-Za-z0-9_]+)(?:[/?#]|$)/i);
+  const m = /^[A-Za-z0-9_]+$/.test(raw) ? [raw, raw] : raw.match(/^(?:https?:\/\/)?(?:www\.)?letterboxd\.com\/([A-Za-z0-9_]+)(?:[/?#]|$)/i);
   const user = m?.[1];
   if (!user || LB_RESERVED.has(user.toLowerCase())) throw new Error(`not a Letterboxd profile URL: ${input} (expected https://letterboxd.com/<username>/)`);
   return user;

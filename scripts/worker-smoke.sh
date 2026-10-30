@@ -11,7 +11,7 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 # rpc <method> <params-json> -> response body on stdout
 rpc() {
   id=$((id + 1))
-  curl -sS --max-time 30 -X POST "$MCP" \
+  curl -sS --max-time 90 -X POST "$MCP" \
     -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -H 'MCP-Protocol-Version: 2025-06-18' \
     -d "{\"jsonrpc\":\"2.0\",\"id\":$id,\"method\":\"$1\",\"params\":$2}"
 }
@@ -66,4 +66,15 @@ echo "ok   get_profile -> $(jq -c '{seen: (.seen | length), ratings: (.ratings |
 r=$(tool picks "{\"airline\":\"emirates\",\"profile\":{\"token\":\"$token\"},\"limit\":3}")
 [[ $(jq '.hidden_seen' <<<"$r") -ge 3 ]] || fail "picks with token: $r"
 echo "ok   picks with saved token -> hidden_seen $(jq '.hidden_seen' <<<"$r"), profile_source $(jq -r '.profile_source' <<<"$r")"
+
+# Optional, because it calls IMDb: SMOKE_IMDB_URL=https://www.imdb.com/user/<id>/ratings/ scripts/worker-smoke.sh <base>
+if [[ -n ${SMOKE_IMDB_URL:-} ]]; then
+  r=$(tool profile_from_imdb_url "{\"url\":\"$SMOKE_IMDB_URL\"}")
+  u=$(jq -r '.imdb_user' <<<"$r")
+  [[ $u =~ ^ur[0-9]+$ ]] && (( $(jq '.seen' <<<"$r") > 0 )) || fail "profile_from_imdb_url: $r"
+  echo "ok   profile_from_imdb_url -> $(jq -c '{imdb_user, cached, seen, rated, total_ratings, watchlist, truncated, liked_genres, notes}' <<<"$r")"
+  r=$(tool picks "{\"airline\":\"emirates\",\"profile\":{\"imdb_user\":\"$u\"},\"limit\":3}")
+  echo "ok   picks with imdb_user -> hidden_seen $(jq '.hidden_seen' <<<"$r"), profile_source $(jq -r '.profile_source' <<<"$r")"
+  jq -r '.picks[] | "       \(.score)  \(.title) (\(.year))  why: \(.why | join("; "))"' <<<"$r"
+fi
 echo "SMOKE OK $BASE"

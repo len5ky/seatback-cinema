@@ -51,7 +51,10 @@ test("parseImdbUserUrl takes profile, ratings, watchlist and locale URLs or bare
   expect(parseImdbUserUrl("https://evil.example/imdb.com/user/ur00000001/")).toBeNull();
 });
 
-interface FakeOpts { profileId?: string | null; scores?: "ok" | "gone"; watchlist?: "ok" | "private"; challenge?: boolean; totalRatings?: number }
+interface FakeOpts {
+  profileId?: string | null; scores?: "ok" | "gone" | "empty" | "network"; watchlist?: "ok" | "private" | "stuck" | "long";
+  challenge?: boolean; totalRatings?: number; omitTotal?: boolean;
+}
 function fakeImdb(o: FakeOpts = {}) {
   const log: { op: string; body: Obj }[] = [];
   const sleeps: number[] = [];
@@ -71,15 +74,22 @@ function fakeImdb(o: FakeOpts = {}) {
       if (op === "ratings") {
         const pos = Number(q.match(/jumpToPosition: (\d+)/)![1]);
         const edges = pos === 1 ? pages[0]! : pos === 251 ? pages[1]! : [];
-        return ok({ advancedTitleSearch: { total, pageInfo: { hasNextPage: pos === 1 }, edges } });
+        return ok({ advancedTitleSearch: { ...(o.omitTotal ? {} : { total }), pageInfo: { hasNextPage: pos === 1 }, edges } });
+      }
+      if (op === "watchlist" && o.watchlist === "stuck") return ok({ predefinedList: { titleListItemSearch: { total: 9, pageInfo: { hasNextPage: true, endCursor: `c${log.length}` }, edges: [] } } });
+      if (op === "watchlist" && o.watchlist === "long") {
+        const edges = Array.from({ length: 250 }, (_, i) => ({ listItem: { id: `tt${String(log.length * 1000 + i).padStart(8, "0")}` } }));
+        return ok({ predefinedList: { titleListItemSearch: { total: 2000, pageInfo: { hasNextPage: true, endCursor: `c${log.length}` }, edges } } });
       }
       if (op === "watchlist")
         return o.watchlist === "private" ? Response.json({ errors: [{ message: "not authorized" }] }, { status: 400 })
           : ok({ predefinedList: { titleListItemSearch: { total: watchEdges.length, pageInfo: { hasNextPage: false, endCursor: "x" }, edges: watchEdges } } });
       if (op === "PersonalizedUserData") {
         if (o.scores === "gone") return Response.json({ errors: [{ message: "PersistedQueryNotFound" }] });
+        if (o.scores === "network") throw new TypeError("network down");
         const ids = (body.variables as { idArray: string[] }).idArray;
         const all = [...scores1.data.titles, ...scores2.data.titles];
+        if (o.scores === "empty") return ok({ titles: ids.map((id) => ({ id, otherUserRating: null })) });
         return ok({ titles: ids.map((id) => all.find((t) => t.id === id) ?? { id, otherUserRating: null }) });
       }
       throw new Error(`unexpected op ${op}`);
@@ -141,7 +151,7 @@ test("profile_from_imdb_url: a dead score hash keeps seen ids with a note; a pri
   const r = await callTool(ctxWith(f.deps), "profile_from_imdb_url", { url: "ur00000001" });
   expect(r).toMatchObject({ seen: 80, rated: 0, watchlist: 0 });
   const notes = r.notes as string[];
-  expect(notes.some((n) => n.includes("score lookup stopped working") && n.includes("CSV export"))).toBe(true);
+  expect(notes.some((n) => n.includes("score lookup failed") && n.includes("CSV export"))).toBe(true);
   expect(notes.some((n) => n.includes("watchlist could not be read"))).toBe(true);
 });
 
@@ -152,4 +162,71 @@ test("profile_from_imdb_url: bad URL, no public ratings, expired import", async 
   empty.deps.fetch = async () => Response.json({ data: { advancedTitleSearch: { total: 0, pageInfo: { hasNextPage: false }, edges: [] } } });
   await expect(callTool(ctxWith(empty.deps), "profile_from_imdb_url", { url: "ur1234567" })).rejects.toThrow(/no public ratings/);
   await expect(callTool(ctx, "picks", { airline: "emirates", profile: { imdb_user: "ur7654321" } })).rejects.toThrow(/expired/);
+});
+
+// ---------- review round 1 fixes ----------
+
+test("profile_from_imdb_url: a repeat p. URL hits the cache after one resolve call", async () => {
+  const f = fakeImdb();
+  const ctx = ctxWith(f.deps);
+  const url = "https://www.imdb.com/user/p.examplepublicid00000000/ratings/";
+  await callTool(ctx, "profile_from_imdb_url", { url });
+  const n = f.log.length;
+  const again = await callTool(ctx, "profile_from_imdb_url", { url });
+  expect(again.cached).toBe(true);
+  expect(f.log.slice(n).map((l) => l.op)).toEqual(["profile"]);
+});
+
+test("profile_from_imdb_url: a bot check while resolving a p. id reports the refusal, not an unresolvable id", async () => {
+  const err = await callTool(ctxWith(fakeImdb({ challenge: true }).deps), "profile_from_imdb_url", { url: "p.examplepublicid00000000" }).catch((e: unknown) => e);
+  expect((err as Error).message).toMatch(/refused.*HTTP 202/);
+  expect((err as Error).message).not.toContain("look for an id");
+});
+
+test("profile_from_imdb_url: scores that fail or come back empty add a note and cache for one hour only", async () => {
+  for (const scores of ["empty", "network"] as const) {
+    const ctx = ctxWith(fakeImdb({ scores }).deps);
+    const r = await callTool(ctx, "profile_from_imdb_url", { url: "ur00000001" });
+    expect(r.rated).toBe(0);
+    expect((r.notes as string[]).some((x) => x.includes("score lookup failed"))).toBe(true);
+    expect(ctx.profiles.data.get("imdb:ur00000001")!.ttl).toBe(3600);
+  }
+});
+
+test("profile_from_imdb_url: watchlist stops on empty pages and notes a cut at 1,000", async () => {
+  const stuck = fakeImdb({ watchlist: "stuck" });
+  const a = await callTool(ctxWith(stuck.deps), "profile_from_imdb_url", { url: "ur00000001" });
+  expect(stuck.log.filter((l) => l.op === "watchlist").length).toBe(1);
+  expect(a.watchlist).toBe(0);
+  const long = fakeImdb({ watchlist: "long" });
+  const b = await callTool(ctxWith(long.deps), "profile_from_imdb_url", { url: "ur00000001" });
+  expect(long.log.filter((l) => l.op === "watchlist").length).toBe(4);
+  expect(b.watchlist).toBe(1000);
+  expect((b.notes as string[])).toContain("Read 1,000 of 2,000 watchlist titles.");
+});
+
+test("profile_from_imdb_url: a missing total follows hasNextPage instead of stopping after page 1", async () => {
+  const f = fakeImdb({ omitTotal: true });
+  const r = await callTool(ctxWith(f.deps), "profile_from_imdb_url", { url: "ur00000001" });
+  expect(f.log.filter((l) => l.op === "ratings").length).toBe(2);
+  expect(r).toMatchObject({ seen: 80, total_ratings: 80, truncated: false });
+});
+
+test("picks uses an inline profile that carries imdb_user from profile_from_text", async () => {
+  const ctx = ctxWith(fakeImdb().deps);
+  const page = await callTool(ctx, "profile_from_text", { text: ratings1!, kind: "imdb_page" });
+  expect(page.imdb_user).toBe("ur00000001");
+  const p = await callTool(ctx, "picks", { airline: "emirates", profile: page });
+  expect(p.profile_source).toBe("imdb_page");
+});
+
+test("profile_from_text: the no-scores note survives the watchlist merge; a bad list value is an error", async () => {
+  const ctx = ctxWith(fakeImdb().deps);
+  const r = await callTool(ctx, "profile_from_text", { text: ratings1!, kind: "imdb_page" });
+  const { note: _n, imdb_user: _u, ...prof } = r;
+  const w = await callTool(ctx, "profile_from_text", { text: watchlist1!, kind: "imdb_page", list: "watchlist", add_to: prof });
+  expect((w.seen as string[]).length).toBe(40);
+  expect((w.watchlist as string[]).length).toBe(40);
+  expect(w.note).toContain("seen only");
+  await expect(callTool(ctx, "profile_from_text", { text: "Name,Year\nX,2025\n", kind: "letterboxd_csv", list: "Watchlist" })).rejects.toThrow(/list must be/);
 });

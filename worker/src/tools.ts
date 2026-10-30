@@ -1,10 +1,12 @@
 // The MCP tools: schemas (user-facing copy) and implementations.
 import type { Catalogue, Filters } from "./catalogue.ts";
 import {
-  PROFILE_KINDS, PROFILE_MAX_BYTES, PROFILE_TTL_SECONDS, TOKEN_RE, mergeProfiles, newToken, profileFromText, validateProfile,
+  NO_SCORES_NOTE, PROFILE_KINDS, PROFILE_MAX_BYTES, PROFILE_TTL_SECONDS, TOKEN_RE, mergeProfiles, newToken, profileFromText, validateProfile,
   type Profile, type ProfileKind,
 } from "./profile.ts";
-import { CACHE_TTL_SECONDS, ImdbError, importImdbProfile, liveDeps, parseImdbUserUrl, type ImdbDeps, type ImdbImport } from "./imdb.ts";
+import {
+  CACHE_TTL_SECONDS, DEGRADED_TTL_SECONDS, ImdbClient, ImdbError, importImdbProfile, liveDeps, parseImdbUserUrl, resolveImdbUser, type ImdbDeps, type ImdbImport,
+} from "./imdb.ts";
 
 /** The slice of Workers KV the tools use (a Map stands in for it in tests). */
 export interface ProfileStore {
@@ -240,7 +242,7 @@ export async function callTool(ctx: ToolContext, name: string, args: Json): Prom
       const p = args.profile;
       let profile = null;
       if (isObj(p) && "token" in p) profile = cat.applyProfile(await loadProfile(ctx, p.token), "saved profile");
-      else if (isObj(p) && "imdb_user" in p) profile = cat.applyProfile(await loadImdbProfile(ctx, p.imdb_user), "imdb profile");
+      else if (isObj(p) && "imdb_user" in p && !("seen" in p)) profile = cat.applyProfile(await loadImdbProfile(ctx, p.imdb_user), "imdb profile");
       else if (p !== undefined && p !== null) {
         const v = profileArg(p);
         profile = cat.applyProfile(v, v.source ?? "inline profile");
@@ -262,28 +264,32 @@ export async function callTool(ctx: ToolContext, name: string, args: Json): Prom
       if (typeof args.url !== "string" || !args.url.trim()) throw new ToolError("url is required, e.g. https://www.imdb.com/user/p.xxxx/ratings/");
       const ref = parseImdbUserUrl(args.url);
       if (!ref) throw new ToolError("that is not an IMDb profile URL; it should look like https://www.imdb.com/user/p.xxxx/ratings/ or https://www.imdb.com/user/ur1234567/");
-      if (ref.kind === "ur") {
-        const hit = await ctx.profiles.get(imdbKey(ref.id));
+      const client = new ImdbClient(ctx.imdb ?? liveDeps);
+      try {
+        const ur = await resolveImdbUser(client, ref);
+        const hit = await ctx.profiles.get(imdbKey(ur));
         if (hit) return importSummary(JSON.parse(hit) as ImdbImport, true);
-      }
-      let r: ImdbImport;
-      try { r = await importImdbProfile(ref, ctx.imdb ?? liveDeps); } catch (e) {
+        const r = await importImdbProfile(client, ur);
+        await ctx.profiles.put(imdbKey(ur), JSON.stringify(r), { expirationTtl: r.degraded ? DEGRADED_TTL_SECONDS : CACHE_TTL_SECONDS });
+        return importSummary(r, false);
+      } catch (e) {
         if (e instanceof ImdbError) throw new ToolError(e.message);
         throw e;
       }
-      await ctx.profiles.put(imdbKey(r.imdb_user), JSON.stringify(r), { expirationTtl: CACHE_TTL_SECONDS });
-      return importSummary(r, false);
     }
     case "profile_from_text": {
       if (typeof args.text !== "string" || !args.text.trim()) throw new ToolError("text is required: paste the CSV or page HTML unchanged");
       const kind = args.kind as ProfileKind;
       if (!PROFILE_KINDS.includes(kind)) throw new ToolError(`kind must be one of ${PROFILE_KINDS.join(", ")}`);
+      if (args.list !== undefined && args.list !== "watched" && args.list !== "watchlist") throw new ToolError("list must be \"watched\" or \"watchlist\"");
       const list = args.list === "watchlist" ? "watchlist" : "watched";
       let parsed: ReturnType<typeof profileFromText>;
       try { parsed = profileFromText(args.text, kind, cat.bundle.letterboxd, list); } catch (e) { throw new ToolError((e as Error).message); }
       const { note, imdb_user, ...profile } = parsed;
       const merged = args.add_to !== undefined ? mergeProfiles(profileArg(args.add_to), profile) : profile;
-      return { ...merged, ...(note ? { note } : {}), ...(imdb_user ? { imdb_user } : {}) };
+      // Pages carry no scores: keep saying so after a merge, as long as nothing in the result has a score.
+      const keepNote = note ?? (kind === "imdb_page" && merged.seen.length && !Object.keys(merged.ratings ?? {}).length ? NO_SCORES_NOTE : undefined);
+      return { ...merged, ...(keepNote ? { note: keepNote } : {}), ...(imdb_user ? { imdb_user } : {}) };
     }
     default:
       throw new ToolError(`unknown tool ${name}`);

@@ -110,7 +110,7 @@ function imdbAuthor(data: unknown): string | null {
   return found;
 }
 
-const NO_SCORES_NOTE =
+export const NO_SCORES_NOTE =
   "IMDb pages do not include the owner's scores, so these films count as seen only. For taste ranking, call profile_from_imdb_url " +
   "with the profile URL, or ask for the IMDb ratings CSV export and pass it with kind \"imdb_csv\".";
 
