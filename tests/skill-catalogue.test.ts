@@ -35,7 +35,7 @@ test.skipIf(!!noLoopback)("skill client: a 404 names the likely cause; invalid J
   try {
     const a = await run(base, cache, "--list");
     expect(a.code).toBe(1);
-    expect(a.err).toContain("may be private, or the path is wrong");
+    expect(a.err).toContain("nothing is published at this address, or the path is wrong");
     expect(a.err).not.toContain("placeholder");
     mode = "junk";
     const b = await run(base, cache, "--list");
