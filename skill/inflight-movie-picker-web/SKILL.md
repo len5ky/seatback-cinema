@@ -65,18 +65,17 @@ no. Tell them it was blocked and offer two ways round it:
 
 ### A Letterboxd profile URL
 
-`https://letterboxd.com/<username>/` (any page under it works; take the username). `/films/ratings/` redirects to
-`/films/`, which lists every film they've logged, 72 per page, with their star rating where they gave one.
+Any URL under `https://letterboxd.com/<username>/` will do; you only need the username. Their films live at
+`/films/` (`/films/ratings/` redirects there): every film they've logged, 72 to a page, with a star rating where
+they gave one. Walk `/films/`, `/films/page/2/` and on until the last page number shown in the links at the
+bottom, or 10 pages (720 films), whichever comes first, and say if you stopped early. Each page goes to
+`profile_from_text` as `kind: "letterboxd_page"`, chained with `add_to` the way the IMDb pages are. The watchlist
+at `/watchlist/` gets the same treatment with `list: "watchlist"`.
 
-1. Fetch `https://letterboxd.com/<username>/films/`, then `/films/page/2/`, `/films/page/3/`, and so on. The page
-   links at the bottom tell you the last page number. Stop at 10 pages (720 films) and say so.
-2. Pass each page to `profile_from_text` with `kind: "letterboxd_page"`, chaining with `add_to` as above.
-3. Fetch `https://letterboxd.com/<username>/watchlist/` and its pages the same way, with `list: "watchlist"`.
-
-Letterboxd pages carry no IMDb ids. The connector matches them by its own Letterboxd links where it has them and by
-title and year otherwise, so a retitled film can slip through. A 403 or a "Just a moment" page means Letterboxd
-blocked the fetch: ask for the export instead (letterboxd.com, Settings, Data, Export your data; attach
-`ratings.csv`, `watched.csv` or `watchlist.csv` from the zip).
+There are no IMDb ids on Letterboxd. The connector matches films through its own Letterboxd links where it has
+them and on title and year otherwise, so the odd retitled film slips through. A 403 or a "Just a moment" page
+means Letterboxd blocked you: ask for the export (letterboxd.com, Settings, Data, Export your data) and have them
+attach `ratings.csv`, `watched.csv` or `watchlist.csv` from the zip.
 
 ### An attached file
 
