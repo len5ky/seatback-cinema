@@ -116,7 +116,7 @@ export const TOOLS = [
   {
     name: "profile_from_imdb_url",
     title: "Import a public IMDb profile",
-    description: "Read a public IMDb profile's ratings (with scores, up to 5,000 most recent) and watchlist on the server, from a URL like https://www.imdb.com/user/p.xxxx/ratings/ or /user/ur1234567/. Returns a summary and an imdb_user id: pass profile: { imdb_user } to picks. Kept for 24 hours. Takes up to half a minute for large profiles.",
+    description: "Read a public IMDb profile's ratings (with scores, up to 5,000 most recent) and watchlist on the server, from a URL like https://www.imdb.com/user/p.xxxx/ratings/ or /user/ur1234567/. Returns a summary and an imdb_user id: pass profile: { imdb_user } to picks. Kept for 24 hours. Takes up to half a minute for large profiles. Often fails: IMDb tends to refuse this cloud server (HTTP 429). So first fetch the ratings pages yourself (https://www.imdb.com/user/<id>/ratings/, then ?page=2 and on) and pass them to profile_from_text with kind \"imdb_page\"; call this tool only when that fetch is blocked or finds no title ids. If this fails too, ask for the IMDb ratings CSV export.",
     inputSchema: { type: "object", properties: { url: { type: "string", description: "The IMDb profile, ratings or watchlist URL (or the bare ur / p. id)." } }, required: ["url"], additionalProperties: false },
     annotations: { readOnlyHint: true, openWorldHint: true },
   },

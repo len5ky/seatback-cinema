@@ -51,9 +51,10 @@ paste the token in place of the URL.
 
 **Make your IMDb lists public first.** On IMDb go to Settings, Privacy and set your ratings and watchlist to
 public. Your profile URL looks like `https://www.imdb.com/user/p.xxxxxxxx/ratings/`: open your ratings while signed
-in and copy it from the address bar. The connector reads your ratings and scores from IMDb itself, so you just
-paste the same URL next time. If IMDb refuses it, Claude asks for the CSV export from
-https://www.imdb.com/list/ratings/export instead; attach the file to the chat. A Letterboxd profile
+in and copy it from the address bar. Claude opens those pages itself and hands them to the connector; pages list
+what you've seen but not your scores. If IMDb blocks that, Claude tries the connector's own import, which IMDb
+usually turns away too, and then asks for the CSV export from https://www.imdb.com/list/ratings/export (attach the
+file to the chat). The export is the only route that carries your scores reliably. A Letterboxd profile
 URL (`https://letterboxd.com/<username>/`) or Letterboxd's export zip works the same way, and with nothing at all
 Claude asks for five films you loved and two you hated.
 

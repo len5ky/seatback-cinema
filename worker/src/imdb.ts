@@ -61,7 +61,11 @@ export class ImdbClient {
       throw new ImdbError(`Could not reach IMDb while reading the ${what}. ${CSV_HELP}`);
     }
     const challenged = res.headers.get("x-amzn-waf-action") !== null || res.status === 202 || res.status === 403 || res.status === 429;
-    if (challenged) throw new ImdbRefusal(`IMDb refused the request for the ${what} (HTTP ${res.status}, bot check). ${CSV_HELP}`);
+    if (challenged) throw new ImdbRefusal(
+      `IMDb refused the request for the ${what} (HTTP ${res.status}, bot check); it often turns this server away, so don't retry. ` +
+      `If you haven't yet, fetch https://www.imdb.com/user/<id>/ratings/ with your web fetch tool and pass each page to profile_from_text with kind "imdb_page". ` +
+      `If that is blocked too: ${CSV_HELP.charAt(0).toLowerCase()}${CSV_HELP.slice(1)}`,
+    );
     let json: Obj;
     try { json = obj(await res.json()); } catch { throw new ImdbError(`IMDb sent an unreadable answer for the ${what} (HTTP ${res.status}). ${CSV_HELP}`); }
     if (!res.ok && !("data" in json)) {

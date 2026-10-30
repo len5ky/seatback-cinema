@@ -142,7 +142,7 @@ test("profile_from_imdb_url: unresolvable p. id tells Claude to find the ur id i
 test("profile_from_imdb_url: a WAF challenge stops at once with the CSV fallback", async () => {
   const f = fakeImdb({ challenge: true });
   const err = await callTool(ctxWith(f.deps), "profile_from_imdb_url", { url: "ur00000001" }).catch((e: unknown) => e);
-  expect((err as Error).message).toMatch(/refused.*HTTP 202.*CSV export/s);
+  expect((err as Error).message).toMatch(/refused.*HTTP 202.*imdb_page.*CSV export/s);
   expect(f.log.length).toBe(1);
 });
 

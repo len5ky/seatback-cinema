@@ -6,7 +6,8 @@ export const SERVER_INFO = { name: "seatback-cinema", title: "Seatback Cinema", 
 const INSTRUCTIONS =
   "In-flight film catalogues for this month, by airline. Start with list_airlines, then picks for recommendations " +
   "(pass flight_minutes and a profile when you have them) or catalogue to browse or check a title. " +
-  "For a public IMDb profile URL, call profile_from_imdb_url and pass profile: { imdb_user } to picks. " +
+  "For a public IMDb profile URL, fetch the ratings pages yourself and pass them to profile_from_text (kind imdb_page). " +
+  "profile_from_imdb_url is the fallback when that fetch is blocked; IMDb often refuses it from the cloud. On success pass profile: { imdb_user } to picks. " +
   "Otherwise build a profile with profile_from_text from an IMDb or Letterboxd export or page you have fetched; save_profile returns a token for next time.";
 
 export type Id = string | number | null;

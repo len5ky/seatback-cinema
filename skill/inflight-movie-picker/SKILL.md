@@ -64,13 +64,9 @@ bun $S emirates --taste data/imdb-ratings
 bun $S united --taste ~/Downloads/letterboxd-export     # unzip the Letterboxd zip first
 ```
 
-No export, but a public IMDb profile? If the Seatback Cinema connector is added in this session (its tools are
-`list_airlines`, `picks`, `profile_from_imdb_url` and so on), call `profile_from_imdb_url` with the URL first: it
-reads ratings, scores and watchlist on the server, where IMDb's bot check doesn't get in the way, and `picks` takes
-`profile: { imdb_user }` from its answer. Without the connector, or for a Letterboxd profile, pass the URL to the
-script. The script fetches it from this machine, page by page (IMDb: 250
-titles a page, up to 50 pages, then the watchlist; Letterboxd: 72 films a page, then the watchlist), and caches it
-for 24 hours:
+No export, but a public IMDb or Letterboxd profile? Pass the URL to the script. It fetches the profile from this
+machine, page by page (IMDb: 250 titles a page, up to 50 pages, then the watchlist; Letterboxd: 72 films a page,
+then the watchlist), and caches it for 24 hours:
 
 ```bash
 bun $S emirates --imdb-url https://www.imdb.com/user/p.xxxxxxxx/ratings/
@@ -79,9 +75,12 @@ bun $S ba --letterboxd-url https://letterboxd.com/<username>/
 
 The IMDb ratings and watchlist have to be public (IMDb, Settings, Privacy). IMDb blocks scripted requests from a
 lot of networks with an empty HTTP 202; Letterboxd sometimes answers 403. When that happens the script prints the
-export route in two lines and exits 1. Pass that on: the CSV export from https://www.imdb.com/list/ratings/export,
-or Letterboxd's Settings, Data, Export your data, then `--taste`. If it stops partway (a block after page 1), it
-keeps the pages it read and adds a `note:` line saying so. Letterboxd pages carry no IMDb id, so those films join
+export route in two lines and exits 1; if it stops partway (a block after page 1), it keeps the pages it read and
+adds a `note:` line saying so. For IMDb, if the Seatback Cinema connector is added in this session (its
+tools are `list_airlines`, `picks`, `profile_from_imdb_url` and so on), try `profile_from_imdb_url` with the URL
+once, and pass `profile: { imdb_user }` from its answer to `picks`. Don't count on it: IMDb refuses the
+connector's cloud server more often than not (HTTP 429). Otherwise pass the export route on: the CSV export from
+https://www.imdb.com/list/ratings/export, or Letterboxd's Settings, Data, Export your data, then `--taste`. Letterboxd pages carry no IMDb id, so those films join
 through the dataset's Letterboxd links where it has them and on title and year otherwise.
 
 With any of these the script hides every film they've rated or logged, adds a `you` column that says `watchlist` for films on

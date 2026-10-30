@@ -45,30 +45,21 @@ tell them, and move on to one of the other routes.
 It looks like `https://www.imdb.com/user/p.xxxxxxxx/ratings/` (older ones use `ur1234567` in place of `p.xxx`).
 The ratings and the watchlist must be public: IMDb, Settings, Privacy.
 
-Call `profile_from_imdb_url` with the URL as they gave it. The connector reads their ratings, their scores and
-their watchlist straight from IMDb, which takes a few seconds (up to half a minute for thousands of ratings). It
-answers with counts, the genres and directors it learned, and an `imdb_user` id. Pass `profile: { imdb_user: "ur..." }`
-to `picks`. The import is kept for 24 hours; after that, call the tool again with the same URL. Read out anything in
-`notes`: a profile over 5,000 ratings is cut to the most recent 5,000, and a private watchlist is skipped.
+Fetch the ratings page yourself first, with your web fetch tool: `https://www.imdb.com/user/<id>/ratings/`. A page
+holds up to 250 titles. Pass it unchanged to `profile_from_text` with `kind: "imdb_page"`, then fetch `?page=2`,
+`?page=3` and on until a page adds nothing new, and stop at 10 pages. From page 2 onward, pass the profile so far
+as `add_to`. The watchlist at `/watchlist/` gets the same treatment with `list: "watchlist"`. Pages list the films
+but not the scores, so every title counts as seen and `picks` hides it; the result's `note` says so. Don't invent
+scores to fill the gap. IMDb often blocks automated fetches: an empty page, HTTP 202 or 403, or a page with no
+title ids on it means it said no.
 
-When the tool returns an error, do what it says:
+The connector's `profile_from_imdb_url` comes second. IMDb turns its cloud server away more often than not (HTTP
+429), so call it only when your own fetch was blocked or found no title ids, and call it once. When it does get
+through, it reads ratings with scores plus the watchlist, and answers with counts, the genres and directors it
+learned, and an `imdb_user` id. Pass `profile: { imdb_user: "ur..." }` to `picks` and read out anything in `notes`
+(over 5,000 ratings are cut to the most recent 5,000; a private watchlist is skipped). The import lasts 24 hours.
 
-- It couldn't turn a `p.` id into a user id: fetch `https://www.imdb.com/user/<p.id>/ratings/` with your web fetch
-  tool, find the id that starts with `ur` (it sits in the page data as `authorId`, or in links like
-  `/user/ur12345678/`), and call `profile_from_imdb_url` again with `https://www.imdb.com/user/<ur id>/ratings/`.
-- IMDb refused the connector, or its API changed: fall back to fetching the pages yourself, below, or ask for the
-  CSV export.
-
-The fallback, when the connector can't read IMDb: fetch `https://www.imdb.com/user/<id>/ratings/` with your web
-fetch tool. Each page holds up to 250 titles; fetch `?page=2`, `?page=3` and so on until a page adds nothing new,
-stopping at 10 pages. Pass each page, unchanged, to `profile_from_text` with `kind: "imdb_page"`, and from page 2
-onward pass the profile so far as `add_to`. Do the same for `/watchlist/` with `list: "watchlist"`. The pages carry
-the film list but not the scores, so every title counts as seen and `picks` hides it; the result's `note` says so.
-Don't invent scores to fill the gap. If `profile_from_text` returns an `imdb_user`, try `profile_from_imdb_url`
-with that id once before you go on.
-
-IMDb often blocks automated fetches. An empty page, HTTP 202 or 403, or a page with no titles on it means it said
-no. Tell them it was blocked and offer two ways round it:
+If the connector fails too, tell them IMDb blocked both and offer two ways round it:
 
 - the CSV export: sign in on a computer, open https://www.imdb.com/list/ratings/export (for the watchlist, the
   three-dot menu on the Watchlist page, then Export), download the file from Your exports and attach it here;

@@ -111,8 +111,8 @@ function imdbAuthor(data: unknown): string | null {
 }
 
 export const NO_SCORES_NOTE =
-  "IMDb pages do not include the owner's scores, so these films count as seen only. For taste ranking, call profile_from_imdb_url " +
-  "with the profile URL, or ask for the IMDb ratings CSV export and pass it with kind \"imdb_csv\".";
+  "IMDb pages do not include the owner's scores, so these films count as seen only. For scores, ask for the IMDb ratings CSV export " +
+  "and pass it with kind \"imdb_csv\" (profile_from_imdb_url can read scores too, but IMDb usually refuses it from the cloud).";
 
 /**
  * IMDb ratings / watchlist / list page. Ids come from the Next.js data blob (ratings: advancedTitleSearch edges; watchlist:
