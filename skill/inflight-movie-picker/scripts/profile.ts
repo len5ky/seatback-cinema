@@ -1,11 +1,15 @@
 // Build a taste Profile from a public IMDb or Letterboxd profile, fetched from this machine.
 // Used by catalogue.ts (--imdb-url, --letterboxd-url). No dependencies; runs on Bun, Node >= 22.6 and Deno.
 //
-// IMDb (checked 2026-10-30): /user/<p.id|ur id>/ratings/?page=N is server-rendered with 250 titles per page in the
-// __NEXT_DATA__ JSON (advancedTitleSearch: total, pageInfo.hasNextPage, edges[].node.title). The owner's own score
-// is not in that HTML: the page asks api.graphql.imdb.com for it (PersonalizedUserData, otherUserId + idArray, a
-// persisted query). The watchlist is /user/<id>/watchlist/?page=N (predefinedList.titleListItemSearch). IMDb's WAF
-// answers scripted requests from many networks with an empty HTTP 202 (x-amzn-waf-action: challenge).
+// IMDb, first route (probed 2026-10-30, tmp/w2/imdb-graphql-probe.md): raw GraphQL POSTs to api.graphql.imdb.com,
+// the calls imdb.com itself makes. userProfile(input: { profileId }) turns a p. id into the ur id; advancedTitleSearch
+// with singleUserRatingConstraint lists the ratings, 250 a page via jumpToPosition (several pages per request as
+// aliases); predefinedList(classType: WATCH_LIST) lists the watchlist (listItem is a client alias for title). The
+// owner's scores need the persisted PersonalizedUserData query (otherUserId + idArray, 250 ids a call).
+// IMDb, fallback route: /user/<p.id|ur id>/ratings/?page=N is server-rendered with 250 titles per page in the
+// __NEXT_DATA__ JSON (advancedTitleSearch: total, pageInfo.hasNextPage, edges[].node.title); the watchlist is
+// /user/<id>/watchlist/?page=N (predefinedList.titleListItemSearch). IMDb's WAF answers scripted page requests from
+// many networks with an empty HTTP 202 (x-amzn-waf-action: challenge).
 // Letterboxd: /<user>/films/page/N/ lists every logged film, 72 per page, with the owner's rating as a rated-1..10
 // class (half stars, so already on a 10-point scale); /films/ratings/ redirects there. /<user>/watchlist/page/N/
 // lists the watchlist. Letterboxd pages carry no IMDb id: slugs map through the dataset's ids.json where it has
@@ -260,6 +264,7 @@ async function imdbOwnerRatings(userId: string, ids: string[], o: FetchOpts): Pr
   const f = o.fetch ?? fetch;
   const out = new Map<string, number>();
   for (let i = 0; i < ids.length; i += 250) {
+    if (o.delayMs) await sleep(o.delayMs);
     const body = {
       operationName: "PersonalizedUserData",
       variables: { locale: "en-US", idArray: ids.slice(i, i + 250), includeUserData: false, includeWatchedData: false,
@@ -274,35 +279,149 @@ async function imdbOwnerRatings(userId: string, ids: string[], o: FetchOpts): Pr
     const text = await res.text();
     if (!res.ok || isChallenge(res.status, res.headers, text)) throw new Error(`IMDb rating lookup -> HTTP ${res.status}${res.headers.get("x-amzn-waf-action") ? ", bot check" : ""}`);
     for (const [k, v] of parseImdbOwnerRatings(text)) out.set(k, v);
-    if (o.delayMs && i + 250 < ids.length) await sleep(o.delayMs);
   }
   return out;
 }
 
-/** Ratings and watchlist of a public IMDb profile. Throws ProfileBlocked when IMDb challenges the request. */
+// ---- IMDb GraphQL route ---------------------------------------------------------------------------------------
+
+/** Ratings pages fetched per GraphQL request after the first (as aliases p1, p2, ...): 1,000 titles a request. */
+export const API_PAGES_PER_REQUEST = 4;
+const GQL_TITLE = "id titleText { text } releaseYear { year } titleGenres { genres { genre { text } } } principalCreditsV2 { grouping { text } credits { name { nameText { text } } } }";
+
+const ratingsField = (alias: string, userId: string, page: number) =>
+  `${alias}: advancedTitleSearch(first: 250, jumpToPosition: ${page * 250 + 1}, constraints: { singleUserRatingConstraint: { filterType: INCLUDE, userId: ${JSON.stringify(userId)} }, ` +
+  `explicitContentConstraint: { explicitContentFilter: INCLUDE_ADULT } }, sort: { sortBy: SINGLE_USER_RATING_DATE, sortOrder: DESC }) ` +
+  `{ total pageInfo { hasNextPage } edges { node { title { ${GQL_TITLE} } } } }`;
+const watchlistField = (userId: string, after: string | null) =>
+  `wl: predefinedList(classType: WATCH_LIST, userId: ${JSON.stringify(userId)}) { titleListItemSearch(first: 250${after ? `, after: ${JSON.stringify(after)}` : ""}) ` +
+  `{ total pageInfo { hasNextPage endCursor } edges { listItem: title { id titleText { text } releaseYear { year } } } } }`;
+
+/** One GraphQL POST. A bot check throws ProfileBlocked; an HTTP error or an answer with no data throws Error. */
+async function gql(body: Obj, what: string, o: FetchOpts, first: boolean): Promise<Obj> {
+  if (!first && o.delayMs) await sleep(o.delayMs);
+  const f = o.fetch ?? fetch;
+  let res: Response;
+  try {
+    res = await f(o.imdbGraphql ?? "https://api.graphql.imdb.com/", {
+      method: "POST",
+      headers: { ...BROWSER_HEADERS, Accept: "application/json", "Content-Type": "application/json", Origin: "https://www.imdb.com", Referer: "https://www.imdb.com/" },
+      body: JSON.stringify(body),
+    });
+  } catch (e) { throw new Error(`cannot reach IMDb's API for the ${what}: ${e instanceof Error ? e.message : String(e)}`); }
+  const text = await res.text();
+  if (isChallenge(res.status, res.headers, text)) throw new ProfileBlocked("imdb", `IMDb's API refused the ${what} (HTTP ${res.status}${res.headers.get("x-amzn-waf-action") ? ", bot check" : ""})`);
+  let json: Obj;
+  try { json = obj(JSON.parse(text) as Json); } catch { throw new Error(`IMDb's API sent an unreadable ${what} (HTTP ${res.status})`); }
+  const err = str(obj(arr(json.errors)[0]).message);
+  if (!res.ok || json.data === undefined || json.data === null) throw new Error(`IMDb's API rejected the ${what} (${(err ?? `HTTP ${res.status}`).slice(0, 160)})`);
+  return obj(json.data);
+}
+
+interface ApiSearch { total: number | null; hasNext: boolean; items: ImdbItem[] }
+function apiRatings(v: Json | undefined): ApiSearch | null {
+  const s = obj(v);
+  if (!Array.isArray(s.edges)) return null;
+  const items = s.edges.map((e) => imdbItem(obj(obj(obj(e).node).title))).filter((i): i is ImdbItem => i !== null);
+  return { total: num(s.total), hasNext: obj(s.pageInfo).hasNextPage === true, items };
+}
+function apiWatchlist(v: Json | undefined): (ApiSearch & { cursor: string | null }) | null {
+  const s = obj(obj(v).titleListItemSearch);
+  if (!Array.isArray(s.edges)) return null;
+  const items = s.edges.map((e) => imdbItem(obj(obj(e).listItem))).filter((i): i is ImdbItem => i !== null);
+  const info = obj(s.pageInfo);
+  return { total: num(s.total), hasNext: info.hasNextPage === true, items, cursor: str(info.endCursor) };
+}
+
+/**
+ * Ratings and watchlist over raw GraphQL. Throws when the route can't start (refused, p. id unresolved, API error,
+ * no ratings), so the caller can try the pages; a failure after the first ratings request keeps what it has, with a note.
+ */
+export async function imdbViaApi(id: string, o: FetchOpts, notes: string[]): Promise<{ userId: string; rated: ImdbItem[]; watch: ImdbItem[] }> {
+  let calls = 0;
+  const call = (body: Obj, what: string) => gql(body, what, o, calls++ === 0);
+  let userId = id;
+  if (!id.startsWith("ur")) {
+    const d = await call({ query: `query { userProfile(input: { profileId: ${JSON.stringify(id)} }) { userId } }` }, "profile id");
+    const ur = str(obj(d.userProfile).userId);
+    if (!ur || !/^ur\d+$/.test(ur)) throw new Error(`IMDb's API did not resolve the profile id ${id}`);
+    userId = ur;
+  }
+  const first = await call({ query: `query { ${ratingsField("p0", userId, 0)} ${watchlistField(userId, null)} }` }, "ratings list");
+  const p0 = apiRatings(first.p0);
+  if (!p0) throw new Error("IMDb's API returned no ratings list");
+  if (!p0.items.length) throw new Error(`IMDb's API lists no public ratings for ${userId}`);
+  const rated: ImdbItem[] = [];
+  const seen = new Set<string>();
+  const add = (xs: ImdbItem[], into: ImdbItem[], ids: Set<string>) => { let n = 0; for (const i of xs) if (!ids.has(i.tconst)) { ids.add(i.tconst); into.push(i); n++; } return n; };
+  add(p0.items, rated, seen);
+  const total = p0.total;
+  o.log?.(`IMDb ratings (API): ${rated.length}${total ? ` of ${total}` : ""}`);
+  let more = p0.hasNext && (total === null || rated.length < total);
+  let page = 1;
+  while (more && page < MAX_PAGES) {
+    const pages = Array.from({ length: Math.min(API_PAGES_PER_REQUEST, MAX_PAGES - page) }, (_, k) => page + k);
+    let d: Obj;
+    try { d = await call({ query: `query { ${pages.map((n) => ratingsField(`p${n}`, userId, n)).join(" ")} }` }, "ratings list"); }
+    catch (e) { notes.push(`IMDb ratings: stopped at page ${page + 1} (${e instanceof Error ? e.message : String(e)}); kept the first ${rated.length}`); more = false; break; }
+    for (const n of pages) {
+      const r = apiRatings(d[`p${n}`]);
+      const fresh = r ? add(r.items, rated, seen) : 0;
+      page = n + 1;
+      if (!r || !r.hasNext || !fresh || (total !== null && rated.length >= total)) { more = false; break; }
+    }
+    o.log?.(`IMDb ratings (API): ${rated.length}${total ? ` of ${total}` : ""}`);
+  }
+  if (more) notes.push(`IMDb ratings: stopped at the ${MAX_PAGES}-page limit; kept the first ${rated.length}${total ? ` of ${total}` : ""}`);
+
+  const watch: ImdbItem[] = [];
+  const wseen = new Set<string>();
+  let wl = apiWatchlist(first.wl);
+  for (let wpage = 1; wl; wpage++) {
+    add(wl.items, watch, wseen);
+    if (!wl.hasNext || !wl.cursor || !wl.items.length || wpage >= MAX_PAGES) break;
+    try { wl = apiWatchlist((await call({ query: `query { ${watchlistField(userId, wl.cursor)} }` }, "watchlist")).wl); }
+    catch (e) { notes.push(`IMDb watchlist: stopped at page ${wpage + 1} (${e instanceof Error ? e.message : String(e)}); kept the first ${watch.length}`); break; }
+  }
+  if (!apiWatchlist(first.wl)) notes.push("watchlist skipped (IMDb's API returned none; it may be private)");
+  return { userId, rated, watch };
+}
+
+/**
+ * Ratings and watchlist of a public IMDb profile: IMDb's GraphQL API first, the HTML pages when the API route can't
+ * start. Throws ProfileBlocked when the pages are refused too.
+ */
 export async function fetchImdbProfile(url: string, o: FetchOpts = {}): Promise<FetchedProfile> {
   const id = imdbUserId(url);
-  const base = `${(o.imdbOrigin ?? "https://www.imdb.com").replace(/\/+$/, "")}/user/${id}`;
-  const notes: string[] = [];
-  const rated = await imdbList(base, "ratings", o, notes);
-  let watch: ImdbItem[] = [];
-  try { watch = (await imdbList(base, "watchlist", o, notes)).items; }
-  catch (e) { if (e instanceof ProfileBlocked) notes.push(`watchlist skipped (${e.message})`); else throw e; }
-  const userId = rated.userId ?? (id.startsWith("ur") ? id : null);
+  let notes: string[] = [];
+  let rated: ImdbItem[], watch: ImdbItem[] = [], userId: string | null;
+  try {
+    ({ userId, rated, watch } = await imdbViaApi(id, o, notes));
+  } catch (apiErr) {
+    o.log?.(`IMDb API route failed (${apiErr instanceof Error ? apiErr.message : String(apiErr)}); trying the profile pages`);
+    notes = [];
+    const base = `${(o.imdbOrigin ?? "https://www.imdb.com").replace(/\/+$/, "")}/user/${id}`;
+    if (o.delayMs) await sleep(o.delayMs);
+    const r = await imdbList(base, "ratings", o, notes);
+    rated = r.items;
+    try { watch = (await imdbList(base, "watchlist", o, notes)).items; }
+    catch (e) { if (e instanceof ProfileBlocked) notes.push(`watchlist skipped (${e.message})`); else throw e; }
+    userId = r.userId ?? (id.startsWith("ur") ? id : null);
+  }
   let ratings = new Map<string, number>();
-  if (userId && rated.items.length) {
+  if (userId && rated.length) {
     let failed = false;
-    try { ratings = await imdbOwnerRatings(userId, rated.items.map((i) => i.tconst), o); }
+    try { ratings = await imdbOwnerRatings(userId, rated.map((i) => i.tconst), o); }
     catch (e) { failed = true; notes.push(`could not read the scores themselves (${e instanceof Error ? e.message : String(e)}); rated films still count as seen`); }
     if (!ratings.size && !failed) notes.push("IMDb returned no scores for the rated films; they still count as seen");
   }
   const titles: Record<string, TitleRef> = {};
-  for (const i of [...rated.items, ...watch]) titles[i.tconst] = { title: i.title, year: i.year, ...(ratings.has(i.tconst) ? { rating: ratings.get(i.tconst)! } : {}) };
+  for (const i of [...rated, ...watch]) titles[i.tconst] = { title: i.title, year: i.year, ...(ratings.has(i.tconst) ? { rating: ratings.get(i.tconst)! } : {}) };
   return {
-    seen: rated.items.map((i) => i.tconst),
+    seen: rated.map((i) => i.tconst),
     ...(ratings.size ? { ratings: Object.fromEntries(ratings) } : {}),
     watchlist: watch.map((i) => i.tconst),
-    ...affinities(rated.items, ratings),
+    ...affinities(rated, ratings),
     source: `imdb:${id}`,
     titles, unmatched: { seen: [], watchlist: [] }, notes, fetchedAt: new Date().toISOString(),
   };

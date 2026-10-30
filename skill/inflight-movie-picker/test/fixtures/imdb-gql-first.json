@@ -1,0 +1,370 @@
+{
+ "data": {
+  "p0": {
+   "total": 252,
+   "pageInfo": {
+    "hasNextPage": true
+   },
+   "edges": [
+    {
+     "node": {
+      "title": {
+       "id": "tt9000001",
+       "titleText": {
+        "text": "Synthetic Horror One"
+       },
+       "releaseYear": {
+        "year": 2026
+       },
+       "titleGenres": {
+        "genres": [
+         {
+          "genre": {
+           "text": "Horror"
+          }
+         }
+        ]
+       },
+       "principalCreditsV2": [
+        {
+         "grouping": {
+          "text": "Director"
+         },
+         "credits": [
+          {
+           "name": {
+            "nameText": {
+             "text": "Dir Alpha"
+            }
+           }
+          }
+         ]
+        },
+        {
+         "grouping": {
+          "text": "Stars"
+         },
+         "credits": [
+          {
+           "name": {
+            "nameText": {
+             "text": "Synthetic Actor"
+            }
+           }
+          }
+         ]
+        }
+       ]
+      }
+     }
+    },
+    {
+     "node": {
+      "title": {
+       "id": "tt9000002",
+       "titleText": {
+        "text": "Synthetic Horror Two"
+       },
+       "releaseYear": {
+        "year": 2025
+       },
+       "titleGenres": {
+        "genres": [
+         {
+          "genre": {
+           "text": "Horror"
+          }
+         },
+         {
+          "genre": {
+           "text": "Thriller"
+          }
+         }
+        ]
+       },
+       "principalCreditsV2": [
+        {
+         "grouping": {
+          "text": "Director"
+         },
+         "credits": [
+          {
+           "name": {
+            "nameText": {
+             "text": "Dir Alpha"
+            }
+           }
+          }
+         ]
+        },
+        {
+         "grouping": {
+          "text": "Stars"
+         },
+         "credits": [
+          {
+           "name": {
+            "nameText": {
+             "text": "Synthetic Actor"
+            }
+           }
+          }
+         ]
+        }
+       ]
+      }
+     }
+    },
+    {
+     "node": {
+      "title": {
+       "id": "tt9000003",
+       "titleText": {
+        "text": "Synthetic Drama"
+       },
+       "releaseYear": {
+        "year": 2024
+       },
+       "titleGenres": {
+        "genres": [
+         {
+          "genre": {
+           "text": "Drama"
+          }
+         }
+        ]
+       },
+       "principalCreditsV2": [
+        {
+         "grouping": {
+          "text": "Director"
+         },
+         "credits": [
+          {
+           "name": {
+            "nameText": {
+             "text": "Dir Beta"
+            }
+           }
+          }
+         ]
+        },
+        {
+         "grouping": {
+          "text": "Stars"
+         },
+         "credits": [
+          {
+           "name": {
+            "nameText": {
+             "text": "Synthetic Actor"
+            }
+           }
+          }
+         ]
+        }
+       ]
+      }
+     }
+    },
+    {
+     "node": {
+      "title": {
+       "id": "tt9000004",
+       "titleText": {
+        "text": "Synthetic Comedy"
+       },
+       "releaseYear": {
+        "year": 2023
+       },
+       "titleGenres": {
+        "genres": [
+         {
+          "genre": {
+           "text": "Comedy"
+          }
+         }
+        ]
+       },
+       "principalCreditsV2": [
+        {
+         "grouping": {
+          "text": "Director"
+         },
+         "credits": [
+          {
+           "name": {
+            "nameText": {
+             "text": "Dir Gamma"
+            }
+           }
+          }
+         ]
+        },
+        {
+         "grouping": {
+          "text": "Stars"
+         },
+         "credits": [
+          {
+           "name": {
+            "nameText": {
+             "text": "Synthetic Actor"
+            }
+           }
+          }
+         ]
+        }
+       ]
+      }
+     }
+    },
+    {
+     "node": {
+      "title": {
+       "id": "tt9000005",
+       "titleText": {
+        "text": "Synthetic Musical"
+       },
+       "releaseYear": {
+        "year": 2022
+       },
+       "titleGenres": {
+        "genres": [
+         {
+          "genre": {
+           "text": "Musical"
+          }
+         },
+         {
+          "genre": {
+           "text": "Drama"
+          }
+         }
+        ]
+       },
+       "principalCreditsV2": [
+        {
+         "grouping": {
+          "text": "Director"
+         },
+         "credits": [
+          {
+           "name": {
+            "nameText": {
+             "text": "Dir Gamma"
+            }
+           }
+          }
+         ]
+        },
+        {
+         "grouping": {
+          "text": "Stars"
+         },
+         "credits": [
+          {
+           "name": {
+            "nameText": {
+             "text": "Synthetic Actor"
+            }
+           }
+          }
+         ]
+        }
+       ]
+      }
+     }
+    },
+    {
+     "node": {
+      "title": {
+       "id": "tt9000006",
+       "titleText": {
+        "text": "Synthetic Thriller"
+       },
+       "releaseYear": {
+        "year": 2021
+       },
+       "titleGenres": {
+        "genres": [
+         {
+          "genre": {
+           "text": "Thriller"
+          }
+         }
+        ]
+       },
+       "principalCreditsV2": [
+        {
+         "grouping": {
+          "text": "Director"
+         },
+         "credits": [
+          {
+           "name": {
+            "nameText": {
+             "text": "Dir Alpha"
+            }
+           }
+          }
+         ]
+        },
+        {
+         "grouping": {
+          "text": "Stars"
+         },
+         "credits": [
+          {
+           "name": {
+            "nameText": {
+             "text": "Synthetic Actor"
+            }
+           }
+          }
+         ]
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "wl": {
+   "titleListItemSearch": {
+    "total": 2,
+    "pageInfo": {
+     "hasNextPage": false,
+     "endCursor": "c2"
+    },
+    "edges": [
+     {
+      "listItem": {
+       "id": "tt9100001",
+       "titleText": {
+        "text": "Synthetic Watchlist One"
+       },
+       "releaseYear": {
+        "year": 2026
+       }
+      }
+     },
+     {
+      "listItem": {
+       "id": "tt9100002",
+       "titleText": {
+        "text": "Synthetic Watchlist Two"
+       },
+       "releaseYear": {
+        "year": 2025
+       }
+      }
+     }
+    ]
+   }
+  }
+ },
+ "extensions": {
+  "disclaimer": "Public, commercial, and/or non-private use of the IMDb data provided by this API is not allowed. (synthetic fixture)"
+ }
+}

@@ -64,9 +64,11 @@ bun $S emirates --taste data/imdb-ratings
 bun $S united --taste ~/Downloads/letterboxd-export     # unzip the Letterboxd zip first
 ```
 
-No export, but a public IMDb or Letterboxd profile? Pass the URL to the script. It fetches the profile from this
-machine, page by page (IMDb: 250 titles a page, up to 50 pages, then the watchlist; Letterboxd: 72 films a page,
-then the watchlist), and caches it for 24 hours:
+No export, but a public IMDb or Letterboxd profile? Pass the URL to the script. It reads the profile from this
+machine and caches it for 24 hours. For IMDb it asks IMDb's API first, the same calls imdb.com makes in a browser:
+a 941-rating profile with its scores and watchlist took 7 requests in October 2026. If the API turns it down, it
+reads the profile pages instead, 250 titles a page. Letterboxd is pages only, 72 films a page, then the watchlist.
+Either way it stops at 50 pages:
 
 ```bash
 bun $S emirates --imdb-url https://www.imdb.com/user/p.xxxxxxxx/ratings/
@@ -74,7 +76,7 @@ bun $S ba --letterboxd-url https://letterboxd.com/<username>/
 ```
 
 The IMDb ratings and watchlist have to be public (IMDb, Settings, Privacy). IMDb blocks scripted requests from a
-lot of networks with an empty HTTP 202; Letterboxd sometimes answers 403. When that happens the script prints the
+lot of networks with an empty HTTP 202 or a 429; Letterboxd sometimes answers 403. When that happens the script prints the
 export route in two lines and exits 1; if it stops partway (a block after page 1), it keeps the pages it read and
 adds a `note:` line saying so. For IMDb, if the Seatback Cinema connector is added in this session (its
 tools are `list_airlines`, `picks`, `profile_from_imdb_url` and so on), try `profile_from_imdb_url` with the URL

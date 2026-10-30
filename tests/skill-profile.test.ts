@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import {
-  blockedHelp, fetchImdbProfile, fetchLetterboxdProfile, imdbUserId, isChallenge, letterboxdUser, parseImdbOwnerRatings,
+  API_PAGES_PER_REQUEST, blockedHelp, fetchImdbProfile, MAX_PAGES, fetchLetterboxdProfile, imdbUserId, isChallenge, letterboxdUser, parseImdbOwnerRatings,
   parseImdbPage, parseLetterboxdPage, ProfileBlocked,
 } from "../skill/inflight-movie-picker/scripts/profile.ts";
 
@@ -22,10 +22,14 @@ function graphqlReply(init?: RequestInit): Response {
   return new Response(JSON.stringify({ data: { titles: all.filter((t) => ids.has(t.id)) } }), { headers: { "content-type": "application/json" } });
 }
 
+/** Raw GraphQL queries (the API route) are refused here, so these mocks exercise the HTML page fallback. */
+const isRawQuery = (init?: RequestInit) => "query" in (JSON.parse(String(init?.body ?? "{}")) as object);
+
 function imdbMock(opts: { block?: boolean; graphqlStatus?: number } = {}) {
   const calls: string[] = [];
   const f = async (url: string, init?: RequestInit): Promise<Response> => {
     calls.push(url);
+    if (url.includes("graphql") && isRawQuery(init)) return new Response("", { status: 429 });
     if (url.includes("graphql")) return opts.graphqlStatus ? new Response("no", { status: opts.graphqlStatus }) : graphqlReply(init);
     if (opts.block) return html("", 202, { "x-amzn-waf-action": "challenge" });
     if (url.includes("/watchlist/")) return html(fx("imdb-watchlist-page1.html"));
@@ -102,7 +106,7 @@ test("Letterboxd films page: 72 per page, title and year split, half-star rating
   expect(w.lastPage).toBe(23);
 });
 
-test("fetchImdbProfile: paginates until no new ids, reads scores over GraphQL, builds the shared Profile", async () => {
+test("fetchImdbProfile (page fallback): paginates until no new ids, reads scores over GraphQL, builds the shared Profile", async () => {
   const { f, calls } = imdbMock();
   const p = await fetchImdbProfile(IMDB_URL, { fetch: f, delayMs: 0 });
   expect(p.seen).toHaveLength(80);
@@ -113,9 +117,9 @@ test("fetchImdbProfile: paginates until no new ids, reads scores over GraphQL, b
   expect(p.titles.tt91000001?.title).toBe("Example Watchlist Film 001");
   expect(p.notes).toEqual([]);
   expect(Array.isArray(p.liked_genres)).toBe(true);
-  // pages 1, 2 and 3 (3 repeats 2, so the loop stops), one watchlist page, one GraphQL batch
+  // the refused API call, pages 1, 2 and 3 (3 repeats 2, so the loop stops), one watchlist page, one score batch
   expect(calls.filter((u) => u.includes("/ratings/"))).toHaveLength(3);
-  expect(calls.filter((u) => u.includes("graphql"))).toHaveLength(1);
+  expect(calls.filter((u) => u.includes("graphql"))).toHaveLength(2);
 });
 
 test("fetchImdbProfile: a failed score lookup keeps the seen list and says so; a WAF 202 throws ProfileBlocked", async () => {
@@ -133,6 +137,95 @@ test("fetchImdbProfile: a failed score lookup keeps the seen list and says so; a
   expect(help.split("\n")).toHaveLength(2);
   expect(help).toContain("https://www.imdb.com/list/ratings/export");
   expect(help).toContain("--taste");
+});
+
+// ---- the GraphQL route (synthetic fixtures: ur10000001, tt9000001..8 rated, tt9100001..2 on the watchlist) -------
+
+const gqlFx = (name: string) => new Response(fx(name), { headers: { "content-type": "application/json" } });
+const SYN_URL = "https://www.imdb.com/user/p.syntheticprofile01/ratings/";
+
+/** A fake api.graphql.imdb.com: answers by what the query asks for; `fail` picks a request to break. */
+function apiMock(opts: { fail?: "resolve" | "first" | "rest" | "scores"; failWith?: number } = {}) {
+  const bodies: { query?: string; operationName?: string; variables?: { idArray?: string[] } }[] = [];
+  const pages: string[] = [];
+  const f = async (url: string, init?: RequestInit): Promise<Response> => {
+    if (!url.includes("graphql")) { pages.push(url); return html(fx(url.includes("/watchlist/") ? "imdb-watchlist-page1.html" : "imdb-ratings-page1.html")); }
+    const b = JSON.parse(String(init?.body)) as (typeof bodies)[number];
+    bodies.push(b);
+    const kind = b.operationName === "PersonalizedUserData" ? "scores" : b.query?.includes("userProfile") ? "resolve" : b.query?.includes("p0:") ? "first" : "rest";
+    if (opts.fail === kind) return opts.failWith ? new Response("", { status: opts.failWith }) : new Response(JSON.stringify({ errors: [{ message: "Cannot query field" }], data: null }), { status: 400 });
+    if (kind === "scores") return gqlFx("imdb-gql-scores.json");
+    return gqlFx(kind === "resolve" ? "imdb-gql-user-profile.json" : kind === "first" ? "imdb-gql-first.json" : "imdb-gql-rest.json");
+  };
+  return { f, bodies, pages };
+}
+
+test("fetchImdbProfile (API): p. id -> ur id, ratings pages batched as aliases, watchlist and scores; no HTML pages", async () => {
+  const m = apiMock();
+  const p = await fetchImdbProfile(SYN_URL, { fetch: m.f, delayMs: 0 });
+  expect(m.pages).toEqual([]);
+  expect(m.bodies).toHaveLength(4); // resolve, ratings page 1 + watchlist, ratings pages 2-5, one score batch
+  expect(m.bodies[0]!.query).toContain('userProfile(input: { profileId: "p.syntheticprofile01" })');
+  expect(m.bodies[1]!.query).toMatch(/p0: advancedTitleSearch\(first: 250, jumpToPosition: 1,.*userId: "ur10000001".*wl: predefinedList\(classType: WATCH_LIST, userId: "ur10000001"\)/s);
+  expect(m.bodies[2]!.query).toMatch(/p1: advancedTitleSearch\(first: 250, jumpToPosition: 251,.*p4: advancedTitleSearch\(first: 250, jumpToPosition: 1001,/s);
+  expect(m.bodies[3]!.variables?.idArray).toHaveLength(8);
+  expect(p.seen).toEqual(["tt9000001", "tt9000002", "tt9000003", "tt9000004", "tt9000005", "tt9000006", "tt9000007", "tt9000008"]);
+  expect(p.watchlist).toEqual(["tt9100001", "tt9100002"]);
+  expect(p.ratings?.tt9000001).toBe(9);
+  expect(p.titles.tt9100002).toEqual({ title: "Synthetic Watchlist Two", year: 2025 });
+  expect(p.titles.tt9000005).toEqual({ title: "Synthetic Musical", year: 2022, rating: 3 });
+  expect(p.liked_genres?.[0]).toBe("Horror");
+  expect(p.disliked_genres).toContain("Musical");
+  expect(p.liked_directors).toEqual(["Dir Alpha"]);
+  expect(p.notes).toEqual([]);
+  expect(p.source).toBe("imdb:p.syntheticprofile01");
+});
+
+test("fetchImdbProfile (API): a ur URL skips the resolve call", async () => {
+  const m = apiMock();
+  const p = await fetchImdbProfile("https://www.imdb.com/user/ur10000001/", { fetch: m.f, delayMs: 0 });
+  expect(m.bodies).toHaveLength(3);
+  expect(p.seen).toHaveLength(8);
+});
+
+test("fetchImdbProfile (API): a refused or broken start falls back to the HTML pages", async () => {
+  for (const [fail, failWith] of [["resolve", 429], ["first", 0], ["first", 202]] as const) {
+    const m = apiMock({ fail, failWith });
+    const p = await fetchImdbProfile(SYN_URL, { fetch: m.f, delayMs: 0 });
+    expect(m.pages.some((u) => u.endsWith("/user/p.syntheticprofile01/ratings/"))).toBe(true);
+    expect(p.seen[0]).toBe("tt90000001"); // from the captured HTML page, not the API fixtures
+  }
+});
+
+test("fetchImdbProfile (API): a failure after the first request keeps the first page with a note; failed scores are a note", async () => {
+  const rest = await fetchImdbProfile(SYN_URL, { fetch: apiMock({ fail: "rest", failWith: 429 }).f, delayMs: 0 });
+  expect(rest.seen).toHaveLength(6);
+  expect(rest.watchlist).toHaveLength(2);
+  expect(rest.notes).toEqual(["IMDb ratings: stopped at page 2 (IMDb's API refused the ratings list (HTTP 429)); kept the first 6"]);
+  const scores = await fetchImdbProfile(SYN_URL, { fetch: apiMock({ fail: "scores", failWith: 403 }).f, delayMs: 0 });
+  expect(scores.seen).toHaveLength(8);
+  expect(scores.ratings).toBeUndefined();
+  expect(scores.notes[0]).toContain("could not read the scores themselves");
+});
+
+test(`fetchImdbProfile (API): a profile past ${MAX_PAGES} pages stops at the limit and says so`, async () => {
+  let requests = 0;
+  const f = async (_url: string, init?: RequestInit): Promise<Response> => {
+    requests++;
+    const b = JSON.parse(String(init?.body)) as { query?: string; operationName?: string };
+    if (b.operationName) return new Response(JSON.stringify({ data: { titles: [] } }));
+    const data: Record<string, unknown> = {};
+    for (const m of (b.query ?? "").matchAll(/p(\d+): advancedTitleSearch/g)) {
+      data[`p${m[1]}`] = { total: 20_000, pageInfo: { hasNextPage: true }, edges: [{ node: { title: { id: `tt8${m[1]!.padStart(6, "0")}`, titleText: { text: `Film ${m[1]}` } } } }] };
+    }
+    if (b.query?.includes("wl:")) data.wl = { titleListItemSearch: { total: 0, pageInfo: { hasNextPage: false }, edges: [] } };
+    return new Response(JSON.stringify({ data }));
+  };
+  const p = await fetchImdbProfile("ur10000001", { fetch: f, delayMs: 0 });
+  expect(p.seen).toHaveLength(MAX_PAGES);
+  expect(p.notes).toContain(`IMDb ratings: stopped at the ${MAX_PAGES}-page limit; kept the first ${MAX_PAGES} of 20000`);
+  expect(p.notes).toContain("IMDb returned no scores for the rated films; they still count as seen");
+  expect(requests).toBe(1 + Math.ceil((MAX_PAGES - 1) / API_PAGES_PER_REQUEST) + 1);
 });
 
 test("fetchLetterboxdProfile: slugs map to IMDb ids through ids.json, the rest stay for the title join", async () => {
@@ -221,7 +314,9 @@ test.skipIf(!!noLoopback)("catalogue.ts --imdb-url hides rated films, flags the 
     expect(c.code).toBe(1);
     expect(c.err).toContain("IMDb refused the request (HTTP 202, challenge)");
     expect(c.err).toContain("https://www.imdb.com/list/ratings/export");
-    expect(c.err.trim().split("\n")).toHaveLength(2);
+    const lines = c.err.trim().split("\n");
+    expect(lines).toHaveLength(3); // the API-route log line, then the two-line export route
+    expect(lines[0]).toContain("IMDb API route failed (IMDb's API refused the profile id (HTTP 429)); trying the profile pages");
   } finally {
     server.stop(true);
     rmSync(dir, { recursive: true, force: true });

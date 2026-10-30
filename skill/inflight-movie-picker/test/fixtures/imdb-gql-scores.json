@@ -1,0 +1,65 @@
+{
+ "data": {
+  "titles": [
+   {
+    "id": "tt9000001",
+    "otherUserRating": {
+     "date": "2026-10-01T00:00:00.000Z",
+     "value": 9
+    }
+   },
+   {
+    "id": "tt9000002",
+    "otherUserRating": {
+     "date": "2026-10-01T00:00:00.000Z",
+     "value": 9
+    }
+   },
+   {
+    "id": "tt9000003",
+    "otherUserRating": {
+     "date": "2026-10-01T00:00:00.000Z",
+     "value": 6
+    }
+   },
+   {
+    "id": "tt9000004",
+    "otherUserRating": {
+     "date": "2026-10-01T00:00:00.000Z",
+     "value": 4
+    }
+   },
+   {
+    "id": "tt9000005",
+    "otherUserRating": {
+     "date": "2026-10-01T00:00:00.000Z",
+     "value": 3
+    }
+   },
+   {
+    "id": "tt9000006",
+    "otherUserRating": {
+     "date": "2026-10-01T00:00:00.000Z",
+     "value": 8
+    }
+   },
+   {
+    "id": "tt9000007",
+    "otherUserRating": {
+     "date": "2026-10-01T00:00:00.000Z",
+     "value": 7
+    }
+   },
+   {
+    "id": "tt9000008",
+    "otherUserRating": {
+     "date": "2026-10-01T00:00:00.000Z",
+     "value": 5
+    }
+   }
+  ]
+ },
+ "extensions": {
+  "disclaimer": "Public, commercial, and/or non-private use of the IMDb data provided by this API is not allowed. (synthetic fixture)"
+ }
+}

@@ -1,0 +1,124 @@
+{
+ "data": {
+  "p1": {
+   "total": 252,
+   "pageInfo": {
+    "hasNextPage": false
+   },
+   "edges": [
+    {
+     "node": {
+      "title": {
+       "id": "tt9000007",
+       "titleText": {
+        "text": "Synthetic Western"
+       },
+       "releaseYear": {
+        "year": 2020
+       },
+       "titleGenres": {
+        "genres": [
+         {
+          "genre": {
+           "text": "Western"
+          }
+         }
+        ]
+       },
+       "principalCreditsV2": [
+        {
+         "grouping": {
+          "text": "Director"
+         },
+         "credits": [
+          {
+           "name": {
+            "nameText": {
+             "text": "Dir Delta"
+            }
+           }
+          }
+         ]
+        },
+        {
+         "grouping": {
+          "text": "Stars"
+         },
+         "credits": [
+          {
+           "name": {
+            "nameText": {
+             "text": "Synthetic Actor"
+            }
+           }
+          }
+         ]
+        }
+       ]
+      }
+     }
+    },
+    {
+     "node": {
+      "title": {
+       "id": "tt9000008",
+       "titleText": {
+        "text": "Synthetic Romance"
+       },
+       "releaseYear": {
+        "year": 2019
+       },
+       "titleGenres": {
+        "genres": [
+         {
+          "genre": {
+           "text": "Romance"
+          }
+         },
+         {
+          "genre": {
+           "text": "Comedy"
+          }
+         }
+        ]
+       },
+       "principalCreditsV2": [
+        {
+         "grouping": {
+          "text": "Director"
+         },
+         "credits": [
+          {
+           "name": {
+            "nameText": {
+             "text": "Dir Beta"
+            }
+           }
+          }
+         ]
+        },
+        {
+         "grouping": {
+          "text": "Stars"
+         },
+         "credits": [
+          {
+           "name": {
+            "nameText": {
+             "text": "Synthetic Actor"
+            }
+           }
+          }
+         ]
+        }
+       ]
+      }
+     }
+    }
+   ]
+  }
+ },
+ "extensions": {
+  "disclaimer": "Public, commercial, and/or non-private use of the IMDb data provided by this API is not allowed. (synthetic fixture)"
+ }
+}
