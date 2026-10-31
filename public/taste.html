@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seatback Cinema taste code</title>
+<meta name="description" content="Turn your IMDb or Letterboxd export into a short code for flight picks in the Claude app.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='1' y='3' width='14' height='10' rx='2' fill='%231c5cab'/%3E%3Cpath d='M6 6v4l4-2z' fill='white'/%3E%3C/svg%3E">
+<style>
+:root {
+  color-scheme: light;
+  --surface-0: #f4f4f2;
+  --surface-1: #fcfcfb;
+  --surface-2: #efeeea;
+  --border: #e3e2de;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #6f6e69;
+  --link: #1c5cab;
+  --accent: #1c5cab;
+  --accent-ink: #ffffff;
+  --drop: #e8f0fb;
+  --warn-bg: #fff4dc;
+  --warn-ink: #6b4a00;
+  --ok-ink: #1d6b3a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-0: #121211;
+    --surface-1: #1a1a19;
+    --surface-2: #232321;
+    --border: #2e2e2c;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7;
+    --text-muted: #9a998f;
+    --link: #86b6ef;
+    --accent: #5598e7;
+    --accent-ink: #0b0b0b;
+    --drop: #17263a;
+    --warn-bg: #3a2c08;
+    --warn-ink: #f3d58a;
+    --ok-ink: #7fd39c;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0: #121211;
+  --surface-1: #1a1a19;
+  --surface-2: #232321;
+  --border: #2e2e2c;
+  --text-primary: #f0efec;
+  --text-secondary: #c3c2b7;
+  --text-muted: #9a998f;
+  --link: #86b6ef;
+  --accent: #5598e7;
+  --accent-ink: #0b0b0b;
+  --drop: #17263a;
+  --warn-bg: #3a2c08;
+  --warn-ink: #f3d58a;
+  --ok-ink: #7fd39c;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 640px; margin: 0 auto; padding: 28px 16px 48px; }
+h1 { font-size: 26px; line-height: 1.2; margin: 0 0 8px; font-weight: 650; letter-spacing: -0.01em; }
+h2 { font-size: 17px; margin: 0 0 8px; font-weight: 600; }
+p { margin: 0 0 12px; }
+.lede { color: var(--text-secondary); margin-bottom: 20px; }
+a { color: var(--link); }
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+.small { font-size: 14px; color: var(--text-secondary); }
+.drop {
+  display: block; border: 2px dashed var(--border); border-radius: 10px; padding: 22px 14px; text-align: center;
+  cursor: pointer; margin: 4px 0 14px; transition: background .15s, border-color .15s;
+}
+.drop.over { background: var(--drop); border-color: var(--accent); }
+.drop strong { display: block; font-size: 17px; margin-bottom: 4px; }
+.drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+button, .btn {
+  font: inherit; font-weight: 600; border: 0; border-radius: 9px; padding: 11px 18px; cursor: pointer;
+  background: var(--accent); color: var(--accent-ink); text-decoration: none; display: inline-block;
+}
+button.ghost { background: var(--surface-2); color: var(--text-primary); border: 1px solid var(--border); }
+button:disabled { opacity: .5; cursor: default; }
+ul.files { list-style: none; padding: 0; margin: 0 0 12px; font-size: 14px; }
+ul.files li { padding: 6px 0; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: space-between; }
+ul.files li span:last-child { color: var(--text-secondary); text-align: right; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 4px 0 12px; }
+.stat { background: var(--surface-2); border-radius: 9px; padding: 10px; }
+.stat b { display: block; font-size: 22px; line-height: 1.2; }
+.stat span { font-size: 13px; color: var(--text-secondary); }
+.code {
+  font: 600 clamp(18px, 5.6vw, 34px)/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .06em; word-break: break-all; background: var(--surface-2); border-radius: 10px;
+  padding: 14px; text-align: center; margin: 6px 0 12px; user-select: all;
+}
+.sentence { background: var(--surface-2); border-radius: 10px; padding: 12px 14px; margin: 6px 0 12px; user-select: all; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+select, input[type="number"] {
+  font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface-1); color: var(--text-primary);
+}
+input[type="number"] { width: 5.5em; }
+.msg { padding: 10px 12px; border-radius: 9px; font-size: 14px; margin: 8px 0; }
+.warn { background: var(--warn-bg); color: var(--warn-ink); }
+.ok { color: var(--ok-ink); font-size: 14px; }
+ol { padding-left: 22px; margin: 0 0 8px; }
+ol li { margin-bottom: 8px; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; word-break: break-all; }
+[hidden] { display: none !important; }
+footer { font-size: 13px; color: var(--text-muted); margin-top: 24px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Your taste code</h1>
+  <p class="lede">Claude can pick films for your flight from what the airline is actually showing this month. Give it
+    your IMDb or Letterboxd history once and it skips what you've seen and ranks the rest by how you score films.
+    This page turns your export into a short code you paste into the chat.</p>
+
+  <section class="card" id="step-files">
+    <h2>1. Add your export</h2>
+    <label class="drop" id="drop">
+      <strong>Drop files here, or tap to choose</strong>
+      <span class="small">IMDb ratings or watchlist CSV, Letterboxd zip or its CSVs</span>
+      <input type="file" id="file" multiple accept=".csv,.zip,text/csv,application/zip">
+    </label>
+    <ul class="files" id="files" hidden></ul>
+    <div id="file-msg"></div>
+    <p class="small"><b>IMDb:</b> on a computer, signed in, open
+      <a href="https://www.imdb.com/list/ratings/export" rel="noopener">imdb.com/list/ratings/export</a>. The file shows
+      up under Your exports a minute later. For the watchlist, use the three-dot menu on your Watchlist page.</p>
+    <p class="small"><b>Letterboxd:</b> Settings, Data, Export your data. Drop the zip in as it is.</p>
+  </section>
+
+  <section class="card" id="step-summary" hidden>
+    <h2>2. Check it</h2>
+    <div class="stats">
+      <div class="stat"><b id="n-rated">0</b><span>rated</span></div>
+      <div class="stat"><b id="n-seen">0</b><span>seen</span></div>
+      <div class="stat"><b id="n-watch">0</b><span>watchlist</span></div>
+    </div>
+    <p class="small" id="genres" hidden></p>
+    <p class="small">Your files stay in this browser. The code stores the film ids and your scores, nothing else, for
+      a year. Anyone who has the code can see that list.</p>
+    <button id="make">Make my taste code</button>
+    <div id="make-msg"></div>
+  </section>
+
+  <section class="card" id="step-code" hidden>
+    <h2>3. Paste it into Claude</h2>
+    <div class="code" id="code"></div>
+    <div class="row"><button class="ghost" id="copy-code">Copy code</button><span class="ok" id="copied-code"></span></div>
+    <p class="small">Keep it somewhere you'll find it again, a note on your phone works. Next flight, paste the same code.</p>
+    <div class="row">
+      <label class="small" for="airline">Flying</label>
+      <select id="airline"></select>
+      <label class="small" for="hours">for</label>
+      <input type="number" id="hours" min="1" max="20" value="8" inputmode="numeric">
+      <span class="small">hours</span>
+    </div>
+    <div class="sentence" id="sentence"></div>
+    <div class="row"><button id="copy-sentence">Copy message</button><span class="ok" id="copied-sentence"></span></div>
+  </section>
+
+  <section class="card">
+    <h2>First time? Set up the Claude app</h2>
+    <p class="small">Once, on claude.ai in a browser. It then works in the phone app too.</p>
+    <ol class="small">
+      <li>Settings, Connectors, Add custom connector. Name it Seatback Cinema and paste
+        <code>https://seatback.len5ky.com/mcp</code>. There's no login.</li>
+      <li>Download the <a href="inflight-movie-picker-web.zip" download>Seatback Cinema skill</a> and upload the zip,
+        unopened, at Settings, Capabilities, Skills.</li>
+    </ol>
+  </section>
+
+  <footer><a href="./">Seatback Cinema</a>: monthly in-flight film catalogues for 11 airlines.</footer>
+</main>
+<script>
+"use strict";
+const MAX_BYTES = 64 * 1024;
+const $ = (id) => document.getElementById(id);
+const FALLBACK_AIRLINES = ["Emirates", "United", "KLM", "British Airways", "Singapore Airlines", "Lufthansa", "JAL", "Cathay Pacific", "Qantas", "ANA", "American Airlines"];
+
+// ---------- CSV (RFC 4180: quotes, doubled quotes, CRLF, BOM) ----------
+function parseCsvRows(text) {
+  const rows = []; let row = [], field = "", quoted = false;
+  const s = text.replace(/^﻿/, "");
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (quoted) {
+      if (c === '"' && s[i + 1] === '"') { field += '"'; i++; }
+      else if (c === '"') quoted = false;
+      else field += c;
+    } else if (c === '"') quoted = true;
+    else if (c === ",") { row.push(field); field = ""; }
+    else if (c === "\n" || c === "\r") {
+      if (c === "\r" && s[i + 1] === "\n") i++;
+      row.push(field); field = "";
+      if (row.some((f) => f !== "")) rows.push(row);
+      row = [];
+    } else field += c;
+  }
+  row.push(field);
+  if (row.some((f) => f !== "")) rows.push(row);
+  return rows;
+}
+function parseCsv(text) {
+  const [header, ...body] = parseCsvRows(text);
+  if (!header) return { header: [], rows: [] };
+  const h = header.map((x) => x.trim());
+  return { header: h, rows: body.map((r) => Object.fromEntries(h.map((k, i) => [k, r[i] ?? ""]))) };
+}
+
+// ---------- zip (central directory + the browser's own deflate) ----------
+async function unzip(buf, wanted) {
+  const v = new DataView(buf), u8 = new Uint8Array(buf);
+  let eocd = -1;
+  for (let i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 65557); i--) if (v.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) throw new Error("this zip looks damaged");
+  const count = v.getUint16(eocd + 10, true);
+  let p = v.getUint32(eocd + 16, true);
+  const out = {}, dec = new TextDecoder();
+  for (let n = 0; n < count; n++) {
+    if (v.getUint32(p, true) !== 0x02014b50) break;
+    const method = v.getUint16(p + 10, true), size = v.getUint32(p + 20, true);
+    const nameLen = v.getUint16(p + 28, true), extraLen = v.getUint16(p + 30, true), commentLen = v.getUint16(p + 32, true);
+    const local = v.getUint32(p + 42, true);
+    const name = dec.decode(u8.subarray(p + 46, p + 46 + nameLen));
+    p += 46 + nameLen + extraLen + commentLen;
+    if (!wanted.includes(name)) continue;
+    const start = local + 30 + v.getUint16(local + 26, true) + v.getUint16(local + 28, true);
+    const data = u8.subarray(start, start + size);
+    if (method === 0) out[name] = dec.decode(data);
+    else if (method === 8) {
+      if (typeof DecompressionStream === "undefined") throw new Error("this browser can't open zips; unzip it and drop the CSV files instead");
+      out[name] = await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).text();
+    }
+  }
+  return out;
+}
+
+// ---------- the profile ----------
+const state = { ratings: new Map(), seen: new Set(), watchlist: new Set(), genres: new Map(), sources: new Set() };
+const key = (title, year) => (Number(year) ? `${title.trim()} (${Number(year)})` : title.trim());
+
+function addImdb(text, fileName) {
+  const { header, rows } = parseCsv(text);
+  const isRatings = header.includes("Your Rating") && !header.includes("Position") && !/watchlist/i.test(fileName);
+  let n = 0;
+  const dated = [];
+  for (const r of rows) {
+    const id = (r.Const || "").trim();
+    if (!/^tt\d+$/.test(id)) continue;
+    n++;
+    if (!isRatings) { state.watchlist.add(id); continue; }
+    state.seen.add(id);
+    const score = Number(r["Your Rating"]);
+    if (r["Your Rating"] && score >= 1 && score <= 10) {
+      dated.push([id, score, r["Date Rated"] || ""]);
+      for (const g of (r.Genres || "").split(",").map((x) => x.trim()).filter(Boolean)) state.genres.set(g, (state.genres.get(g) || 0) + 1);
+    }
+  }
+  addRatings(dated);
+  state.sources.add("imdb");
+  return isRatings ? `${n} IMDb ratings` : `${n} IMDb watchlist titles`;
+}
+
+function addLetterboxd(text, fileName) {
+  const { header, rows } = parseCsv(text);
+  const hasRating = header.includes("Rating");
+  const isWatchlist = /watchlist/i.test(fileName) && !hasRating;
+  let n = 0;
+  const dated = [];
+  for (const r of rows) {
+    const name = (r.Name || "").trim();
+    if (!name) continue;
+    n++;
+    const k = key(name, r.Year).slice(0, 200);
+    if (isWatchlist) { state.watchlist.add(k); continue; }
+    state.seen.add(k);
+    const stars = Number(r.Rating);
+    if (hasRating && r.Rating && stars > 0 && stars <= 5) dated.push([k, Math.max(1, stars * 2), r.Date || ""]);
+  }
+  addRatings(dated);
+  state.sources.add("letterboxd");
+  if (isWatchlist) return `${n} Letterboxd watchlist films`;
+  return hasRating ? `${n} Letterboxd ratings` : `${n} Letterboxd watched films`;
+}
+
+function addRatings(list) {
+  for (const [k, score, date] of list) state.ratings.set(k, { score: Math.round(score * 2) / 2, date });
+}
+
+/** What save_profile takes, cut to 64 KB: rated films count as seen on the server, then the oldest ratings go first. */
+function buildProfile() {
+  const rated = [...state.ratings].sort((a, b) => (b[1].date || "").localeCompare(a[1].date || ""));
+  const seen = [...state.seen].filter((k) => !state.ratings.has(k));
+  const watchlist = [...state.watchlist].filter((k) => !state.seen.has(k));
+  const source = [...state.sources].sort().join("+") + "_export";
+  const make = (r, s, w) => ({ seen: seen.slice(0, s), ratings: Object.fromEntries(rated.slice(0, r).map(([k, v]) => [k, v.score])), ...(w ? { watchlist: watchlist.slice(0, w) } : {}), source });
+  let r = rated.length, s = seen.length, w = watchlist.length;
+  const size = () => new TextEncoder().encode(JSON.stringify(make(r, s, w))).length;
+  while (size() > MAX_BYTES && w > 1000) w = Math.floor(w * 0.9);
+  while (size() > MAX_BYTES && s > 0) s = Math.floor(s * 0.9);
+  while (size() > MAX_BYTES && r > 0) r = Math.floor(r * 0.9);
+  const dropped = [];
+  if (r < rated.length) dropped.push(`${rated.length - r} of your oldest ratings`);
+  if (s < seen.length) dropped.push(`${seen.length - s} unrated films`);
+  if (w < watchlist.length) dropped.push(`${watchlist.length - w} watchlist titles`);
+  return { profile: make(r, s, w), dropped };
+}
+
+function render() {
+  const seenAll = new Set([...state.seen, ...state.ratings.keys()]);
+  $("n-rated").textContent = state.ratings.size.toLocaleString();
+  $("n-seen").textContent = seenAll.size.toLocaleString();
+  $("n-watch").textContent = state.watchlist.size.toLocaleString();
+  const top = [...state.genres].sort((a, b) => b[1] - a[1]).slice(0, 5);
+  $("genres").hidden = !top.length;
+  $("genres").textContent = top.length ? `Genres you rate most: ${top.map(([g, n]) => `${g} (${n})`).join(", ")}` : "";
+  $("step-summary").hidden = seenAll.size + state.watchlist.size === 0;
+}
+
+function note(el, text, kind) {
+  el.innerHTML = "";
+  if (!text) return;
+  const d = document.createElement("div");
+  d.className = `msg ${kind || "warn"}`;
+  d.textContent = text;
+  el.appendChild(d);
+}
+
+function listFile(name, what) {
+  const li = document.createElement("li");
+  const a = document.createElement("span"), b = document.createElement("span");
+  a.textContent = name; b.textContent = what;
+  li.append(a, b);
+  $("files").appendChild(li);
+  $("files").hidden = false;
+}
+
+const LB_FILES = ["ratings.csv", "watched.csv", "watchlist.csv"];
+async function handleText(name, text) {
+  const header = parseCsvRows(text.slice(0, 2000).split(/\r?\n/)[0] || "")[0] || [];
+  const h = header.map((x) => x.trim());
+  if (h.includes("Const")) return addImdb(text, name);
+  if (h.includes("Name") && h.includes("Letterboxd URI")) return addLetterboxd(text, name);
+  throw new Error("not an IMDb or Letterboxd export");
+}
+
+async function handleFiles(files) {
+  note($("file-msg"), "");
+  for (const f of files) {
+    try {
+      if (/\.zip$/i.test(f.name) || f.type === "application/zip") {
+        const parts = await unzip(await f.arrayBuffer(), LB_FILES);
+        const found = LB_FILES.filter((n) => parts[n] !== undefined);
+        if (!found.length) throw new Error("no ratings.csv, watched.csv or watchlist.csv inside");
+        for (const n of found) listFile(`${f.name}: ${n}`, await handleText(n, parts[n]));
+      } else listFile(f.name, await handleText(f.name, await f.text()));
+    } catch (e) {
+      listFile(f.name, "skipped");
+      note($("file-msg"), `${f.name}: ${e.message}.`);
+    }
+  }
+  $("step-code").hidden = true;
+  render();
+}
+
+// ---------- the code ----------
+async function mcp(name, args) {
+  const res = await fetch("/mcp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: Date.now(), method: "tools/call", params: { name, arguments: args } }),
+  });
+  if (!res.ok) throw new Error(`the server answered ${res.status}`);
+  const body = await res.json();
+  if (body.error) throw new Error(body.error.message);
+  if (body.result.isError) throw new Error(body.result.content[0].text);
+  return body.result.structuredContent;
+}
+
+let code = "";
+function sentence() {
+  const h = Math.max(1, Math.min(20, Number($("hours").value) || 8));
+  return `My Seatback Cinema taste code is ${code}. Flying ${$("airline").value} for ${h} hours, what should I watch?`;
+}
+function showSentence() { $("sentence").textContent = sentence(); }
+
+async function copy(text, flag) {
+  try { await navigator.clipboard.writeText(text); $(flag).textContent = "Copied"; }
+  catch { $(flag).textContent = "Select the text and copy it"; }
+  setTimeout(() => { $(flag).textContent = ""; }, 2500);
+}
+
+$("make").addEventListener("click", async () => {
+  const btn = $("make");
+  btn.disabled = true; btn.textContent = "Saving...";
+  note($("make-msg"), "");
+  try {
+    const { profile, dropped } = buildProfile();
+    const r = await mcp("save_profile", { profile });
+    code = r.token;
+    $("code").textContent = code;
+    showSentence();
+    $("step-code").hidden = false;
+    if (dropped.length) note($("make-msg"), `The code has room for about 3,000 films, so it leaves out ${dropped.join(" and ")}.`);
+    $("step-code").scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (e) {
+    note($("make-msg"), `Couldn't save it: ${e.message}. Try again in a minute.`);
+  } finally {
+    btn.disabled = false; btn.textContent = "Make my taste code";
+  }
+});
+$("copy-code").addEventListener("click", () => copy(code, "copied-code"));
+$("copy-sentence").addEventListener("click", () => copy(sentence(), "copied-sentence"));
+$("airline").addEventListener("change", showSentence);
+$("hours").addEventListener("input", showSentence);
+
+const drop = $("drop");
+["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", (e) => handleFiles([...e.dataTransfer.files]));
+$("file").addEventListener("change", (e) => { handleFiles([...e.target.files]); e.target.value = ""; });
+
+function fillAirlines(names) {
+  $("airline").innerHTML = "";
+  for (const n of names) { const o = document.createElement("option"); o.textContent = n; $("airline").appendChild(o); }
+}
+fillAirlines(FALLBACK_AIRLINES);
+mcp("list_airlines", {}).then((r) => { if (r.airlines.length) fillAirlines(r.airlines.map((a) => a.name)); showSentence(); }).catch(() => {});
+</script>
+</body>
+</html>
