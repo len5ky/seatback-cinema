@@ -48,7 +48,8 @@ on one signal, such as runtime alone, so treat it as probably right. `-` means n
 the plane, but you can't vouch for which film it is.
 
 Other options: `--matched` (only films with an IMDb id), `--tmdb` (adds TMDB score and vote count; needs
-`TMDB_API_KEY`), `--taste <path>`, `--imdb-url <url>` and `--letterboxd-url <url>` (below), `--json`, `--refresh`. Emirates lists about 2,000 films and Cathay
+`TMDB_API_KEY`), `--taste <path>`, `--imdb-url <url>` and `--letterboxd-url <url>` (below), `--profile-token <token>`,
+`--save-profile`, `--json`, `--refresh`. Emirates lists about 2,000 films and Cathay
 about 1,500, so filter by genre or runtime, or read the full list once and shortlist from it.
 
 If the flight month isn't published yet, use the latest month and tell the person the line-up may change.
@@ -84,6 +85,10 @@ once, and pass `profile: { imdb_user }` from its answer to `picks`. Don't count 
 connector's cloud server more often than not (HTTP 429). Otherwise pass the export route on: the CSV export from
 https://www.imdb.com/list/ratings/export, or Letterboxd's Settings, Data, Export your data, then `--taste`. Letterboxd pages carry no IMDb id, so those films join
 through the dataset's Letterboxd links where it has them and on title and year otherwise.
+
+To use the profile in the Claude app, where IMDb blocks the fetch, add `--save-profile`: the script stores the profile on
+the Seatback server and ends with a line to paste into the app, "My Seatback Cinema profile token is ...". If they
+give you a token ("my profile token is ..."), pass it as `--profile-token <token>` in place of the other taste options.
 
 With any of these the script hides every film they've rated or logged, adds a `you` column that says `watchlist` for films on
 their watchlist, and prints their 9-10/10 films and their 1-4/10 films above the table. The join: IMDb rows match on

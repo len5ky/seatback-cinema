@@ -36,9 +36,11 @@ Four routes, best first. Ask which one they want only if it isn't obvious from t
 
 ### A saved profile token
 
-If they give a 20-character token from an earlier chat, pass `profile: { token: "..." }` straight to `picks`. Call
-`get_profile` only when you need to show them what's in it. An expired or unknown token comes back as an error:
-tell them, and move on to one of the other routes.
+A token is 20 lowercase letters and digits. People usually paste it as a sentence, "My Seatback Cinema profile token
+is abcd...", or just "my profile token is ...". It may come from an earlier chat or from the Claude Code skill. When
+they give one, pass `profile: { token: "..." }` straight to `picks` and skip the other routes, even if they also
+pasted an IMDb URL. Call `get_profile` only when you need to show them what's in it. An expired or unknown token
+comes back as an error: tell them, and move on to one of the other routes.
 
 ### An IMDb profile URL
 
@@ -59,11 +61,20 @@ through, it reads ratings with scores plus the watchlist, and answers with count
 learned, and an `imdb_user` id. Pass `profile: { imdb_user: "ur..." }` to `picks` and read out anything in `notes`
 (over 5,000 ratings are cut to the most recent 5,000; a private watchlist is skipped). The import lasts 24 hours.
 
-If the connector fails too, tell them IMDb blocked both and offer two ways round it:
+If the connector fails too, tell them IMDb blocked both and offer the ways round it:
 
 - the CSV export: sign in on a computer, open https://www.imdb.com/list/ratings/export (for the watchlist, the
   three-dot menu on the Watchlist page, then Export), download the file from Your exports and attach it here;
-- a profile token, if they saved one before.
+- a profile token, if they saved one before;
+- a new token from the Claude Code skill (`skill/inflight-movie-picker` in github.com/len5ky/seatback-cinema).
+  It reads IMDb from their own computer, which IMDb lets through far more often than a cloud server, and it
+  takes one command:
+
+  ```
+  bun ~/.claude/skills/inflight-movie-picker/scripts/catalogue.ts emirates --imdb-url https://www.imdb.com/user/<id>/ratings/ --save-profile
+  ```
+
+  Any airline id works there. The last line it prints is the sentence to paste back into this chat.
 
 ### A Letterboxd profile URL
 
