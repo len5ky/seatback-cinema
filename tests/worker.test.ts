@@ -179,10 +179,10 @@ test("GET /mcp 405, DELETE 200, OPTIONS has CORS, /healthz ok, / falls through t
   expect(await (await app.fetch(new Request("https://x/"), env)).text()).toBe("asset");
 });
 
-test("tools/list has the five contract tools plus the two profile builders, no em dashes in copy", async () => {
+test("tools/list has the five contract tools plus the three profile builders, no em dashes in copy", async () => {
   const { body } = await rpc("tools/list");
   const tools = body.result?.tools as { name: string; description: string }[];
-  expect(tools.map((t) => t.name)).toEqual(["list_airlines", "catalogue", "picks", "save_profile", "get_profile", "profile_from_imdb_url", "profile_from_text"]);
+  expect(tools.map((t) => t.name)).toEqual(["list_airlines", "catalogue", "picks", "save_profile", "get_profile", "profile_from_imdb_url", "profile_from_letterboxd", "profile_from_text"]);
   expect(JSON.stringify(tools)).not.toContain("—");
 });
 

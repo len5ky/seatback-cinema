@@ -6,9 +6,9 @@ export const SERVER_INFO = { name: "seatback-cinema", title: "Seatback Cinema", 
 const INSTRUCTIONS =
   "In-flight film catalogues for this month, by airline. Start with list_airlines, then picks for recommendations " +
   "(pass flight_minutes and a profile when you have them) or catalogue to browse or check a title. " +
-  "For a public IMDb profile URL, fetch the ratings pages yourself and pass them to profile_from_text (kind imdb_page). " +
-  "profile_from_imdb_url is the fallback when that fetch is blocked; IMDb often refuses it from the cloud. On success pass profile: { imdb_user } to picks. " +
-  "Otherwise build a profile with profile_from_text from an IMDb or Letterboxd export or page you have fetched; save_profile returns a taste code (the token field) for next time; call it a taste code when you talk to the person, and https://seatback.len5ky.com/taste makes one from an export without the chat.";
+  "For a public IMDb profile link, call profile_from_imdb_url with it directly (no fetching of your own first) and pass profile: { imdb_user } to picks. " +
+  "For a Letterboxd username, call profile_from_letterboxd and pass its profile to picks; it covers the latest 50 diary entries only. " +
+  "profile_from_text builds a profile from an IMDb or Letterboxd export or a page you have; save_profile returns a taste code (the token field) for next time; call it a taste code when you talk to the person, and https://seatback.len5ky.com/taste makes one from an export without the chat.";
 
 export type Id = string | number | null;
 interface RpcRequest { jsonrpc: "2.0"; id?: Id; method: string; params?: unknown }

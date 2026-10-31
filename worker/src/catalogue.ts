@@ -57,12 +57,14 @@ export interface AppliedProfile { model: TasteModel; taste: Taste; favDirs: stri
 export class Catalogue {
   private byId = new Map<string, BundleFilm>();
   private byTitle = new Map<string, Set<string>>(); // normalised title -> tconsts
+  private byTmdb = new Map<number, string>();
   private rows = new WeakMap<BundleFilm, PickRow>();
 
   constructor(readonly bundle: Bundle) {
     for (const a of bundle.airlines) for (const f of a.films) {
       if (!f.imdbId) continue;
       this.byId.set(f.imdbId, f);
+      if (f.tmdbId !== null) this.byTmdb.set(f.tmdbId, f.imdbId);
       for (const t of [f.title, f.imdbTitle]) if (t) {
         const k = normalizeTitle(t);
         this.byTitle.set(k, (this.byTitle.get(k) ?? new Set()).add(f.imdbId));
@@ -89,6 +91,11 @@ export class Catalogue {
 
   filtered(a: BundleAirline, x: Filters): BundleFilm[] {
     return a.films.filter((f) => matchesFilters(f, this.row(f), x));
+  }
+
+  /** The tconst of a catalogue film with this TMDB id. */
+  tmdb(id: number): string | null {
+    return this.byTmdb.get(id) ?? null;
   }
 
   resolve(key: string): string | null {

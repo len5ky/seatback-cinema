@@ -166,7 +166,7 @@ test("profile_from_imdb_url: bad URL, no public ratings, expired import", async 
 
 // ---------- review round 1 fixes ----------
 
-test("profile_from_imdb_url: a repeat p. URL hits the cache after one resolve call", async () => {
+test("profile_from_imdb_url: a repeat p. URL hits the cache through the stored alias, with no IMDb call", async () => {
   const f = fakeImdb();
   const ctx = ctxWith(f.deps);
   const url = "https://www.imdb.com/user/p.examplepublicid00000000/ratings/";
@@ -174,7 +174,7 @@ test("profile_from_imdb_url: a repeat p. URL hits the cache after one resolve ca
   const n = f.log.length;
   const again = await callTool(ctx, "profile_from_imdb_url", { url });
   expect(again.cached).toBe(true);
-  expect(f.log.slice(n).map((l) => l.op)).toEqual(["profile"]);
+  expect(f.log.slice(n).map((l) => l.op)).toEqual([]);
 });
 
 test("profile_from_imdb_url: a bot check while resolving a p. id reports the refusal, not an unresolvable id", async () => {

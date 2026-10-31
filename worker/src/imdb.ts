@@ -25,6 +25,10 @@ export const liveDeps: ImdbDeps = { fetch: (url, init) => fetch(url, init), slee
 export class ImdbError extends Error {}
 /** IMDb's bot check: no point in trying further calls in this import. */
 export class ImdbRefusal extends ImdbError {}
+/** No public ratings to read: private, or an empty profile. */
+export class ImdbPrivate extends ImdbError {}
+/** A p. profile id that did not resolve to a ur user id. */
+export class ImdbNotFound extends ImdbError {}
 const isRefusal = (e: unknown) => e instanceof ImdbRefusal;
 
 export type ImdbUserRef = { kind: "ur"; id: string } | { kind: "p"; id: string };
@@ -88,7 +92,7 @@ export class ImdbClient {
     const q = `query { advancedTitleSearch(first: ${PAGE_SIZE}, jumpToPosition: ${position}, constraints: { singleUserRatingConstraint: { filterType: INCLUDE, userId: ${JSON.stringify(userId)} }, explicitContentConstraint: { explicitContentFilter: INCLUDE_ADULT } }, sort: { sortBy: SINGLE_USER_RATING_DATE, sortOrder: DESC }) { total pageInfo { hasNextPage } edges { node { title { ${TITLE_FIELDS} } } } } }`;
     const r = await this.post({ query: q }, "ratings list");
     const s = obj(obj(r.data).advancedTitleSearch);
-    if (!("edges" in s)) throw new ImdbError(`IMDb returned no ratings list${apiError(r)}; the ratings may be private (IMDb, Settings, Privacy) or the API changed. ${CSV_HELP}`);
+    if (!("edges" in s)) throw new ImdbPrivate(`IMDb returned no ratings list${apiError(r)}; the ratings may be private (IMDb, Settings, Privacy) or the API changed. ${CSV_HELP}`);
     const titles = arr(s.edges).map((e) => titleOf(obj(obj(e).node).title)).filter((t): t is Title => t !== null);
     return { total: typeof s.total === "number" ? s.total : null, titles, hasNext: obj(s.pageInfo).hasNextPage === true };
   }
@@ -155,7 +159,7 @@ export async function resolveImdbUser(c: ImdbClient, ref: ImdbUserRef): Promise<
   if (ref.kind === "ur") return ref.id;
   const ur = await c.resolveProfileId(ref.id);
   if (ur) return ur;
-  throw new ImdbError(
+  throw new ImdbNotFound(
     `Could not turn the profile id ${ref.id} into an IMDb user id. Fetch https://www.imdb.com/user/${ref.id}/ratings/ with your web fetch tool and ` +
     `look for an id that starts with "ur" (authorId in the page data, or a link like /user/ur12345678/), then call profile_from_imdb_url again ` +
     `with https://www.imdb.com/user/<that id>/ratings/. If the page is blocked or has no ur id, ${CSV_HELP.charAt(0).toLowerCase()}${CSV_HELP.slice(1)}`,
@@ -175,7 +179,7 @@ export async function importImdbProfile(c: ImdbClient, userId: string): Promise<
     if (!more || (total !== null && titles.length >= total)) { more = false; break; }
   }
   if (!titles.length)
-    throw new ImdbError(`${userId} has no public ratings. The person can make them public (IMDb, Settings, Privacy) and try again. ${CSV_HELP}`);
+    throw new ImdbPrivate(`${userId} has no public ratings. The person can make them public (IMDb, Settings, Privacy) and try again. ${CSV_HELP}`);
   const n = (x: number) => x.toLocaleString("en-US");
   const truncated = more || (total !== null && total > titles.length);
   if (truncated) notes.push(`Read the ${n(titles.length)} most recent of ${total !== null ? n(total) : "more"} ratings.`);

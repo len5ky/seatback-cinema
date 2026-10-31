@@ -5,15 +5,21 @@ import {
   type Profile, type ProfileKind,
 } from "./profile.ts";
 import {
-  CACHE_TTL_SECONDS, DEGRADED_TTL_SECONDS, ImdbClient, ImdbError, importImdbProfile, liveDeps, parseImdbUserUrl, resolveImdbUser, type ImdbDeps, type ImdbImport,
+  CACHE_TTL_SECONDS, DEGRADED_TTL_SECONDS, ImdbClient, ImdbError, importImdbProfile, liveDeps, parseImdbUserUrl, resolveImdbUser,
+  type ImdbDeps, type ImdbImport, type ImdbUserRef,
 } from "./imdb.ts";
+import { LATEST_ONLY_NOTE, LetterboxdError, fetchLetterboxd, parseLetterboxdUser } from "./letterboxd.ts";
 
 /** The slice of Workers KV the tools use (a Map stands in for it in tests). */
 export interface ProfileStore {
   get(key: string): Promise<string | null>;
   put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
 }
-export interface ToolContext { catalogue: Catalogue; profiles: ProfileStore; imdb?: ImdbDeps }
+type Fetcher = (url: string, init: RequestInit) => Promise<Response>;
+/** The Convex import service (AWS egress, which IMDb answers; Cloudflare's gets HTTP 429). */
+export interface Importer { url: string; secret: string; fetch?: Fetcher }
+/** imdb: direct IMDb calls (the fallback); importer: Convex; web: other outbound fetches (Letterboxd). Tests stub all three. */
+export interface ToolContext { catalogue: Catalogue; profiles: ProfileStore; imdb?: ImdbDeps; importer?: Importer; web?: Fetcher }
 
 /** A failure the caller can fix; its message is shown to the model as a tool error. */
 export class ToolError extends Error {}
@@ -116,8 +122,15 @@ export const TOOLS = [
   {
     name: "profile_from_imdb_url",
     title: "Import a public IMDb profile",
-    description: "Read a public IMDb profile's ratings (with scores, up to 5,000 most recent) and watchlist on the server, from a URL like https://www.imdb.com/user/p.xxxx/ratings/ or /user/ur1234567/. Returns a summary and an imdb_user id: pass profile: { imdb_user } to picks. Kept for 24 hours. Takes up to half a minute for large profiles. Often fails: IMDb tends to refuse this cloud server (HTTP 429). So first fetch the ratings pages yourself (https://www.imdb.com/user/<id>/ratings/, then ?page=2 and on) and pass them to profile_from_text with kind \"imdb_page\"; call this tool only when that fetch is blocked or finds no title ids. If this fails too, ask for the IMDb ratings CSV export.",
+    description: "Read a public IMDb profile's ratings (with scores, up to 5,000 most recent) and watchlist on the server, from a URL like https://www.imdb.com/user/p.xxxx/ratings/ or /user/ur1234567/. Call it straight away with the link the person gave; don't fetch the IMDb pages yourself first. Returns counts, the genres and directors it learned, notes, and an imdb_user id: pass profile: { imdb_user } to picks. Kept for 24 hours, so calling again is cheap. Takes up to half a minute for large profiles. If it fails, the error says why (private ratings, a daily limit, or IMDb's bot check) and what to do next; don't retry the same link.",
     inputSchema: { type: "object", properties: { url: { type: "string", description: "The IMDb profile, ratings or watchlist URL (or the bare ur / p. id)." } }, required: ["url"], additionalProperties: false },
+    annotations: { readOnlyHint: true, openWorldHint: true },
+  },
+  {
+    name: "profile_from_letterboxd",
+    title: "Read a Letterboxd diary",
+    description: "Read a Letterboxd member's public diary feed: their latest 50 logged films with star ratings (doubled to a 10-point scale). Returns a profile to pass to picks as is, plus counts and a note. It covers the latest 50 entries only, so say so, and expect some films they've seen to come back in picks.",
+    inputSchema: { type: "object", properties: { username: { type: "string", description: "The Letterboxd username, or any letterboxd.com/<username>/ link." } }, required: ["username"], additionalProperties: false },
     annotations: { readOnlyHint: true, openWorldHint: true },
   },
   {
@@ -191,6 +204,64 @@ function profileArg(v: unknown): Profile {
 }
 
 const imdbKey = (ur: string) => `imdb:${ur}`;
+/** p. profile id -> ur id, so a repeat p. link skips the resolve call. */
+const aliasKey = (p: string) => `imdbp:${p}`;
+
+const IMPORT_TIMEOUT_MS = 90_000;
+const NEXT_STEP = "Move on: ask for their Letterboxd username, or run the seen check.";
+
+type ConvexOutcome = { kind: "ok"; import: ImdbImport; cached: boolean } | { kind: "unavailable"; why: string };
+
+/** One call to the Convex import service. Its own refusals (limits, private, bot check) become a ToolError; transport trouble is "unavailable". */
+async function importViaConvex(ctx: ToolContext, imp: Importer, ref: ImdbUserRef): Promise<ConvexOutcome> {
+  let res: Response;
+  try {
+    res = await (imp.fetch ?? ((u, i) => fetch(u, i)))(`${imp.url.replace(/\/+$/, "")}/import/imdb`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-import-secret": imp.secret },
+      body: JSON.stringify({ user: ref.id }),
+      signal: AbortSignal.timeout(IMPORT_TIMEOUT_MS),
+    });
+  } catch (e) {
+    return { kind: "unavailable", why: (e as Error).name || "network" };
+  }
+  let body: Json;
+  try { body = (await res.json()) as Json; } catch { return { kind: "unavailable", why: `HTTP ${res.status}, not JSON` }; }
+  if (res.ok && body.ok === true && isObj(body.import)) {
+    const r = body.import as unknown as ImdbImport;
+    if (typeof r.imdb_user !== "string" || !/^ur\d+$/.test(r.imdb_user)) return { kind: "unavailable", why: "bad import" };
+    try { r.profile = validateProfile(r.profile); } catch { return { kind: "unavailable", why: "bad profile" }; }
+    if (!Array.isArray(r.notes)) r.notes = [];
+    return { kind: "ok", import: r, cached: body.cached === true };
+  }
+  const message = typeof body.message === "string" ? body.message : "";
+  switch (body.error) {
+    case "capped":
+      throw new ToolError(body.scope === "user"
+        ? `This IMDb profile has been imported as many times as allowed today; the import from earlier is gone or failed. Try again tomorrow. ${NEXT_STEP}`
+        : `The IMDb import has reached its limit for today. Try again tomorrow. ${NEXT_STEP}`);
+    case "challenged":
+      throw new ToolError(`IMDb turned the import away this time (its bot check), so nothing was read. Don't retry now. ${NEXT_STEP}`);
+    case "private":
+      throw new ToolError("IMDb shows no public ratings for this profile, so they are almost certainly private. Tell the person how to make them " +
+        "public in one line: on imdb.com, open their name menu, Settings, Privacy, and set their ratings (and watchlist) to public; then send the link again. " +
+        "Meanwhile, ask for their Letterboxd username, or run the seen check.");
+    case "not_found":
+      throw new ToolError(`IMDb doesn't know this profile id. Ask the person to copy the link again from their IMDb profile (Share, Copy link). ${NEXT_STEP}`);
+    case "imdb_error":
+      throw new ToolError(message || `The IMDb import failed. ${NEXT_STEP}`);
+    case "bad_request":
+      throw new ToolError("that is not an IMDb profile URL; it should look like https://www.imdb.com/user/p.xxxx/ratings/ or https://www.imdb.com/user/ur1234567/");
+    default:
+      return { kind: "unavailable", why: `HTTP ${res.status}` };
+  }
+}
+
+async function remember(ctx: ToolContext, r: ImdbImport, ref: ImdbUserRef) {
+  const ttl = r.degraded ? DEGRADED_TTL_SECONDS : CACHE_TTL_SECONDS;
+  await ctx.profiles.put(imdbKey(r.imdb_user), JSON.stringify(r), { expirationTtl: ttl });
+  if (ref.kind === "p") await ctx.profiles.put(aliasKey(ref.id), r.imdb_user, { expirationTtl: ttl });
+}
 
 async function loadImdbProfile(ctx: ToolContext, user: unknown): Promise<Profile> {
   if (typeof user !== "string" || !/^ur\d{5,12}$/.test(user.trim().toLowerCase())) throw new ToolError("imdb_user must be the ur id profile_from_imdb_url returned, e.g. ur12345678");
@@ -264,16 +335,38 @@ export async function callTool(ctx: ToolContext, name: string, args: Json): Prom
       if (typeof args.url !== "string" || !args.url.trim()) throw new ToolError("url is required, e.g. https://www.imdb.com/user/p.xxxx/ratings/");
       const ref = parseImdbUserUrl(args.url);
       if (!ref) throw new ToolError("that is not an IMDb profile URL; it should look like https://www.imdb.com/user/p.xxxx/ratings/ or https://www.imdb.com/user/ur1234567/");
+      const knownUr = ref.kind === "ur" ? ref.id : await ctx.profiles.get(aliasKey(ref.id));
+      if (knownUr) {
+        const hit = await ctx.profiles.get(imdbKey(knownUr));
+        if (hit) return importSummary(JSON.parse(hit) as ImdbImport, true);
+      }
+      if (ctx.importer) {
+        const out = await importViaConvex(ctx, ctx.importer, ref);
+        if (out.kind === "ok") { await remember(ctx, out.import, ref); return importSummary(out.import, out.cached); }
+        console.error("convex import unavailable, trying IMDb directly:", out.why);
+      }
+      // Direct from Cloudflare: IMDb answers it with HTTP 429 nearly every time; kept for when Convex is down or not configured.
       const client = new ImdbClient(ctx.imdb ?? liveDeps);
       try {
         const ur = await resolveImdbUser(client, ref);
         const hit = await ctx.profiles.get(imdbKey(ur));
         if (hit) return importSummary(JSON.parse(hit) as ImdbImport, true);
         const r = await importImdbProfile(client, ur);
-        await ctx.profiles.put(imdbKey(ur), JSON.stringify(r), { expirationTtl: r.degraded ? DEGRADED_TTL_SECONDS : CACHE_TTL_SECONDS });
+        await remember(ctx, r, ref);
         return importSummary(r, false);
       } catch (e) {
         if (e instanceof ImdbError) throw new ToolError(e.message);
+        throw e;
+      }
+    }
+    case "profile_from_letterboxd": {
+      const user = typeof args.username === "string" ? parseLetterboxdUser(args.username) : null;
+      if (!user) throw new ToolError("username is required: the Letterboxd username, e.g. \"dave\", or a link like https://letterboxd.com/dave/");
+      try {
+        const r = await fetchLetterboxd(ctx.web ?? ((u, i) => fetch(u, i)), user, { tmdb: (id) => cat.tmdb(id), slug: (s) => cat.bundle.letterboxd[s] ?? null });
+        return { username: user, entries: r.entries, rated: r.rated, matched: r.matched, profile: r.profile, note: LATEST_ONLY_NOTE };
+      } catch (e) {
+        if (e instanceof LetterboxdError) throw new ToolError(e.message);
         throw e;
       }
     }
