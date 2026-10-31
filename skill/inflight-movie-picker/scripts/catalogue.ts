@@ -13,6 +13,9 @@
 //          --imdb-url <url>  public IMDb profile (https://www.imdb.com/user/p.xxxx/ratings/): ratings + watchlist
 //          --letterboxd-url <url>  public Letterboxd profile (https://letterboxd.com/<user>/): films + watchlist
 //                            (both fetched from this machine, cached 24 h; combine freely with --taste)
+//          --save-profile    save the profile built from the options above on the Seatback server, print its token
+//                            (for the Claude app: "My Seatback Cinema profile token is <token>.")
+//          --profile-token <t>  use a profile saved with --save-profile (or by the Claude app's connector)
 //          --tmdb            add TMDB vote average / count (needs TMDB_API_KEY; cached 30 days)
 //          --base <url|dir>  dataset location (also SEATBACK_DATASET_URL; default https://seatback.len5ky.com):
 //                            https://..., http://localhost:4173, a local public/ folder or file:///.../public
@@ -21,8 +24,9 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { blockedHelp, fetchImdbProfile, fetchLetterboxdProfile, type FetchedProfile, type FetchOpts, imdbUserId, letterboxdUser, PROFILE_TTL_MS,
-  ProfileBlocked } from "./profile.ts";
+import { blockedHelp, fetchImdbProfile, fetchLetterboxdProfile, type FetchedProfile, type FetchOpts, imdbUserId, letterboxdUser, type Profile,
+  PROFILE_TTL_MS, type TitleRef, ProfileBlocked } from "./profile.ts";
+import { getProfile, pasteSentence, saveProfile } from "./seatback.ts";
 
 const DEFAULT_BASE_URL = "https://seatback.len5ky.com";
 const CACHE_ROOT = join(process.env.XDG_CACHE_HOME ?? join(homedir(), ".cache"), "inflight-movie-picker");
@@ -51,8 +55,8 @@ function fail<T>(msg: string, fallback?: T): T {
 }
 
 function parseArgs(argv: string[]) {
-  const flags = new Set(["list", "matched", "family", "tmdb", "json", "refresh", "help"]);
-  const valued = new Set(["search", "genre", "max-runtime", "base", "taste", "imdb-url", "letterboxd-url"]);
+  const flags = new Set(["list", "matched", "family", "tmdb", "json", "refresh", "help", "save-profile"]);
+  const valued = new Set(["search", "genre", "max-runtime", "base", "taste", "imdb-url", "letterboxd-url", "profile-token"]);
   const opts: Record<string, string | boolean> = {};
   const pos: string[] = [];
   for (let i = 0; i < argv.length; i++) {
@@ -174,7 +178,9 @@ async function tmdbScores(films: Film[], refresh: boolean): Promise<Map<string, 
 // ---- taste: IMDb and Letterboxd CSV exports -------------------------------------------------------------------
 
 interface Taste { seenIds: Set<string>; watchIds: Set<string>; seenKeys: Map<string, (number | null)[]>; watchKeys: Map<string, (number | null)[]>;
-  rated: { title: string; year: number | null; rating: number }[]; files: string[]; seen: number; watchlist: number }
+  rated: { title: string; year: number | null; rating: number }[]; files: string[]; seen: number; watchlist: number;
+  /** For --save-profile: IMDb-id ratings, films known only by name ("Title (Year)", the server's key), learned preferences. */
+  ratings: Map<string, number>; named: { seen: string[]; watchlist: string[] }; prefs: Pick<Profile, "liked_genres" | "disliked_genres" | "liked_directors"> }
 
 /** Minimal RFC 4180 reader: quoted fields, doubled quotes, newlines inside quotes. */
 function parseCsv(text: string): string[][] {
@@ -216,10 +222,14 @@ function csvFiles(path: string): string[] {
   return out;
 }
 
-const emptyTaste = (): Taste => ({ seenIds: new Set(), watchIds: new Set(), seenKeys: new Map(), watchKeys: new Map(), rated: [], files: [], seen: 0, watchlist: 0 });
-function addKey(m: Map<string, (number | null)[]>, title: string, year: number | null): void {
+const emptyTaste = (): Taste => ({ seenIds: new Set(), watchIds: new Set(), seenKeys: new Map(), watchKeys: new Map(), rated: [], files: [], seen: 0, watchlist: 0,
+  ratings: new Map(), named: { seen: [], watchlist: [] }, prefs: {} });
+/** A film known only by title (Letterboxd): joined on title key here, saved under "Title (Year)". */
+function addNamed(t: Taste, list: "seen" | "watchlist", title: string, year: number | null): void {
   const k = titleKey(title); if (!k) return;
+  const m = list === "seen" ? t.seenKeys : t.watchKeys;
   m.set(k, [...(m.get(k) ?? []), year]);
+  t.named[list].push(year ? `${title} (${year})` : title);
 }
 
 function loadTaste(path: string, t: Taste = emptyTaste()): Taste {
@@ -237,6 +247,7 @@ function loadTaste(path: string, t: Taste = emptyTaste()): Taste {
         if (watch) { t.watchIds.add(id); t.watchlist++; continue; }
         t.seenIds.add(id); t.seen++;
         const rating = Number(r[iMine]);
+        if (rating >= 1 && rating <= 10) t.ratings.set(id, rating);
         if (rating > 0 && iTitle >= 0) t.rated.push({ title: r[iTitle]!, year: year(r, iYear), rating });
       }
     } else if (iName >= 0 && iUri >= 0) { // Letterboxd: watchlist.csv, or ratings/watched/diary/reviews (all seen)
@@ -244,8 +255,8 @@ function loadTaste(path: string, t: Taste = emptyTaste()): Taste {
       for (const r of rows) {
         const name = r[iName]?.trim(); if (!name) continue;
         const y = year(r, iYear);
-        if (watch) { addKey(t.watchKeys, name, y); t.watchlist++; continue; }
-        addKey(t.seenKeys, name, y); t.seen++;
+        if (watch) { addNamed(t, "watchlist", name, y); t.watchlist++; continue; }
+        addNamed(t, "seen", name, y); t.seen++;
         const stars = iRating >= 0 ? Number(r[iRating]) : 0;
         if (stars > 0) t.rated.push({ title: name, year: y, rating: stars * 2 });
       }
@@ -260,16 +271,53 @@ function loadTaste(path: string, t: Taste = emptyTaste()): Taste {
 function addProfile(t: Taste, p: FetchedProfile): void {
   for (const id of p.seen) t.seenIds.add(id);
   for (const id of p.watchlist ?? []) t.watchIds.add(id);
-  for (const r of p.unmatched.seen) addKey(t.seenKeys, r.title, r.year);
-  for (const r of p.unmatched.watchlist) addKey(t.watchKeys, r.title, r.year);
+  for (const r of p.unmatched.seen) addNamed(t, "seen", r.title, r.year);
+  for (const r of p.unmatched.watchlist) addNamed(t, "watchlist", r.title, r.year);
   for (const [id, rating] of Object.entries(p.ratings ?? {})) {
+    t.ratings.set(id, rating);
     const ref = p.titles[id];
     if (ref) t.rated.push({ title: ref.title, year: ref.year, rating });
   }
+  for (const f of ["liked_genres", "disliked_genres", "liked_directors"] as const)
+    if (p[f]?.length) t.prefs[f] = [...new Set([...(t.prefs[f] ?? []), ...p[f]])];
   for (const r of p.unmatched.seen) if (r.rating) t.rated.push({ title: r.title, year: r.year, rating: r.rating });
   t.seen += p.seen.length + p.unmatched.seen.length;
   t.watchlist += (p.watchlist?.length ?? 0) + p.unmatched.watchlist.length;
   t.files.push(p.source ?? "profile");
+}
+
+/** A saved profile (--profile-token): ids only, so seen keys that aren't IMDb ids join on title like Letterboxd rows. */
+function addSaved(t: Taste, p: Profile, label: string): void {
+  const split = (keys: string[]) => {
+    const ids: string[] = [], named: TitleRef[] = [];
+    for (const k of keys) {
+      if (/^tt\d+$/.test(k)) { ids.push(k); continue; }
+      const m = /^(.*) \((\d{4})\)$/.exec(k);
+      named.push(m ? { title: m[1]!, year: Number(m[2]) } : { title: k, year: null });
+    }
+    return { ids, named };
+  };
+  const seen = split([...new Set([...p.seen, ...Object.keys(p.ratings ?? {})])]), watch = split(p.watchlist ?? []);
+  const ratings = Object.fromEntries(Object.entries(p.ratings ?? {}).filter(([k]) => /^tt\d+$/.test(k)));
+  addProfile(t, { ...p, seen: seen.ids, watchlist: watch.ids, ratings, source: label, titles: {}, unmatched: { seen: seen.named, watchlist: watch.named }, notes: [], fetchedAt: "" });
+}
+
+/** The taste as the server's Profile, for --save-profile. */
+function toProfile(t: Taste): Profile {
+  const ids = (s: Set<string>) => [...s].filter((x) => /^tt\d+$/.test(x));
+  return {
+    seen: [...ids(t.seenIds), ...t.named.seen],
+    ...(t.ratings.size ? { ratings: Object.fromEntries(t.ratings) } : {}),
+    watchlist: [...ids(t.watchIds), ...t.named.watchlist],
+    ...t.prefs,
+    source: t.files.join(", "),
+  };
+}
+
+/** The Seatback MCP server sits next to the published dataset; a local dataset has none. */
+function mcpBase(flag: string): string {
+  if (LOCAL) fail(`--${flag} talks to the Seatback server: use an https --base (the default is ${DEFAULT_BASE_URL}), not a local folder`);
+  return BASE;
 }
 
 /** Test hooks (undocumented): serve fixtures from a loopback server instead of imdb.com / letterboxd.com. */
@@ -329,7 +377,7 @@ async function main(): Promise<void> {
   const { opts, pos } = parseArgs(process.argv.slice(2));
   const refresh = opts.refresh === true;
   if (opts.help) {
-    console.log(readFileSync(new URL(import.meta.url), "utf8").split("\n").filter((l) => l.startsWith("//")).slice(0, 18).map((l) => l.slice(3)).join("\n"));
+    console.log(readFileSync(new URL(import.meta.url), "utf8").split("\n").filter((l) => l.startsWith("//")).slice(0, 21).map((l) => l.slice(3)).join("\n"));
     return;
   }
   resolveBase(typeof opts.base === "string" ? opts.base : undefined);
@@ -339,7 +387,7 @@ async function main(): Promise<void> {
     console.log(`dataset ${BASE} (generated ${index.generatedAt})`);
     console.log("airline | name | months (films)");
     for (const a of index.airlines) console.log(`${a.id} | ${a.name} | ${a.months.map((m) => `${m.month} (${m.count})`).join(", ")}`);
-    if (!pos[0] && !opts.list) console.log("\nusage: catalogue.ts <airline> [YYYY-MM] [--search t] [--genre g] [--max-runtime m] [--family] [--matched] [--taste path] [--imdb-url url] [--letterboxd-url url] [--tmdb] [--base url|dir] [--json]");
+    if (!pos[0] && !opts.list) console.log("\nusage: catalogue.ts <airline> [YYYY-MM] [--search t] [--genre g] [--max-runtime m] [--family] [--matched] [--taste path] [--imdb-url url] [--letterboxd-url url] [--profile-token t] [--save-profile] [--tmdb] [--base url|dir] [--json]");
     return;
   }
 
@@ -376,6 +424,22 @@ async function main(): Promise<void> {
     addProfile(taste, p);
     notes.push(...p.notes.map((n) => `${p.source}: ${n}`));
   }
+  if (typeof opts["profile-token"] === "string") {
+    let p: Profile;
+    try { p = await getProfile(mcpBase("profile-token"), opts["profile-token"]); }
+    catch (e) { return fail(e instanceof Error ? e.message : String(e)); }
+    taste ??= emptyTaste();
+    addSaved(taste, p, `saved profile${p.source ? ` (${p.source})` : ""}`);
+  }
+  let saved: string[] = [];
+  if (opts["save-profile"]) {
+    if (!taste) fail("--save-profile needs a profile to save: add --imdb-url, --letterboxd-url, --taste or --profile-token");
+    let r: Awaited<ReturnType<typeof saveProfile>>;
+    try { r = await saveProfile(mcpBase("save-profile"), toProfile(taste)); }
+    catch (e) { return fail(e instanceof Error ? e.message : String(e)); }
+    if (r.dropped) notes.push(`saved profile: over the server's 64 KB limit, so it left out the ${r.dropped}`);
+    saved = [`profile token: ${r.token} (kept for a year)`, `for the Claude app, paste: ${pasteSentence(r.token)}`];
+  }
   let hidden = 0;
   if (taste) {
     const before = films.length;
@@ -391,6 +455,7 @@ async function main(): Promise<void> {
       ...(tmdb && f.imdbId ? { tmdb: tmdb.get(f.imdbId) ?? null } : {}),
       ...(taste ? { watchlist: onWatchlist(f) } : {}),
     }))));
+    for (const l of saved) console.error(l); // stdout stays JSON
     return;
   }
   const matched = cat.films.filter((f) => f.imdbId).length;
@@ -402,6 +467,10 @@ async function main(): Promise<void> {
     console.log(`taste (${taste.files.join(", ")}): ${taste.seen} seen, ${taste.watchlist} on the watchlist; hid ${hidden} seen films`);
     if (loved.length) console.log(`loved (9-10/10): ${loved.map(fmt).join("; ")}`);
     if (hated.length) console.log(`disliked (1-4/10): ${hated.map(fmt).join("; ")}`);
+    const pr = taste.prefs; // a saved profile has ids, not titles: show what it learned instead
+    if (!loved.length && (pr.liked_genres || pr.disliked_genres || pr.liked_directors))
+      console.log([pr.liked_genres && `liked genres: ${pr.liked_genres.join(", ")}`, pr.disliked_genres && `disliked genres: ${pr.disliked_genres.join(", ")}`,
+        pr.liked_directors && `liked directors: ${pr.liked_directors.join(", ")}`].filter(Boolean).join("; "));
     for (const n of notes) console.log(`note: ${n}`);
   }
   // imdb is the id, with "(medium)" when the match rests on one signal; cert is the airline's own age rating
@@ -416,6 +485,7 @@ async function main(): Promise<void> {
     }
     console.log(row.join(" | "));
   }
+  if (saved.length) console.log(["", ...saved].join("\n")); // last, so it is the first thing a person sees
 }
 
 await main();
