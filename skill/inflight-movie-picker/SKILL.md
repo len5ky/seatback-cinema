@@ -87,8 +87,8 @@ https://www.imdb.com/list/ratings/export, or Letterboxd's Settings, Data, Export
 through the dataset's Letterboxd links where it has them and on title and year otherwise.
 
 To use the profile in the Claude app, where IMDb blocks the fetch, add `--save-profile`: the script stores the profile on
-the Seatback server and ends with a line to paste into the app, "My Seatback Cinema profile token is ...". If they
-give you a token ("my profile token is ..."), pass it as `--profile-token <token>` in place of the other taste options.
+the Seatback server and ends with a line to paste into the app, "My Seatback Cinema taste code is ...". If they
+give you a taste code ("my taste code is ...", or the older "my profile token is ..."), pass it as `--profile-token <code>` in place of the other taste options.
 
 With any of these the script hides every film they've rated or logged, adds a `you` column that says `watchlist` for films on
 their watchlist, and prints their 9-10/10 films and their 1-4/10 films above the table. The join: IMDb rows match on

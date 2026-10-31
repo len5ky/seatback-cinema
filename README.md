@@ -36,31 +36,32 @@ This needs a Claude plan that allows custom connectors and skills. Set it up onc
 
 1. **Add the connector.** Settings, Connectors, Add custom connector. Name it Seatback Cinema and paste
    `https://seatback.len5ky.com/mcp`. It asks for no login.
-2. **Add the skill.** In a checkout of this repo, `scripts/package-web-skill.sh` builds
-   `tmp/inflight-movie-picker-web.zip`. Upload it at Settings, Capabilities, Skills, as it is: the skill folder
-   has to sit at the root of the zip.
+2. **Add the skill.** Download https://seatback.len5ky.com/inflight-movie-picker-web.zip and upload it, unopened,
+   at Settings, Capabilities, Skills. (In a checkout, `scripts/package-web-skill.sh` builds the same zip into
+   `tmp/` and `public/`.)
 
 After that, start a chat, on the web or in the mobile app, and say where you're flying:
 
 > I'm on Emirates from Dubai to Sydney next Tuesday, about 14 hours. My IMDb is
 > https://www.imdb.com/user/p.xxxxxxxx/ratings/ - what should I watch?
 
-Claude reads your ratings, drops what you've seen, and answers with three films and a backup, each with its ratings,
-a one-line synopsis, why it suits you and an IMDb link. It offers to save your taste as a token, so next time you
-paste the token in place of the URL.
+Claude drops what you've seen and answers with three films and a backup, each with its ratings, a one-line
+synopsis, why it suits you and an IMDb link. Your taste can come from four places, and Claude offers them in one
+line when it needs to: a public IMDb or Letterboxd profile link, an IMDb ratings export (CSV) or Letterboxd export
+(zip) attached to the chat, a taste code from last time, or nothing, in which case it goes by ratings alone.
 
-**Make your IMDb lists public first.** On IMDb go to Settings, Privacy and set your ratings and watchlist to
-public. Your profile URL looks like `https://www.imdb.com/user/p.xxxxxxxx/ratings/`: open your ratings while signed
-in and copy it from the address bar. Claude opens those pages itself and hands them to the connector; pages list
-what you've seen but not your scores. If IMDb blocks that, Claude tries the connector's own import, which IMDb
-usually turns away too, and then asks for the CSV export from https://www.imdb.com/list/ratings/export (attach the
-file to the chat). The export is the only route that carries your scores reliably. If you have Claude Code, the
-skill below can read your IMDb profile from your own machine and save it in one command
-(`bun ~/.claude/skills/inflight-movie-picker/scripts/catalogue.ts emirates --imdb-url <your URL> --save-profile`).
-Paste the sentence it prints, "My Seatback Cinema profile token is ...", into the chat and Claude uses your saved
-taste with its scores. A Letterboxd profile
-URL (`https://letterboxd.com/<username>/`) or Letterboxd's export zip works the same way, and with nothing at all
-Claude asks for five films you loved and two you hated.
+**The taste code.** https://seatback.len5ky.com/taste reads your IMDb or Letterboxd export in the browser and gives
+you a 20-character code; nothing goes through the chat. Paste the sentence it shows ("My Seatback Cinema taste code
+is ...") and Claude skips everything you've rated. The code holds film ids and your scores, nothing else, for a
+year. Claude also offers to make one after the first import in a chat.
+
+**Links are hit and miss.** IMDb's ratings and watchlist have to be public (Settings, Privacy), and even then IMDb
+blocks Claude's fetches often and the connector's own import nearly always (it answers Cloudflare's servers with
+HTTP 429; see `tmp/w5/imdb-from-worker.md` in a checkout). Pages also list what you've seen but not your scores.
+The export, from https://www.imdb.com/list/ratings/export on a computer, is the reliable route. Letterboxd's is at
+Settings, Data, Export your data. If you have Claude Code, the skill below can read your IMDb profile from your own
+machine and print a taste code:
+`bun ~/.claude/skills/inflight-movie-picker/scripts/catalogue.ts emirates --imdb-url <your URL> --save-profile`.
 
 ## Quick start: the skill
 

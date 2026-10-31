@@ -32,20 +32,34 @@ check each pick's `cert` against the child's age yourself.
 
 ## 2. Their taste
 
-Four routes, best first. Ask which one they want only if it isn't obvious from the message.
+People see this part, so a word on naming: the saved profile is their **taste code**. Never call it a token in
+anything you write to them, even though the tool field is `token`.
 
-### A saved profile token
+If they already gave a taste code, use it (below) and skip the rest of this step. Otherwise, when taste matters
+(they want picks, not a yes or no on one title), offer the choices in one short paragraph, in your own words, along
+these lines:
 
-A token is 20 lowercase letters and digits. People usually paste it as a sentence, "My Seatback Cinema profile token
-is abcd...", or just "my profile token is ...". It may come from an earlier chat or from the Claude Code skill. When
-they give one, pass `profile: { token: "..." }` straight to `picks` and skip the other routes, even if they also
-pasted an IMDb URL. Call `get_profile` only when you need to show them what's in it. An expired or unknown token
-comes back as an error: tell them, and move on to one of the other routes.
+> I can rank these by your taste. Send me your public IMDb or Letterboxd profile link and I'll try to read it,
+> though IMDb often blocks me. Or attach your IMDb ratings export (a CSV) or your Letterboxd export (a zip) right
+> here. If you have a taste code from last time, paste it. Or I'll go by ratings alone.
 
-### An IMDb profile URL
+Add two lines only if they ask how, or if the link route fails. IMDb ratings go public under Settings, Privacy on
+imdb.com, and the export is at https://www.imdb.com/list/ratings/export on a computer (the file appears under Your
+exports a minute later). Letterboxd's export is under Settings, Data, Export your data. Also mention, once, that
+they can make a taste code at https://seatback.len5ky.com/taste from those same files without sending them to the
+chat; it suits a big export, or a phone where attaching a file is awkward.
+
+### A taste code
+
+It's 20 lowercase letters and digits, usually pasted as "My Seatback Cinema taste code is abcd...". Older ones say
+"profile token" instead; treat them the same. Pass `profile: { token: "..." }` straight to `picks` and skip the
+other routes, even if they also pasted a profile link. Call `get_profile` only when you need to show them what's in
+it. If the code comes back unknown or expired, say so in plain words and offer the other routes.
+
+### An IMDb profile link
 
 It looks like `https://www.imdb.com/user/p.xxxxxxxx/ratings/` (older ones use `ur1234567` in place of `p.xxx`).
-The ratings and the watchlist must be public: IMDb, Settings, Privacy.
+The ratings and the watchlist must be public.
 
 Fetch the ratings page yourself first, with your web fetch tool: `https://www.imdb.com/user/<id>/ratings/`. A page
 holds up to 250 titles. Pass it unchanged to `profile_from_text` with `kind: "imdb_page"`, then fetch `?page=2`,
@@ -55,28 +69,15 @@ but not the scores, so every title counts as seen and `picks` hides it; the resu
 scores to fill the gap. IMDb often blocks automated fetches: an empty page, HTTP 202 or 403, or a page with no
 title ids on it means it said no.
 
-The connector's `profile_from_imdb_url` comes second. IMDb turns its cloud server away more often than not (HTTP
+The connector's `profile_from_imdb_url` comes second. IMDb turns its cloud server away nearly every time (HTTP
 429), so call it only when your own fetch was blocked or found no title ids, and call it once. When it does get
 through, it reads ratings with scores plus the watchlist, and answers with counts, the genres and directors it
-learned, and an `imdb_user` id. Pass `profile: { imdb_user: "ur..." }` to `picks` and read out anything in `notes`
-(over 5,000 ratings are cut to the most recent 5,000; a private watchlist is skipped). The import lasts 24 hours.
+learned, and an `imdb_user` id. Pass `profile: { imdb_user: "ur..." }` to `picks` and read out anything in `notes`.
 
-If the connector fails too, tell them IMDb blocked both and offer the ways round it:
+If both fail, tell them IMDb blocked the link and point them to the export: attach it here, or turn it into a taste
+code at https://seatback.len5ky.com/taste.
 
-- the CSV export: sign in on a computer, open https://www.imdb.com/list/ratings/export (for the watchlist, the
-  three-dot menu on the Watchlist page, then Export), download the file from Your exports and attach it here;
-- a profile token, if they saved one before;
-- a new token from the Claude Code skill (`skill/inflight-movie-picker` in github.com/len5ky/seatback-cinema).
-  It reads IMDb from their own computer, which IMDb lets through far more often than a cloud server, and it
-  takes one command:
-
-  ```
-  bun ~/.claude/skills/inflight-movie-picker/scripts/catalogue.ts emirates --imdb-url https://www.imdb.com/user/<id>/ratings/ --save-profile
-  ```
-
-  Any airline id works there. The last line it prints is the sentence to paste back into this chat.
-
-### A Letterboxd profile URL
+### A Letterboxd profile link
 
 Any URL under `https://letterboxd.com/<username>/` will do; you only need the username. Their films live at
 `/films/` (`/films/ratings/` redirects there): every film they've logged, 72 to a page, with a star rating where
@@ -87,34 +88,42 @@ at `/watchlist/` gets the same treatment with `list: "watchlist"`.
 
 There are no IMDb ids on Letterboxd. The connector matches films through its own Letterboxd links where it has
 them and on title and year otherwise, so the odd retitled film slips through. A 403 or a "Just a moment" page
-means Letterboxd blocked you: ask for the export (letterboxd.com, Settings, Data, Export your data) and have them
-attach `ratings.csv`, `watched.csv` or `watchlist.csv` from the zip.
+means Letterboxd blocked you: ask for the export zip instead.
 
 ### An attached file
 
-- IMDb export (`Const` and `Your Rating` columns, or just `Const` for the watchlist): `kind: "imdb_csv"`. The tool
-  tells ratings and watchlist apart by the header.
-- Letterboxd `ratings.csv` or `watched.csv`: `kind: "letterboxd_csv"`. For `watchlist.csv` add
+Send each file's text to `profile_from_text`, unchanged, and chain the files with `add_to`:
+
+- IMDb ratings export (`Const` and `Your Rating` columns, short or full): `kind: "imdb_csv"`.
+- IMDb watchlist export (`Const` without `Your Rating`, or a list export that starts with `Position`):
+  `kind: "imdb_csv"`; the tool detects it. Add `list: "watchlist"` if the file name says watchlist and you want to
+  be sure.
+- Letterboxd `ratings.csv` and `watched.csv`: `kind: "letterboxd_csv"`. `watchlist.csv`: the same with
   `list: "watchlist"`.
 
-Pass the file text unchanged. With several files, chain them with `add_to`.
+A zip (Letterboxd's export): unpack it with your file tool or code sandbox and send `ratings.csv`, `watched.csv` and
+`watchlist.csv` as three calls. Skip the rest; `profile.csv` holds their email and has no films. If you can't open
+zips here, ask them to attach those three files, or to use https://seatback.len5ky.com/taste, which reads the zip
+in their browser.
 
-### Nothing
+A file over about 200 KB goes in parts of about 200 KB, cut at line ends. Every part starts with the file's header
+line (repeat it), and each call after the first passes the previous result as `add_to`. Over about 1 MB (some 5,000
+ratings), suggest the /taste page instead: copying that much through the chat is slow.
 
-Ask, in one message, for five films they loved, two they hated and anything to avoid (horror, subtitles, sad
-endings, musicals). Build the profile yourself: the films they name go in `seen` as `"Title (Year)"`, the genres
-they like or avoid go in `liked_genres` and `disliked_genres`, and a director they mention twice goes in
-`liked_directors`. That takes thirty seconds and beats picking blind. If they'd rather skip it, run `picks` with no
-profile.
+### Ratings alone
 
-## 3. Save the profile (offer once)
+If they don't want to share anything, run `picks` with no profile; it ranks by the blended ratings. If they'd rather
+name a few films they loved and a few they hated, put those in `seen` as `"Title (Year)"` and any genres they like
+or avoid in `liked_genres` and `disliked_genres`.
 
-An IMDb import through `profile_from_imdb_url` needs no token: next time they paste the same URL. When the profile
-came from fetched pages or a file, offer once to save it so next time they can skip this step. If they
-say yes, call `save_profile` and give them the token on its own line. Tell them to keep it somewhere they'll find
-it: it's the only way back to the profile, it lasts a year, and anyone who has it can load the film list (ids and
-ratings, nothing else). Don't offer again in the same chat, and don't save a profile they built from five titles in
-chat unless they ask.
+## 3. Offer a taste code (once)
+
+After the first profile that worked from a link or a file, ask once: "Want me to remember this? I'll give you a short
+taste code to paste next time." Add one line on what it holds: your rated film ids and scores, nothing else, kept
+for a year. If they say yes, call `save_profile` and give them the code on its own line, then the sentence to paste
+next time: "My Seatback Cinema taste code is <code>." Anyone with the code can load that film list, so tell them to
+keep it somewhere private. Don't offer again in the same chat, and don't offer for a profile built from a few films
+named in chat unless they ask. An import through `profile_from_imdb_url` needs no code.
 
 ## 4. Picks
 

@@ -15,7 +15,8 @@ export const DEGRADED_TTL_SECONDS = 3600;
 const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
 const CSV_HELP =
   "Ask the person for their IMDb ratings CSV export instead (signed in on a computer: https://www.imdb.com/list/ratings/export, " +
-  "then download it from Your exports and attach it) and pass it to profile_from_text with kind \"imdb_csv\".";
+  "then download it from Your exports and attach it) and pass it to profile_from_text with kind \"imdb_csv\", " +
+  "or point them to https://seatback.len5ky.com/taste, which turns the export into a taste code in their browser.";
 
 export interface ImdbDeps { fetch: (url: string, init: RequestInit) => Promise<Response>; sleep: (ms: number) => Promise<void> }
 export const liveDeps: ImdbDeps = { fetch: (url, init) => fetch(url, init), sleep: (ms) => new Promise((r) => setTimeout(r, ms)) };

@@ -8,7 +8,7 @@ const INSTRUCTIONS =
   "(pass flight_minutes and a profile when you have them) or catalogue to browse or check a title. " +
   "For a public IMDb profile URL, fetch the ratings pages yourself and pass them to profile_from_text (kind imdb_page). " +
   "profile_from_imdb_url is the fallback when that fetch is blocked; IMDb often refuses it from the cloud. On success pass profile: { imdb_user } to picks. " +
-  "Otherwise build a profile with profile_from_text from an IMDb or Letterboxd export or page you have fetched; save_profile returns a token for next time.";
+  "Otherwise build a profile with profile_from_text from an IMDb or Letterboxd export or page you have fetched; save_profile returns a taste code (the token field) for next time; call it a taste code when you talk to the person, and https://seatback.len5ky.com/taste makes one from an export without the chat.";
 
 export type Id = string | number | null;
 interface RpcRequest { jsonrpc: "2.0"; id?: Id; method: string; params?: unknown }

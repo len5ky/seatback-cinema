@@ -31,7 +31,7 @@ test("seatback: save_profile posts a JSON-RPC tools/call to <base>/mcp with only
   expect(calls[0]!.url).toBe("https://seatback.example/mcp");
   expect(calls[0]!.body.method).toBe("tools/call");
   expect(calls[0]!.body.params).toEqual({ name: "save_profile", arguments: { profile: { seen: ["tt1", "Film (2020)"], ratings: { tt1: 9 }, liked_genres: ["Drama"], source: "imdb:p.x" } } });
-  expect(pasteSentence(TOKEN)).toBe(`My Seatback Cinema profile token is ${TOKEN}.`);
+  expect(pasteSentence(TOKEN)).toBe(`My Seatback Cinema taste code is ${TOKEN}.`);
 });
 
 test("seatback: tool errors, JSON-RPC errors and HTTP errors come back as readable Errors", async () => {
@@ -105,8 +105,8 @@ test.skipIf(!!noLoopback)("catalogue.ts: --save-profile saves the --taste profil
     writeFileSync(`${dir}/watched.csv`, "Date,Name,Year,Letterboxd URI\n2024-01-01,Seen Letterboxd,2021,https://boxd.it/a\n");
     const s = await run("qantas", "--taste", dir, "--save-profile");
     expect(s.code).toBe(0);
-    expect(s.out).toContain(`profile token: ${TOKEN}`);
-    expect(s.out.trimEnd().endsWith(`for the Claude app, paste: My Seatback Cinema profile token is ${TOKEN}.`)).toBe(true);
+    expect(s.out).toContain(`taste code: ${TOKEN}`);
+    expect(s.out.trimEnd().endsWith(`for the Claude app, paste: My Seatback Cinema taste code is ${TOKEN}.`)).toBe(true);
     expect(store.get(TOKEN)).toEqual({ seen: ["tt0000001", "Seen Letterboxd (2021)"], ratings: { tt0000001: 9 }, source: "ratings.csv, watched.csv" });
 
     const t = await run("qantas", "--profile-token", TOKEN);
@@ -124,7 +124,7 @@ test.skipIf(!!noLoopback)("catalogue.ts: --save-profile saves the --taste profil
     expect(none.err).toContain("--save-profile needs a profile to save");
     const json = await run("qantas", "--taste", dir, "--save-profile", "--json");
     expect(JSON.parse(json.out)).toHaveLength(1); // stdout stays JSON, the token goes to stderr
-    expect(json.err).toContain(`My Seatback Cinema profile token is ${TOKEN}.`);
+    expect(json.err).toContain(`My Seatback Cinema taste code is ${TOKEN}.`);
   } finally {
     server.stop(true);
     rmSync(dir, { recursive: true, force: true });

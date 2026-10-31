@@ -14,7 +14,7 @@
 //          --letterboxd-url <url>  public Letterboxd profile (https://letterboxd.com/<user>/): films + watchlist
 //                            (both fetched from this machine, cached 24 h; combine freely with --taste)
 //          --save-profile    save the profile built from the options above on the Seatback server, print its token
-//                            (for the Claude app: "My Seatback Cinema profile token is <token>.")
+//                            (for the Claude app: "My Seatback Cinema taste code is <token>.")
 //          --profile-token <t>  use a profile saved with --save-profile (or by the Claude app's connector)
 //          --tmdb            add TMDB vote average / count (needs TMDB_API_KEY; cached 30 days)
 //          --base <url|dir>  dataset location (also SEATBACK_DATASET_URL; default https://seatback.len5ky.com):
@@ -438,7 +438,7 @@ async function main(): Promise<void> {
     try { r = await saveProfile(mcpBase("save-profile"), toProfile(taste)); }
     catch (e) { return fail(e instanceof Error ? e.message : String(e)); }
     if (r.dropped) notes.push(`saved profile: over the server's 64 KB limit, so it left out the ${r.dropped}`);
-    saved = [`profile token: ${r.token} (kept for a year)`, `for the Claude app, paste: ${pasteSentence(r.token)}`];
+    saved = [`taste code: ${r.token} (kept for a year)`, `for the Claude app, paste: ${pasteSentence(r.token)}`];
   }
   let hidden = 0;
   if (taste) {

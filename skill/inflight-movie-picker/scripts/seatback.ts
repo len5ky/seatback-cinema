@@ -77,4 +77,4 @@ export async function getProfile(base: string, token: string, fetchFn: Fetch = f
   return r as unknown as Profile;
 }
 
-export const pasteSentence = (token: string) => `My Seatback Cinema profile token is ${token}.`;
+export const pasteSentence = (token: string) => `My Seatback Cinema taste code is ${token}.`;

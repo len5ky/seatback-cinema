@@ -86,7 +86,7 @@ export const TOOLS = [
         flight_minutes: int("Flight length in minutes. Films longer than this minus 30 are dropped.", 30),
         filters: FILTERS,
         profile: {
-          description: "A profile object, { \"token\": \"...\" } for one saved with save_profile, or { \"imdb_user\": \"ur...\" } after profile_from_imdb_url.",
+          description: "A profile object, { \"token\": \"...\" } for a taste code from save_profile, or { \"imdb_user\": \"ur...\" } after profile_from_imdb_url.",
           anyOf: [
             PROFILE,
             { type: "object", properties: { token: { type: "string" } }, required: ["token"], additionalProperties: false },
@@ -102,7 +102,7 @@ export const TOOLS = [
   {
     name: "save_profile",
     title: "Save a taste profile",
-    description: "Store a taste profile for a year and get a token the person can reuse on later flights. Stores only film ids, ratings, genres and director names (64 KB max).",
+    description: "Store a taste profile for a year and get its taste code (the token field), which the person pastes on later flights. Call it their taste code, not a token. Stores only film ids, ratings, genres and director names (64 KB max).",
     inputSchema: { type: "object", properties: { profile: PROFILE }, required: ["profile"], additionalProperties: false },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   },
@@ -110,7 +110,7 @@ export const TOOLS = [
     name: "get_profile",
     title: "Load a saved profile",
     description: "Load a taste profile saved with save_profile.",
-    inputSchema: { type: "object", properties: { token: { type: "string", description: "The 20-character token from save_profile." } }, required: ["token"], additionalProperties: false },
+    inputSchema: { type: "object", properties: { token: { type: "string", description: "The 20-character taste code from save_profile." } }, required: ["token"], additionalProperties: false },
     annotations: READ_ONLY,
   },
   {
@@ -123,7 +123,7 @@ export const TOOLS = [
   {
     name: "profile_from_text",
     title: "Build a profile from an export or page",
-    description: "Turn text you already have into a taste profile: an IMDb ratings or watchlist CSV export, a Letterboxd ratings.csv / watched.csv / watchlist.csv, or the HTML of an IMDb or Letterboxd ratings page. For several pages, pass the previous result as add_to.",
+    description: "Turn text you already have into a taste profile: an IMDb ratings or watchlist CSV export, a Letterboxd ratings.csv / watched.csv / watchlist.csv, or the HTML of an IMDb or Letterboxd ratings page. For several pages or files, pass the previous result as add_to. Send a CSV over about 200 KB in parts cut at line ends, each starting with the header line.",
     inputSchema: {
       type: "object",
       properties: {
@@ -211,9 +211,9 @@ function importSummary(r: ImdbImport, cached: boolean): Json {
 }
 
 async function loadProfile(ctx: ToolContext, token: unknown): Promise<Profile> {
-  if (typeof token !== "string" || !TOKEN_RE.test(token.trim().toLowerCase())) throw new ToolError("token must be the 20-character code save_profile returned");
+  if (typeof token !== "string" || !TOKEN_RE.test(token.trim().toLowerCase())) throw new ToolError("token must be the 20-character taste code save_profile returned");
   const raw = await ctx.profiles.get(`profile:${token.trim().toLowerCase()}`);
-  if (!raw) throw new ToolError("no saved profile for that token; it may have expired (profiles last a year). Build a new one with profile_from_text and save it again.");
+  if (!raw) throw new ToolError("no saved profile for that taste code; it may have expired (they last a year) or have a typo. Build a new profile from a link or export, or make a new code at https://seatback.len5ky.com/taste.");
   return JSON.parse(raw) as Profile;
 }
 
