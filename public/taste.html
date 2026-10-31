@@ -235,13 +235,15 @@ async function unzip(buf, wanted) {
     const local = v.getUint32(p + 42, true);
     const name = dec.decode(u8.subarray(p + 46, p + 46 + nameLen));
     p += 46 + nameLen + extraLen + commentLen;
-    if (!wanted.includes(name)) continue;
+    const base = name.split("/").pop();
+    // Letterboxd keeps likes/ and deleted/ copies of some files; only the main ones count
+    if (!wanted.includes(base) || /(^|\/)(likes|deleted|orphaned)\//i.test(name) || out[base] !== undefined) continue;
     const start = local + 30 + v.getUint16(local + 26, true) + v.getUint16(local + 28, true);
     const data = u8.subarray(start, start + size);
-    if (method === 0) out[name] = dec.decode(data);
+    if (method === 0) out[base] = dec.decode(data);
     else if (method === 8) {
       if (typeof DecompressionStream === "undefined") throw new Error("this browser can't open zips; unzip it and drop the CSV files instead");
-      out[name] = await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).text();
+      out[base] = await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).text();
     }
   }
   return out;
@@ -253,7 +255,7 @@ const key = (title, year) => (Number(year) ? `${title.trim()} (${Number(year)})`
 
 function addImdb(text, fileName) {
   const { header, rows } = parseCsv(text);
-  const isRatings = header.includes("Your Rating") && !header.includes("Position") && !/watchlist/i.test(fileName);
+  const isRatings = header.includes("Your Rating") && !header.includes("Position");
   let n = 0;
   const dated = [];
   for (const r of rows) {
@@ -311,6 +313,7 @@ function buildProfile() {
   while (size() > MAX_BYTES && w > 1000) w = Math.floor(w * 0.9);
   while (size() > MAX_BYTES && s > 0) s = Math.floor(s * 0.9);
   while (size() > MAX_BYTES && r > 0) r = Math.floor(r * 0.9);
+  while (size() > MAX_BYTES && w > 0) w = Math.floor(w * 0.9);
   const dropped = [];
   if (r < rated.length) dropped.push(`${(rated.length - r).toLocaleString()} of your oldest ratings`);
   if (s < seen.length) dropped.push(`${(seen.length - s).toLocaleString()} unrated films`);
