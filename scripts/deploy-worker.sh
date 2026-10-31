@@ -2,7 +2,7 @@
 # Deploy the seatback Worker to https://seatback.len5ky.com from devserver (the bundle needs the local SQLite db).
 #   scripts/deploy-worker.sh            export --worker, create the PROFILES KV namespace if missing, wrangler deploy, smoke
 # Credentials: env file at $SEATBACK_CF_ENV (default ~/.config/seatback/env) with CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID
-# (CF_API_TOKEN / CF_ACCOUNT_ID also accepted). The token is never printed.
+# (CF_API_TOKEN / CF_ACCOUNT_ID also accepted) and CONVEX_URL for the IMDb import service. The token is never printed.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="${SEATBACK_CF_ENV:-$HOME/.config/seatback/env}"
@@ -35,7 +35,11 @@ if grep -q 'REPLACE_WITH_KV_ID' wrangler.toml; then
   echo "KV namespace seatback-PROFILES = $kv_id (written to worker/wrangler.toml; commit it)"
 fi
 
-"$WRANGLER" deploy
+# The Convex import service: CONVEX_URL (https://<name>.convex.cloud) in the env file; HTTP actions are served on .convex.site.
+# Its secret is a Worker secret (scripts/rotate-import-secret.sh), which deploys keep.
+vars=()
+if [[ -n ${CONVEX_URL:-} ]]; then vars=(--var "IMPORT_URL:${CONVEX_URL/.convex.cloud/.convex.site}"); else echo "no CONVEX_URL in $ENV_FILE: IMDb imports go direct (and mostly fail)" >&2; fi
+"$WRANGLER" deploy "${vars[@]}"
 cd "$ROOT"
 # a new custom domain can take a minute to get its certificate
 for i in $(seq 1 12); do curl -sf -o /dev/null --max-time 10 "$BASE_URL/healthz" && break; sleep 10; done

@@ -106,3 +106,22 @@ test("Without an importer the tool goes straight to IMDb, as before", async () =
   expect(t.convex.length).toBe(0);
   expect(t.direct()).toBe(1);
 });
+
+test("save_profile takes { imdb_user } after an import and stores that profile; a big import keeps its newest films under 64 KB", async () => {
+  const t = setup(ok());
+  await callTool(t.ctx, "profile_from_imdb_url", { url: P });
+  const { token } = await callTool(t.ctx, "save_profile", { profile: { imdb_user: "ur00000001" } });
+  const saved = await callTool(t.ctx, "get_profile", { token });
+  expect(saved).toMatchObject({ seen: IMPORT.profile.seen, ratings: IMPORT.profile.ratings, source: "imdb_profile" });
+
+  const seen = Array.from({ length: 6000 }, (_, i) => `tt${String(10_000_000 + i)}`);
+  const big: ImdbImport = { ...IMPORT, imdb_user: "ur7654321", profile: { seen, ratings: Object.fromEntries(seen.map((id) => [id, 7])), source: "imdb_profile" } };
+  const t2 = setup(() => Response.json({ ok: true, cached: false, import: big }));
+  await callTool(t2.ctx, "profile_from_imdb_url", { url: "ur7654321" });
+  const r = await callTool(t2.ctx, "save_profile", { profile: { imdb_user: "ur7654321" } });
+  const kept = JSON.parse(t2.store.data.get(`profile:${String(r.token)}`)!.value) as { seen: string[] };
+  expect(t2.store.data.get(`profile:${String(r.token)}`)!.value.length).toBeLessThanOrEqual(64 * 1024);
+  expect(kept.seen[0]).toBe(seen[0]);
+  expect(kept.seen.length).toBeLessThan(6000);
+  await expect(callTool(t2.ctx, "save_profile", { profile: { imdb_user: "ur1111111" } })).rejects.toThrow(/expired/);
+});

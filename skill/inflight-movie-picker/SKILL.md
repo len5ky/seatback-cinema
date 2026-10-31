@@ -56,54 +56,51 @@ If the flight month isn't published yet, use the latest month and tell the perso
 
 ## 3. Learn their taste
 
-Look in the working directory first. An IMDb export (`data/imdb-ratings/*.csv`, or any CSV with a `Const` column)
-or an unzipped Letterboxd export (`ratings.csv`, `watched.csv`, `watchlist.csv`) is better than any interview.
-Pass the file or folder to the script:
+Look in the working directory first, without asking: an IMDb export (`data/imdb-ratings/*.csv`, or any CSV with a
+`Const` column) or an unzipped Letterboxd export (`ratings.csv`, `watched.csv`, `watchlist.csv`) beats anything
+else. Pass the file or folder to the script with `--taste data/imdb-ratings` (or the export folder).
 
-```bash
-bun $S emirates --taste data/imdb-ratings
-bun $S united --taste ~/Downloads/letterboxd-export     # unzip the Letterboxd zip first
-```
+Otherwise ask for the first of these they can give, in this order: an IMDb profile link, a Letterboxd username, a
+taste code from last time. With none of them, do the seen check below. Mention exports only if they ask or
+everything else failed.
 
-No export, but a public IMDb or Letterboxd profile? Pass the URL to the script. It reads the profile from this
-machine and caches it for 24 hours. For IMDb it asks IMDb's API first, the same calls imdb.com makes in a browser:
-a 941-rating profile with its scores and watchlist took 7 requests in October 2026. If the API turns it down, it
-reads the profile pages instead, 250 titles a page. Letterboxd is pages only, 72 films a page, then the watchlist.
-Either way it stops at 50 pages:
+**IMDb link.** Pass it to the script. It reads the profile from this machine through IMDb's API (the calls
+imdb.com makes in a browser; a 941-rating profile with scores and watchlist is 7 requests), falls back to the
+profile pages, and caches it for 24 hours. The ratings must be public: if the script or the connector says they're
+private, tell them in one line to set ratings to public under Settings, Privacy on imdb.com and send the link
+again. IMDb refuses scripted requests from some networks (an empty HTTP 202 or a 429). Then, if the Seatback Cinema
+connector is in this session (tools `list_airlines`, `picks`, `profile_from_imdb_url` and so on), call
+`profile_from_imdb_url` with the link once; it reads the profile from its own server and usually gets through. Pass
+`profile: { imdb_user }` from its answer to `picks`.
+
+**Letterboxd username.** `--letterboxd-url https://letterboxd.com/<username>/` reads their films pages, 72 a page,
+then the watchlist, up to 50 pages. If Letterboxd answers 403, the connector's `profile_from_letterboxd` reads their
+diary feed instead, which covers only the latest 50 entries; say so, and follow with the seen check.
 
 ```bash
 bun $S emirates --imdb-url https://www.imdb.com/user/p.xxxxxxxx/ratings/
 bun $S ba --letterboxd-url https://letterboxd.com/<username>/
+bun $S emirates --profile-token <code>
 ```
 
-The IMDb ratings and watchlist have to be public (IMDb, Settings, Privacy). IMDb blocks scripted requests from a
-lot of networks with an empty HTTP 202 or a 429; Letterboxd sometimes answers 403. When that happens the script prints the
-export route in two lines and exits 1; if it stops partway (a block after page 1), it keeps the pages it read and
-adds a `note:` line saying so. For IMDb, if the Seatback Cinema connector is added in this session (its
-tools are `list_airlines`, `picks`, `profile_from_imdb_url` and so on), try `profile_from_imdb_url` with the URL
-once, and pass `profile: { imdb_user }` from its answer to `picks`. Don't count on it: IMDb refuses the
-connector's cloud server more often than not (HTTP 429). Otherwise pass the export route on: the CSV export from
-https://www.imdb.com/list/ratings/export, or Letterboxd's Settings, Data, Export your data, then `--taste`. Letterboxd pages carry no IMDb id, so those films join
-through the dataset's Letterboxd links where it has them and on title and year otherwise.
+**Taste code.** "My Seatback Cinema taste code is ..." (or the older "my profile token is ...") goes in as
+`--profile-token <code>`, in place of the other options. To carry a profile into the Claude app, add
+`--save-profile` to an `--imdb-url`, `--letterboxd-url` or `--taste` run: it stores the profile on the Seatback
+server and ends with the sentence to paste there.
 
-To use the profile in the Claude app, where IMDb blocks the fetch, add `--save-profile`: the script stores the profile on
-the Seatback server and ends with a line to paste into the app, "My Seatback Cinema taste code is ...". If they
-give you a taste code ("my taste code is ...", or the older "my profile token is ..."), pass it as `--profile-token <code>` in place of the other taste options.
+With any of these the script hides every film they've rated or logged, adds a `you` column that says `watchlist`
+for films on their watchlist, and prints their 9-10/10 films and their 1-4/10 films above the table. IMDb rows
+match on the IMDb id, exactly. Letterboxd rows have no IMDb id, so they match through the dataset's Letterboxd
+links where it has them, else on title (lowercased, accents, punctuation and a leading "The" dropped) with the year
+within one. Letterboxd half-stars are doubled to the 10-point scale.
 
-With any of these the script hides every film they've rated or logged, adds a `you` column that says `watchlist` for films on
-their watchlist, and prints their 9-10/10 films and their 1-4/10 films above the table. The join: IMDb rows match on
-the IMDb id (`Const`), exactly. Letterboxd rows have no IMDb id, so they match on title (lowercased, accents,
-punctuation and a leading "The" dropped) with the year within one; a catalogue row with no year (most of
-Emirates) matches on title alone. Letterboxd half-stars are doubled to the 10-point scale.
+**The seen check.** Most of what a long rating history buys is knowing what they've already watched. With nothing
+else, shortlist the 20 strongest films for the flight from the table, show the first ten as title and year, and
+ask which they've seen; then ask once more about the next ten. Two rounds at most. Drop every film they name, and
+note any they say they loved or hated, plus anything to avoid (horror, subtitles, sad endings).
 
-No export? Ask, in one message:
-
-1. Five films they loved.
-2. Two they hated.
-3. Anything to avoid (horror, subtitles, sad endings, musicals, superheroes).
-
-That takes thirty seconds. Note every film they mention as seen and don't recommend it. Tell IMDb users about the
-export for next time: imdb.com, Your Ratings, the three-dot menu, Export.
+When everything else has failed, the export is the fallback: imdb.com, Your ratings, the three-dot menu, Export,
+or Letterboxd's Settings, Data, Export your data; then `--taste`.
 
 ## 4. Rank
 

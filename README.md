@@ -46,22 +46,19 @@ After that, start a chat, on the web or in the mobile app, and say where you're 
 > https://www.imdb.com/user/p.xxxxxxxx/ratings/ - what should I watch?
 
 Claude drops what you've seen and answers with three films and a backup, each with its ratings, a one-line
-synopsis, why it suits you and an IMDb link. Your taste can come from four places, and Claude offers them in one
-line when it needs to: a public IMDb or Letterboxd profile link, an IMDb ratings export (CSV) or Letterboxd export
-(zip) attached to the chat, a taste code from last time, or nothing, in which case it goes by ratings alone.
+synopsis, why it suits you and an IMDb link. For your taste it asks for a public IMDb profile link first, then a
+Letterboxd username, then a taste code from last time. With none of those, it lists ten likely picks, twice, and
+drops the ones you say you've seen.
 
 **The taste code.** https://seatback.len5ky.com/taste reads your IMDb or Letterboxd export in the browser and gives
 you a 20-character code; nothing goes through the chat. Paste the sentence it shows ("My Seatback Cinema taste code
 is ...") and Claude skips everything you've rated. The code holds film ids and your scores, nothing else, for a
 year. Claude also offers to make one after the first import in a chat.
 
-**Links are hit and miss.** IMDb's ratings and watchlist have to be public (Settings, Privacy), and even then IMDb
-blocks Claude's fetches often and the connector's own import nearly always (it answers Cloudflare's servers with
-HTTP 429; see `tmp/w5/imdb-from-worker.md` in a checkout). Pages also list what you've seen but not your scores.
-The export, from https://www.imdb.com/list/ratings/export on a computer, is the reliable route. Letterboxd's is at
-Settings, Data, Export your data. If you have Claude Code, the skill below can read your IMDb profile from your own
-machine and print a taste code:
-`bun ~/.claude/skills/inflight-movie-picker/scripts/catalogue.ts emirates --imdb-url <your URL> --save-profile`.
+**The IMDb link.** Your ratings have to be public (Settings, Privacy on imdb.com). The connector reads them on its
+own server, scores and watchlist included, and keeps the import for a day; Letterboxd gives it only your latest 50
+diary entries. When a link fails, an IMDb export (CSV, from https://www.imdb.com/list/ratings/export on a computer)
+or a Letterboxd export (zip) still works, attached to the chat or turned into a code at https://seatback.len5ky.com/taste.
 
 ## Quick start: the skill
 

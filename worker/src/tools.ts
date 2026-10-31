@@ -108,8 +108,17 @@ export const TOOLS = [
   {
     name: "save_profile",
     title: "Save a taste profile",
-    description: "Store a taste profile for a year and get its taste code (the token field), which the person pastes on later flights. Call it their taste code, not a token. Stores only film ids, ratings, genres and director names (64 KB max).",
-    inputSchema: { type: "object", properties: { profile: PROFILE }, required: ["profile"], additionalProperties: false },
+    description: "Store a taste profile for a year and get its taste code (the token field), which the person pastes on later flights. Call it their taste code, not a token. Pass a profile object, or { \"imdb_user\": \"ur...\" } after profile_from_imdb_url to save that import. Stores only film ids, ratings, genres and director names (64 KB max; a bigger IMDb import keeps its most recent films).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        profile: {
+          anyOf: [PROFILE, { type: "object", properties: { imdb_user: { type: "string" } }, required: ["imdb_user"], additionalProperties: false }],
+          description: "The profile to save, or { imdb_user } from profile_from_imdb_url.",
+        },
+      },
+      required: ["profile"], additionalProperties: false,
+    },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   },
   {
@@ -244,7 +253,7 @@ async function importViaConvex(ctx: ToolContext, imp: Importer, ref: ImdbUserRef
       throw new ToolError(`IMDb turned the import away this time (its bot check), so nothing was read. Don't retry now. ${NEXT_STEP}`);
     case "private":
       throw new ToolError("IMDb shows no public ratings for this profile, so they are almost certainly private. Tell the person how to make them " +
-        "public in one line: on imdb.com, open their name menu, Settings, Privacy, and set their ratings (and watchlist) to public; then send the link again. " +
+        "public in one line: on imdb.com, Settings, then Privacy, and set ratings (and the watchlist) to public; then send the link again. " +
         "Meanwhile, ask for their Letterboxd username, or run the seen check.");
     case "not_found":
       throw new ToolError(`IMDb doesn't know this profile id. Ask the person to copy the link again from their IMDb profile (Share, Copy link). ${NEXT_STEP}`);
@@ -279,6 +288,21 @@ function importSummary(r: ImdbImport, cached: boolean): Json {
     liked_genres: p.liked_genres ?? [], disliked_genres: p.disliked_genres ?? [], liked_directors: p.liked_directors ?? [],
     notes: r.notes,
   };
+}
+
+const bytes = (s: string) => new TextEncoder().encode(s).length;
+
+/** An IMDb import cut to its most recent films (seen is newest first) until it fits a saved profile. */
+function fitProfile(p: Profile): Profile {
+  let n = p.seen.length;
+  let out = p;
+  while (bytes(JSON.stringify(out)) > PROFILE_MAX_BYTES && n > 0) {
+    n = Math.floor(n * 0.9);
+    const keep = new Set(p.seen.slice(0, n));
+    const ratings = Object.fromEntries(Object.entries(p.ratings ?? {}).filter(([k]) => keep.has(k)));
+    out = { ...p, seen: p.seen.slice(0, n), ratings, ...(p.watchlist ? { watchlist: p.watchlist.slice(0, 500) } : {}) };
+  }
+  return out;
 }
 
 async function loadProfile(ctx: ToolContext, token: unknown): Promise<Profile> {
@@ -321,9 +345,11 @@ export async function callTool(ctx: ToolContext, name: string, args: Json): Prom
       return cat.picks(a, { filters: parseFilters(args.filters), flightMinutes, profile, limit });
     }
     case "save_profile": {
-      const profile = profileArg(args.profile);
+      const p = args.profile;
+      const fromImport = isObj(p) && "imdb_user" in p && !("seen" in p);
+      const profile = fromImport ? fitProfile(await loadImdbProfile(ctx, p.imdb_user)) : profileArg(p);
       const json = JSON.stringify(profile);
-      if (new TextEncoder().encode(json).length > PROFILE_MAX_BYTES)
+      if (bytes(json) > PROFILE_MAX_BYTES)
         throw new ToolError("profile is over 64 KB; keep the most recent ratings (about 3,000) and the seen list, then try again");
       const token = newToken();
       await ctx.profiles.put(`profile:${token}`, json, { expirationTtl: PROFILE_TTL_SECONDS });
