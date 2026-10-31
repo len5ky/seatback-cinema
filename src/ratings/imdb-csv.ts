@@ -3,12 +3,15 @@ import { parseCsv, parseCsvRows } from "../csv.ts";
 
 export type ImdbExportKind = "ratings" | "watchlist";
 
-/** IMDb's "Your Ratings" and "Watchlist" exports both carry a Const column; only the ratings one has Your Rating. */
+/**
+ * IMDb's "Your Ratings" and "Watchlist" exports both carry a Const column. Only the ratings one has Your Rating, except that
+ * list exports (watchlist and custom lists: they start with Position) may add Your Rating and Date Rated too.
+ */
 export function detectImdbExport(text: string): ImdbExportKind | null {
   const nl = text.search(/\r?\n/);
   const header = (parseCsvRows(nl < 0 ? text : text.slice(0, nl))[0] ?? []).map((h) => h.trim());
   if (!header.includes("Const")) return null;
-  return header.includes("Your Rating") ? "ratings" : "watchlist";
+  return header.includes("Your Rating") && !header.includes("Position") ? "ratings" : "watchlist";
 }
 
 /** genres and directors are the export's own comma-separated columns (empty when absent). */
@@ -24,7 +27,7 @@ const commaList = (s: string | undefined) => (s ?? "").split(",").map((x) => x.t
 /** Rows with a valid tconst. Your Rating is IMDb's own 1-10 scale, kept as-is; out-of-range or blank becomes null. */
 export function parseImdbExport(text: string): { kind: ImdbExportKind; films: ImdbFilm[]; skipped: number } {
   const kind = detectImdbExport(text);
-  if (!kind) throw new Error("no Const column: is this an IMDb ratings or watchlist export?");
+  if (!kind) throw new Error("no Const column: is this an IMDb ratings or watchlist export? When you send a big file in parts, start every part with the file's header line.");
   const films: ImdbFilm[] = [];
   let skipped = 0;
   for (const r of parseCsv(text)) {

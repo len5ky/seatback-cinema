@@ -72,9 +72,9 @@ export function preferences(films: { rating: number; genres: string[]; directors
   return out;
 }
 
-function fromImdbCsv(text: string): Profile {
+function fromImdbCsv(text: string, list: "watched" | "watchlist"): Profile {
   const { kind, films } = parseImdbExport(text);
-  if (kind === "watchlist") return { seen: [], watchlist: films.map((f) => f.tconst), source: "imdb_csv" };
+  if (kind === "watchlist" || list === "watchlist") return { seen: [], watchlist: films.map((f) => f.tconst), source: "imdb_csv" };
   const ratings: Record<string, number> = {};
   for (const f of films) if (f.rating !== null) ratings[f.tconst] = f.rating;
   const rated = films.filter((f): f is typeof f & { rating: number } => f.rating !== null);
@@ -84,7 +84,7 @@ function fromImdbCsv(text: string): Profile {
 /** ratings.csv (has Rating) or watched.csv / watchlist.csv (same columns, so `list` says which). Stars become a 10-point scale. */
 function fromLetterboxdCsv(text: string, list: "watched" | "watchlist"): Profile {
   const rows = parseCsv(text);
-  if (!rows.length || !("Name" in rows[0]!)) throw new Error("no Name column: is this a Letterboxd ratings.csv, watched.csv or watchlist.csv?");
+  if (!rows.length || !("Name" in rows[0]!)) throw new Error("no Name column: is this a Letterboxd ratings.csv, watched.csv or watchlist.csv? When you send a big file in parts, start every part with the file's header line.");
   const keys: string[] = [], ratings: Record<string, number> = {};
   for (const r of rows) {
     const name = r.Name?.trim();
@@ -180,7 +180,7 @@ export type ProfileResult = Profile & { note?: string; imdb_user?: string };
 export function profileFromText(text: string, kind: ProfileKind, slugs: Record<string, string>, list: "watched" | "watchlist" = "watched"): ProfileResult {
   if (text.length > TEXT_MAX) throw new Error("text is over 4 MB: send one page or one CSV file at a time");
   switch (kind) {
-    case "imdb_csv": return fromImdbCsv(text);
+    case "imdb_csv": return fromImdbCsv(text, list);
     case "letterboxd_csv": return fromLetterboxdCsv(text, list);
     case "imdb_page": return fromImdbPage(text, list);
     case "letterboxd_page": return fromLetterboxdPage(text, slugs, list);
