@@ -62,7 +62,7 @@ test("Convex refusals become clear errors and never fall through to the direct r
     [err(429, { error: "capped", scope: "daily" }), /limit for today/],
     [err(429, { error: "capped", scope: "user" }), /as many times as allowed today/],
     [err(502, { error: "challenged", message: "IMDb refused" }), /bot check.*Don't retry/s],
-    [err(422, { error: "private", message: "no public ratings" }), /private.*Settings, Privacy/s],
+    [err(422, { error: "private", message: "no public ratings" }), /private.*Settings, then Privacy/s],
     [err(422, { error: "not_found", message: "x" }), /doesn't know this profile id/],
     [err(422, { error: "imdb_error", message: "IMDb's API rejected the request for the scores" }), /API rejected/],
   ];
