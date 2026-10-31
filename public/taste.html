@@ -121,7 +121,7 @@ footer { font-size: 13px; color: var(--text-muted); margin-top: 24px; }
 <body>
 <main>
   <h1>Your taste code</h1>
-  <p class="lede">Claude can pick films for your flight from what the airline is actually showing this month. Give it
+  <p class="lede">Claude can pick films for your flight from what the airline is showing this month. Give it
     your IMDb or Letterboxd history once and it skips what you've seen and ranks the rest by how you score films.
     This page turns your export into a short code you paste into the chat.</p>
 
@@ -312,9 +312,9 @@ function buildProfile() {
   while (size() > MAX_BYTES && s > 0) s = Math.floor(s * 0.9);
   while (size() > MAX_BYTES && r > 0) r = Math.floor(r * 0.9);
   const dropped = [];
-  if (r < rated.length) dropped.push(`${rated.length - r} of your oldest ratings`);
-  if (s < seen.length) dropped.push(`${seen.length - s} unrated films`);
-  if (w < watchlist.length) dropped.push(`${watchlist.length - w} watchlist titles`);
+  if (r < rated.length) dropped.push(`${(rated.length - r).toLocaleString()} of your oldest ratings`);
+  if (s < seen.length) dropped.push(`${(seen.length - s).toLocaleString()} unrated films`);
+  if (w < watchlist.length) dropped.push(`${(watchlist.length - w).toLocaleString()} watchlist titles`);
   return { profile: make(r, s, w), dropped };
 }
 
