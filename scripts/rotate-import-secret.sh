@@ -18,7 +18,7 @@ f=$(mktemp "$ROOT/tmp/import-secret.XXXXXX")
 trap 'rm -f "$f"' EXIT
 secret=$(openssl rand -hex 32)
 printf 'IMPORT_SECRET=%s\n' "$secret" >"$f"
-node_modules/.bin/convex env set --prod --from-file "$f" >/dev/null
+node_modules/.bin/convex env set --prod --force --from-file "$f" >/dev/null
 printf '%s' "$secret" | (cd worker && node_modules/.bin/wrangler secret put IMPORT_SECRET >/dev/null)
 unset secret
 

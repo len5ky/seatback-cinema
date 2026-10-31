@@ -82,8 +82,8 @@ export class ImdbClient {
 
   async resolveProfileId(profileId: string): Promise<string | null> {
     const q = `query { userProfile(input: { profileId: ${JSON.stringify(profileId)} }) { userId } }`;
-    let r: Obj;
-    try { r = await this.post({ query: q }, "profile id"); } catch (e) { if (isRefusal(e)) throw e; return null; }
+    // Transport and HTTP failures propagate (they are not "unknown profile"); only an answer without a user id is null.
+    const r = await this.post({ query: q }, "profile id");
     const id = str(obj(obj(r.data).userProfile).userId);
     return id && /^ur\d+$/.test(id) ? id : null;
   }

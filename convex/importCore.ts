@@ -45,6 +45,8 @@ export interface ImportStore {
   cached(key: string): Promise<ImdbImport | null>;
   reserve(key: string, countGlobal: boolean): Promise<Reservation>;
   save(imp: ImdbImport, alias: string | null): Promise<void>;
+  /** Point a p. alias at an already cached ur import, keeping that import's expiry. */
+  alias(alias: string, ur: string): Promise<void>;
 }
 
 export type ImportError = "bad_request" | "capped" | "challenged" | "private" | "not_found" | "imdb_error";
@@ -76,7 +78,7 @@ export async function runImport(store: ImportStore, deps: ImdbDeps, user: string
     if (ref.kind === "p") {
       alias = ref.id;
       const known = await store.cached(ur);
-      if (known) { await store.save(known, alias); return { status: 200, body: { ok: true, cached: true, import: known }, calls }; }
+      if (known) { await store.alias(alias, ur); return { status: 200, body: { ok: true, cached: true, import: known }, calls }; }
       const second = capped(await store.reserve(ur, false));
       if (second) return second;
     }

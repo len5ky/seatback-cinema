@@ -17,6 +17,7 @@ export const run = internalAction({
         return data === null ? null : (JSON.parse(data) as ImdbImport);
       },
       reserve: (key, countGlobal) => ctx.runMutation(internal.store.reserve, { key, countGlobal, ...caps }),
+      alias: async (alias, ur) => { await ctx.runMutation(internal.store.alias, { alias, ur }); },
       save: async (imp, alias) => {
         await ctx.runMutation(internal.store.save, {
           ur: imp.imdb_user, ...(alias ? { alias } : {}), data: JSON.stringify(imp), expiresAt: expiresAt(imp, Date.now()),

@@ -46,6 +46,15 @@ async function upsert(ctx: MutationCtx, key: string, ur: string, data: string | 
   else await ctx.db.insert("imports", { key, ur, ...(data !== undefined ? { data } : {}), expiresAt });
 }
 
+/** A p. alias for a cached ur import, expiring with it (so an alias never extends the cache). */
+export const alias = internalMutation({
+  args: { alias: v.string(), ur: v.string() },
+  handler: async (ctx, { alias, ur }) => {
+    const target = await ctx.db.query("imports").withIndex("by_key", (q) => q.eq("key", ur)).first();
+    if (target?.data !== undefined) await upsert(ctx, alias, ur, undefined, target.expiresAt);
+  },
+});
+
 /** Store an import under its ur id (and a p. alias), and drop a few expired rows. */
 export const save = internalMutation({
   args: { ur: v.string(), alias: v.optional(v.string()), data: v.string(), expiresAt: v.number() },

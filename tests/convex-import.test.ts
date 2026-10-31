@@ -50,6 +50,10 @@ function memoryStore(caps: Caps = DEFAULT_CAPS, clock = { now: Date.UTC(2026, 9,
       if (r.ok) { if (countGlobal) counters.set(g, (counters.get(g) ?? 0) + 1); counters.set(u, (counters.get(u) ?? 0) + 1); }
       return r;
     },
+    async alias(alias, ur) {
+      const t = rows.get(ur);
+      if (t?.data !== undefined) rows.set(alias, { ur, expiresAt: t.expiresAt });
+    },
     async save(imp, alias) {
       const exp = expiresAt(imp, clock.now);
       rows.set(imp.imdb_user, { ur: imp.imdb_user, data: JSON.stringify(imp), expiresAt: exp });
@@ -149,4 +153,23 @@ test("runImport: bot check, private ratings, unknown profile and a bad id map to
   expect(await runImport(m.store, fakeImdb({ unknownProfile: true }).deps, P)).toMatchObject({ status: 422, body: { error: "not_found" } });
   expect(await runImport(m.store, fakeImdb().deps, "https://letterboxd.com/dave/")).toMatchObject({ status: 400, body: { error: "bad_request" }, calls: 0 });
   expect(m.rows.size).toBe(0);
+});
+
+test("runImport: a first p. link to a cached ur import adds the alias without extending the cache", async () => {
+  const m = memoryStore(), f = fakeImdb();
+  await runImport(m.store, f.deps, "ur00000001");
+  const exp = m.rows.get("ur00000001")!.expiresAt;
+  m.clock.now += 23 * 3600_000;
+  const r = await runImport(m.store, f.deps, P);
+  expect(r.body).toMatchObject({ ok: true, cached: true });
+  expect(m.rows.get("ur00000001")!.expiresAt).toBe(exp);
+  expect(m.rows.get("p.examplepublicid00000000")!.expiresAt).toBe(exp);
+});
+
+test("runImport: a network failure while resolving a p. id is an IMDb error, not an unknown profile", async () => {
+  const m = memoryStore();
+  const deps: ImdbDeps = { sleep: async () => {}, fetch: async () => { throw new TypeError("network down"); } };
+  expect(await runImport(m.store, deps, P)).toMatchObject({ status: 422, body: { error: "imdb_error" } });
+  const http500: ImdbDeps = { sleep: async () => {}, fetch: async () => new Response("oops", { status: 500 }) };
+  expect((await runImport(m.store, http500, P)).body).toMatchObject({ error: "imdb_error" });
 });
