@@ -81,7 +81,7 @@ cd ~/.claude/skills/inflight-movie-picker   # or wherever you put it
 bun scripts/catalogue.ts --list
 bun scripts/catalogue.ts singapore --genre comedy --max-runtime 110
 bun scripts/catalogue.ts emirates --taste ~/Downloads/imdb-ratings    # hides films you rated, flags your watchlist
-bun scripts/catalogue.ts klm --imdb-url https://www.imdb.com/user/p.xxxxxxxx/ratings/
+bun scripts/catalogue.ts klm --imdb-url https://www.imdb.com/user/ur12345678/ratings/
 bun scripts/catalogue.ts ba --letterboxd-url https://letterboxd.com/<username>/
 ```
 

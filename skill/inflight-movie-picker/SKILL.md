@@ -80,7 +80,7 @@ then the watchlist, up to 50 pages. If Letterboxd answers 403, the connector's `
 diary feed instead, which covers only the latest 50 entries; say so, and follow with the seen check.
 
 ```bash
-bun $S emirates --imdb-url https://www.imdb.com/user/p.xxxxxxxx/ratings/
+bun $S emirates --imdb-url https://www.imdb.com/user/ur12345678/ratings/
 bun $S ba --letterboxd-url https://letterboxd.com/<username>/
 bun $S emirates --profile-token <code>
 ```
