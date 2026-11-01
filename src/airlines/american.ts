@@ -1,11 +1,15 @@
 // American Airlines: entertainment.aa.com (Next.js on Vercel). The movie gallery is paged (?page=N, 28 per page) and
 // each page's React Server Component payload carries the full title records, IMDb ids included. Vercel's checkpoint
 // blocks curl on TLS fingerprint, so the pages are fetched from inside a headless Chromium session.
+// Two record shapes: through Oct 2026 each record nested its shelves and languages in `summaries` and carried
+// `imdb_id`; from Nov 2026 the gallery serves flat per-cycle rows (`cycle_start`, `categories`, ISO `audio` codes,
+// `image_url`) with no IMDb id, so those films are matched on title, year and director.
 import type { AirlineAdapter, CatalogueFilm } from "./types.ts";
 import { existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import { homedir } from "node:os";
 import { BROWSER_UA, monthDir, splitList, uniq } from "./http.ts";
 import { splitNames } from "../text.ts";
+import { languageName } from "./lang.ts";
 
 const SITE = "https://entertainment.aa.com";
 const MAX_PAGES = 40; // 683 films / 28 per page = 25 pages in Oct 2026; the loop stops at the first empty page
@@ -17,20 +21,23 @@ interface AaSummary {
   programming?: AaProgramming[] | null;
 }
 export interface AaRecord {
-  id: string; name: string; imdb_id: string | null; content_type?: string | null; release_date?: string | null; slug?: string | null;
+  id: string; name: string; imdb_id?: string | null; content_type?: string | null; release_date?: string | null; slug?: string | null;
   duration?: number | null; director?: string | null; cast_list?: string | null; genres?: string[] | null;
   mpaa_rating?: string | null; synopsis?: string | null; poster?: string | null; summaries?: AaSummary[] | null;
+  // flat shape (Nov 2026 on)
+  cycle_start?: string | null; is_current_cycle?: boolean | null; categories?: string[] | null; audio?: string[] | null;
+  image_url?: string | null;
 }
 export interface AmericanRaw { pages: AaRecord[][] }
 
-/** Parse a `text/x-component` RSC payload: every JSON row, walked for objects carrying `name` and an `imdb_id` key. */
+/** Parse a `text/x-component` RSC payload: every JSON row, walked for title objects (`name` plus `imdb_id` or `cycle_start`). */
 export function extractRscRecords(text: string): AaRecord[] {
   const found = new Map<string, AaRecord>();
   const walk = (v: unknown): void => {
     if (Array.isArray(v)) { for (const x of v) walk(x); return; }
     if (!v || typeof v !== "object") return;
     const o = v as Record<string, unknown>;
-    if (typeof o.name === "string" && "imdb_id" in o && typeof o.id === "string") { found.set(o.id, o as unknown as AaRecord); return; }
+    if (typeof o.name === "string" && ("imdb_id" in o || "cycle_start" in o) && typeof o.id === "string") { found.set(o.id, o as unknown as AaRecord); return; }
     for (const x of Object.values(o)) walk(x);
   };
   for (const line of text.split("\n")) {
@@ -45,7 +52,12 @@ export function extractRscRecords(text: string): AaRecord[] {
 const LAYOUT_PICK = /^(Category Image|Tile|Website Hero|Thales)\b|Hero\b/;
 
 const currentSummaries = (r: AaRecord): AaSummary[] => {
-  const all = r.summaries ?? [];
+  if (!r.summaries) {
+    // flat shape: the record is its own (single-cycle) summary
+    return [{ cycles: { cycle_start: r.cycle_start ?? null, is_current_cycle: r.is_current_cycle ?? null }, picks: r.categories ?? [],
+      programming: r.audio?.length ? [{ audio: uniq(r.audio.map(languageName)).join(", ") }] : [] }];
+  }
+  const all = r.summaries;
   const current = all.filter((s) => s.cycles?.is_current_cycle);
   return current.length ? current : all;
 };
@@ -80,7 +92,7 @@ export function parseAmerican(raw: unknown): CatalogueFilm[] {
       subtitles: uniq(programming.flatMap((p) => splitList(p.subtitles))),
       ...(r.synopsis?.trim() ? { synopsis: r.synopsis.trim() } : {}),
       ...(r.imdb_id?.startsWith("tt") ? { imdbId: r.imdb_id } : {}),
-      ...(r.poster ? { poster: r.poster } : {}),
+      ...(r.poster || r.image_url ? { poster: (r.poster || r.image_url)! } : {}),
       categories: uniq(summaries.flatMap((s) => [
         ...(s.channels ?? []), ...(s.featured_channel ?? []), ...(s.picks ?? []).filter((p) => !LAYOUT_PICK.test(p)),
       ])),

@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { type AaRecord, AmericanPageError, american, extractRscRecords, fetchAmerican, servedMonth } from "../src/airlines/american.ts";
 import records from "./fixtures/american-records.json";
+import nov from "./fixtures/american-records-2026-11.json";
 
 const page1 = records as unknown as AaRecord[];
 const tmpRoot = () => { const d = `${import.meta.dir}/../tmp`; mkdirSync(d, { recursive: true }); return d; };
@@ -21,6 +22,22 @@ test("parse: one film per record with IMDb id, year from release date, shelves a
   expect(sg.categories).toEqual(expect.arrayContaining(["New Releases", "Superpowered Cinema", "Heroes & Villains", "New This Month"]));
   expect(sg.categories.some((c) => /Tile|Hero -|Thales|Category Image/.test(c))).toBe(false);
   expect(films.find((f) => f.title === "Ash")?.imdbId).toBeUndefined();
+});
+
+test("parse: flat Nov 2026 records (no summaries, no IMDb id, ISO audio codes)", () => {
+  const raw = { pages: [nov as unknown as AaRecord[]] };
+  expect(servedMonth(raw)).toBe("2026-11");
+  const films = american.parse(raw);
+  expect(films).toHaveLength(3);
+  const sm = films.find((f) => f.title === "Spider-Man: Brand New Day")!;
+  expect(sm).toMatchObject({ year: 2026, runtime: 145, directors: ["Destin Daniel Cretton"], genres: ["Action", "Adventure", "Fantasy"], rating: "PG-13" });
+  expect(sm.imdbId).toBeUndefined();
+  expect(sm.languages).toEqual(["English", "Spanish", "Portuguese", "French", "German", "Italian"]);
+  expect(sm.poster).toMatch(/^https:\/\//);
+  expect(sm.categories).toEqual(expect.arrayContaining(["New Releases", "Superpowered Cinema", "Heroes & Villains", "New This Month"]));
+  expect(sm.categories.some((c) => /Tile|Hero\b|Thales|Category Image/.test(c))).toBe(false);
+  const rsc = `5:${JSON.stringify(["$", "div", null, { data: nov[0] }])}`;
+  expect(extractRscRecords(rsc).map((r) => r.name)).toEqual(["Spider-Man: Brand New Day"]);
 });
 
 test("parse dedupes a record repeated across pages", () => {
