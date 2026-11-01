@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-29T23:01:30.695Z",
+ "generatedAt": "2026-11-01T10:54:05.984Z",
  "airlines": [
   {
    "id": "american",
@@ -22,6 +22,12 @@
      "count": 233,
      "fetchedAt": "2026-10-29T15:58:10.989Z",
      "path": "ana/2026-10.json"
+    },
+    {
+     "month": "2026-11",
+     "count": 240,
+     "fetchedAt": "2026-11-01T10:53:55.320Z",
+     "path": "ana/2026-11.json"
     }
    ]
   },
@@ -34,6 +40,12 @@
      "count": 658,
      "fetchedAt": "2026-10-29T15:54:38.070Z",
      "path": "ba/2026-10.json"
+    },
+    {
+     "month": "2026-11",
+     "count": 658,
+     "fetchedAt": "2026-11-01T10:53:08.061Z",
+     "path": "ba/2026-11.json"
     }
    ]
   },
@@ -46,6 +58,12 @@
      "count": 1551,
      "fetchedAt": "2026-10-29T15:57:27.860Z",
      "path": "cathay/2026-10.json"
+    },
+    {
+     "month": "2026-11",
+     "count": 1565,
+     "fetchedAt": "2026-11-01T10:53:43.812Z",
+     "path": "cathay/2026-11.json"
     }
    ]
   },
@@ -58,6 +76,12 @@
      "count": 2055,
      "fetchedAt": "2026-10-22T01:42:52.101Z",
      "path": "emirates/2026-10.json"
+    },
+    {
+     "month": "2026-11",
+     "count": 1968,
+     "fetchedAt": "2026-11-01T10:52:54.599Z",
+     "path": "emirates/2026-11.json"
     }
    ]
   },
@@ -70,6 +94,12 @@
      "count": 124,
      "fetchedAt": "2026-10-29T15:57:39.979Z",
      "path": "jal/2026-10.json"
+    },
+    {
+     "month": "2026-11",
+     "count": 136,
+     "fetchedAt": "2026-11-01T10:53:33.646Z",
+     "path": "jal/2026-11.json"
     }
    ]
   },
@@ -82,6 +112,12 @@
      "count": 474,
      "fetchedAt": "2026-10-29T15:54:36.180Z",
      "path": "klm/2026-10.json"
+    },
+    {
+     "month": "2026-11",
+     "count": 476,
+     "fetchedAt": "2026-11-01T10:52:56.338Z",
+     "path": "klm/2026-11.json"
     }
    ]
   },
@@ -94,6 +130,12 @@
      "count": 405,
      "fetchedAt": "2026-10-29T15:58:00.927Z",
      "path": "lufthansa/2026-10.json"
+    },
+    {
+     "month": "2026-11",
+     "count": 398,
+     "fetchedAt": "2026-11-01T10:53:26.853Z",
+     "path": "lufthansa/2026-11.json"
     }
    ]
   },
@@ -106,6 +148,12 @@
      "count": 257,
      "fetchedAt": "2026-10-29T15:57:14.014Z",
      "path": "qantas/2026-10.json"
+    },
+    {
+     "month": "2026-11",
+     "count": 257,
+     "fetchedAt": "2026-11-01T10:53:44.859Z",
+     "path": "qantas/2026-11.json"
     }
    ]
   },
@@ -118,6 +166,12 @@
      "count": 384,
      "fetchedAt": "2026-10-29T15:54:37.074Z",
      "path": "singapore/2026-10.json"
+    },
+    {
+     "month": "2026-11",
+     "count": 385,
+     "fetchedAt": "2026-11-01T10:53:09.375Z",
+     "path": "singapore/2026-11.json"
     }
    ]
   },
@@ -130,6 +184,12 @@
      "count": 508,
      "fetchedAt": "2026-10-29T15:54:35.461Z",
      "path": "united/2026-10.json"
+    },
+    {
+     "month": "2026-11",
+     "count": 530,
+     "fetchedAt": "2026-11-01T10:52:55.504Z",
+     "path": "united/2026-11.json"
     }
    ]
   }
