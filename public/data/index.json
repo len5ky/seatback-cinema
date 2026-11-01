@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-01T10:54:05.984Z",
+ "generatedAt": "2026-11-01T10:55:01.879Z",
  "airlines": [
   {
    "id": "american",
@@ -10,6 +10,12 @@
      "count": 682,
      "fetchedAt": "2026-10-29T16:12:30.484Z",
      "path": "american/2026-10.json"
+    },
+    {
+     "month": "2026-11",
+     "count": 708,
+     "fetchedAt": "2026-11-01T10:54:58.019Z",
+     "path": "american/2026-11.json"
     }
    ]
   },

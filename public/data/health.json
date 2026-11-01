@@ -95,13 +95,14 @@
       "error": null
     },
     "american": {
-      "status": "failed",
-      "exitCode": 1,
-      "films": null,
-      "seconds": 1,
-      "checkedAt": "2026-10-29T16:25:20Z",
-      "lastSuccess": null,
-      "error": "$ bun src/cli.ts fetch american --month \"2026-10\" american 2026-10: FAILED american page 1 -> 429: <!DOCTYPE html><html lang=\"en\" data-astro-cid-4wdtffzm><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"theme-color\" content=\"#000\"><link rel "
+      "status": "ok",
+      "reason": "fetched locally",
+      "exitCode": 0,
+      "films": 708,
+      "seconds": 19,
+      "checkedAt": "2026-11-01T10:55:01Z",
+      "lastSuccess": "2026-11-01T10:55:01Z",
+      "error": null
     }
   }
 }
