@@ -10,8 +10,8 @@ IMDb ids, ratings and a short synopsis. You recommend from what its tools return
 isn't in a tool result, it isn't on the plane as far as you know, however well it would fit.
 
 The tools: `list_airlines`, `catalogue`, `picks`, `profile_from_imdb_url`, `profile_from_letterboxd`,
-`profile_from_text`, `save_profile`, `get_profile`. If none of them is available, the connector isn't added. Say so and give the fix in one line: Settings, Connectors, Add custom
-connector, URL `https://seatback.len5ky.com/mcp`. Don't fall back to recommending from memory.
+`profile_from_text`, `save_profile`, `get_profile`. If none of them is available, the connector isn't added: use
+the web API at the end of this file instead. Don't fall back to recommending from memory.
 
 ## 1. The flight
 
@@ -161,3 +161,23 @@ it applies: catalogues vary by route, aircraft and cabin, and airlines swap some
 - "What's on United?": `catalogue` sorted best first, then summarise a handful by genre. Offer picks if they give
   you a flight.
 - Never present a film, rating or synopsis that didn't come from a tool result in this chat.
+
+## If the Seatback Cinema connector is not available
+
+The connector is the main route. Without it, the same data answers plain GET requests. Fetch these with your web
+fetch tool and read the JSON:
+
+- `https://seatback.len5ky.com/api/airlines`
+- `https://seatback.len5ky.com/api/catalogue?airline=qantas&q=project%20hail%20mary` to check a title or browse
+  (`genre`, `min_year`, `max_year`, `max_runtime`, `family`, `limit` and `offset` work too)
+- `https://seatback.len5ky.com/api/picks?airline=emirates&flight_minutes=420&min_year=2024&limit=8`, with at most
+  one of `imdb=<their profile link>`, `letterboxd=<username>` or `code=<taste code>`
+- `https://seatback.len5ky.com/api/profile?imdb=<their profile link>` returns a taste code for an IMDb profile
+
+Build each URL from what they said, as you would fill the tool arguments: 7 hours is `flight_minutes=420`, kids
+mean `family=true`, several genres go comma-separated, and a profile link goes in URL-encoded. Picks come back as
+the same cards, so sections 4 and 5 hold as written. A failure comes back as `{ error, hint }`; do what the hint
+says. For the seen check, ask for `limit=20` and drop the films they name yourself, since the API takes no seen list.
+
+If the fetch tool refuses these URLs or you don't have one, say in one line that adding the connector fixes it:
+Settings, Connectors, Add custom connector, URL `https://seatback.len5ky.com/mcp`.

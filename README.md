@@ -40,10 +40,15 @@ This needs a Claude plan that allows custom connectors and skills. Set it up onc
    at Settings, Capabilities, Skills. (In a checkout, `scripts/package-web-skill.sh` builds the same zip into
    `tmp/` and `public/`.)
 
-After that, start a chat, on the web or in the mobile app, and say where you're flying:
+After that, start a chat, on the web or in the mobile app, and say where you're flying. Any of these works:
 
-> I'm on Emirates from Dubai to Sydney next Tuesday, about 14 hours. My IMDb is
-> https://www.imdb.com/user/p.xxxxxxxx/ratings/ - what should I watch?
+> I'm on Emirates to Dubai on Thursday, about 7 hours. My IMDb ratings are at https://www.imdb.com/user/ur12345678/ratings/. Skip anything I've already seen and pick me three films for the flight, newer ones first.
+
+> Flying United to Chicago tomorrow, 9 hours, no idea what's on. Show me what's good and ask me what I've seen.
+
+> BA to New York with two kids, 8 and 11. What's on board for them, and one thing for me after they fall asleep?
+
+> Is Project Hail Mary on Qantas this month? If not, what's the closest thing?
 
 Claude drops what you've seen and answers with three films and a backup, each with its ratings, a one-line
 synopsis, why it suits you and an IMDb link. For your taste it asks for a public IMDb profile link first, then a
@@ -72,7 +77,7 @@ cp -r seatback-cinema/skill/inflight-movie-picker ~/.claude/skills/             
 mkdir -p ~/.codex/skills && cp -r seatback-cinema/skill/inflight-movie-picker ~/.codex/skills/   # Codex CLI
 ```
 
-Start a new session and ask about your flight. For Cursor, copy the folder into your project and add a rule that
+Start a new session and ask about your flight; the four prompts in the Claude app section above work here too. For Cursor, copy the folder into your project and add a rule that
 points at its `SKILL.md`; [`skill/README.md`](skill/README.md) has the rule file and the Codex fallback for
 versions that don't load skills.
 
@@ -133,6 +138,28 @@ and year, which can miss a retitled film.
 - **Medium-confidence matches.** About 7% of IMDb ids rest on a single signal, often runtime alone. The skill
   flags them; check the link before you trust the rating. Regional-language films and concert specials match least
   often, and unmatched films are left out of rankings rather than guessed.
+
+## API
+
+The connector's tools also answer plain GET requests at `https://seatback.len5ky.com/api/`, as JSON with open CORS.
+Picks come back as the same cards the connector returns. Add `pretty=1` to indent the output.
+
+```bash
+curl 'https://seatback.len5ky.com/api/airlines'
+curl 'https://seatback.len5ky.com/api/picks?airline=emirates&flight_minutes=420&min_year=2025&limit=3&pretty=1'
+curl 'https://seatback.len5ky.com/api/picks?airline=emirates&imdb=https://www.imdb.com/user/ur12345678/ratings/&limit=3'
+```
+
+`/api/catalogue` takes `airline`, `genre` (comma-separated), `min_year`, `max_year`, `max_runtime`, `family`, `q`,
+`limit` and `offset`. `/api/picks` takes `airline`, `flight_minutes`, the same filters, `limit`, and one of `imdb`
+(a profile link or its `ur` / `p.` id), `letterboxd` (a username) or `code` (a taste code). `/api/profile?imdb=...`
+imports a profile and returns `{ code, rated, watchlist }`. Errors come back as `{ error, hint }` with a 4xx or 5xx
+status.
+
+Limits: an IMDb profile can be imported 10 times a UTC day, and all profiles together 2,000 times. An import is kept
+for 24 hours, so repeat calls with the same link cost nothing. Letterboxd covers the latest 50 diary entries.
+`picks` returns at most 20 films and `catalogue` 200 rows a page. Calls without a profile are cached for 5 minutes;
+calls with one are never cached. Taste codes last a year.
 
 ## For developers
 

@@ -71,7 +71,9 @@ private, tell them in one line to set ratings to public under Settings, Privacy 
 again. IMDb refuses scripted requests from some networks (an empty HTTP 202 or a 429). Then, if the Seatback Cinema
 connector is in this session (tools `list_airlines`, `picks`, `profile_from_imdb_url` and so on), call
 `profile_from_imdb_url` with the link once; it reads the profile from its own server and usually gets through. Pass
-`profile: { imdb_user }` from its answer to `picks`.
+`profile: { imdb_user }` from its answer to `picks`. Without the connector, the same server answers
+`curl 'https://seatback.len5ky.com/api/profile?imdb=<link>'` with a taste code, and
+`/api/picks?airline=<id>&flight_minutes=<n>&code=<taste code>` with ranked cards.
 
 **Letterboxd username.** `--letterboxd-url https://letterboxd.com/<username>/` reads their films pages, 72 a page,
 then the watchlist, up to 50 pages. If Letterboxd answers 403, the connector's `profile_from_letterboxd` reads their

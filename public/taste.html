@@ -170,6 +170,12 @@ footer { font-size: 13px; color: var(--text-muted); margin-top: 24px; }
     </div>
     <div class="sentence" id="sentence"></div>
     <div class="row"><button id="copy-sentence">Copy message</button><span class="ok" id="copied-sentence"></span></div>
+    <p class="small">Lost the code? If your IMDb ratings are public, send a message like the first one with your own
+      link where the example is. The second works with no history at all: Claude lists ten films and asks which you've seen.</p>
+    <div class="sentence" id="alt-1">I'm on Emirates to Dubai on Thursday, about 7 hours. My IMDb ratings are at https://www.imdb.com/user/ur12345678/ratings/. Skip anything I've already seen and pick me three films for the flight, newer ones first.</div>
+    <div class="row"><button class="ghost" id="copy-alt-1">Copy</button><span class="ok" id="copied-alt-1"></span></div>
+    <div class="sentence" id="alt-2">Flying United to Chicago tomorrow, 9 hours, no idea what's on. Show me what's good and ask me what I've seen.</div>
+    <div class="row"><button class="ghost" id="copy-alt-2">Copy</button><span class="ok" id="copied-alt-2"></span></div>
   </section>
 
   <section class="card">
@@ -428,6 +434,7 @@ $("make").addEventListener("click", async () => {
 });
 $("copy-code").addEventListener("click", () => copy(code, "copied-code"));
 $("copy-sentence").addEventListener("click", () => copy(sentence(), "copied-sentence"));
+for (const n of [1, 2]) $(`copy-alt-${n}`).addEventListener("click", () => copy($(`alt-${n}`).textContent, `copied-alt-${n}`));
 $("airline").addEventListener("change", showSentence);
 $("hours").addEventListener("input", showSentence);
 
