@@ -33,22 +33,22 @@ test("fetchMonth: one guest session, section list, one call per section, all cac
     expect(headers.get("host-id")).toBe("460e26f4-d499-11e9-b038-6306ca4fd90b");
     if (url.endsWith("/account/session")) return new Response(JSON.stringify({ auth_token: "tok" }));
     expect(headers.get("auth-token")).toBe("tok");
-    expect(url).toContain("flight_date=2026-11-05");
+    expect(url).toContain("flight_date=2099-11-05");
     const id = url.match(/items\/(\d+)\?/)![1];
     if (id === root.id) return new Response(JSON.stringify({ items: [{ ...root, child_items: [] }] }));
     const section = root.child_items.find((s) => s.id === id);
     return section ? new Response(JSON.stringify({ items: [section] })) : new Response("missing", { status: 404 });
   }) as typeof fetch;
   try {
-    const raw = await cathay.fetchMonth("2026-11", { cacheDir });
+    const raw = await cathay.fetchMonth("2099-11", { cacheDir });
     expect(calls).toEqual([
       "https://afg.anuvu.cloud/api/v1/account/session",
       "https://afg.anuvu.cloud/api/v1/content/items/21004340#1", // the live API rejects max_child_depth=0
       ...root.child_id_list.map((id) => `https://afg.anuvu.cloud/api/v1/content/items/${id}#1`),
     ]);
     expect(cathay.parse(raw)).toEqual(cathay.parse(tree));
-    expect(await Bun.file(`${cacheDir}/cathay/2026-11/sections/24104650.json`).exists()).toBe(true);
-    await cathay.fetchMonth("2026-11", { cacheDir });
+    expect(await Bun.file(`${cacheDir}/cathay/2099-11/sections/24104650.json`).exists()).toBe(true);
+    await cathay.fetchMonth("2099-11", { cacheDir });
     expect(calls.length).toBe(5); // cached run makes no requests, not even the session
   } finally {
     rmSync(cacheDir, { recursive: true, force: true });
@@ -67,7 +67,7 @@ test("fetchMonth: one failed section fails the whole fetch", async () => {
     return new Response(JSON.stringify({ items: [root.child_items.find((s) => s.id === id)] }));
   }) as typeof fetch;
   try {
-    await expect(cathay.fetchMonth("2026-11", { cacheDir })).rejects.toThrow(`section ${broken} failed`);
+    await expect(cathay.fetchMonth("2099-11", { cacheDir })).rejects.toThrow(`section ${broken} failed`);
   } finally {
     rmSync(cacheDir, { recursive: true, force: true });
   }
