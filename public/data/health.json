@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-01T10:53:55Z",
+  "generatedAt": "2026-11-01T11:56:58Z",
   "month": "2026-11",
   "ok": 10,
   "failed": 0,
@@ -9,8 +9,8 @@
       "exitCode": 0,
       "films": 2065,
       "seconds": 1,
-      "checkedAt": "2026-11-01T10:52:54Z",
-      "lastSuccess": "2026-11-01T10:52:54Z",
+      "checkedAt": "2026-11-01T11:56:14Z",
+      "lastSuccess": "2026-11-01T11:56:14Z",
       "error": null
     },
     "united": {
@@ -18,26 +18,26 @@
       "exitCode": 0,
       "films": 530,
       "seconds": 1,
-      "checkedAt": "2026-11-01T10:52:55Z",
-      "lastSuccess": "2026-11-01T10:52:55Z",
+      "checkedAt": "2026-11-01T11:56:15Z",
+      "lastSuccess": "2026-11-01T11:56:15Z",
       "error": null
     },
     "klm": {
       "status": "ok",
       "exitCode": 0,
       "films": 476,
-      "seconds": 1,
-      "checkedAt": "2026-11-01T10:52:56Z",
-      "lastSuccess": "2026-11-01T10:52:56Z",
+      "seconds": 0,
+      "checkedAt": "2026-11-01T11:56:15Z",
+      "lastSuccess": "2026-11-01T11:56:15Z",
       "error": null
     },
     "ba": {
       "status": "ok",
       "exitCode": 0,
       "films": 658,
-      "seconds": 12,
-      "checkedAt": "2026-11-01T10:53:08Z",
-      "lastSuccess": "2026-11-01T10:53:08Z",
+      "seconds": 2,
+      "checkedAt": "2026-11-01T11:56:17Z",
+      "lastSuccess": "2026-11-01T11:56:17Z",
       "error": null
     },
     "singapore": {
@@ -45,35 +45,35 @@
       "exitCode": 0,
       "films": 385,
       "seconds": 1,
-      "checkedAt": "2026-11-01T10:53:09Z",
-      "lastSuccess": "2026-11-01T10:53:09Z",
+      "checkedAt": "2026-11-01T11:56:18Z",
+      "lastSuccess": "2026-11-01T11:56:18Z",
       "error": null
     },
     "lufthansa": {
       "status": "ok",
       "exitCode": 0,
       "films": 398,
-      "seconds": 17,
-      "checkedAt": "2026-11-01T10:53:26Z",
-      "lastSuccess": "2026-11-01T10:53:26Z",
+      "seconds": 16,
+      "checkedAt": "2026-11-01T11:56:34Z",
+      "lastSuccess": "2026-11-01T11:56:34Z",
       "error": null
     },
     "jal": {
       "status": "ok",
       "exitCode": 0,
       "films": 136,
-      "seconds": 7,
-      "checkedAt": "2026-11-01T10:53:33Z",
-      "lastSuccess": "2026-11-01T10:53:33Z",
+      "seconds": 6,
+      "checkedAt": "2026-11-01T11:56:40Z",
+      "lastSuccess": "2026-11-01T11:56:40Z",
       "error": null
     },
     "cathay": {
       "status": "ok",
       "exitCode": 0,
       "films": 1565,
-      "seconds": 10,
-      "checkedAt": "2026-11-01T10:53:43Z",
-      "lastSuccess": "2026-11-01T10:53:43Z",
+      "seconds": 7,
+      "checkedAt": "2026-11-01T11:56:47Z",
+      "lastSuccess": "2026-11-01T11:56:47Z",
       "error": null
     },
     "qantas": {
@@ -81,17 +81,17 @@
       "exitCode": 0,
       "films": 258,
       "seconds": 1,
-      "checkedAt": "2026-11-01T10:53:44Z",
-      "lastSuccess": "2026-11-01T10:53:44Z",
+      "checkedAt": "2026-11-01T11:56:48Z",
+      "lastSuccess": "2026-11-01T11:56:48Z",
       "error": null
     },
     "ana": {
       "status": "ok",
       "exitCode": 0,
       "films": 242,
-      "seconds": 11,
-      "checkedAt": "2026-11-01T10:53:55Z",
-      "lastSuccess": "2026-11-01T10:53:55Z",
+      "seconds": 10,
+      "checkedAt": "2026-11-01T11:56:58Z",
+      "lastSuccess": "2026-11-01T11:56:58Z",
       "error": null
     },
     "american": {
