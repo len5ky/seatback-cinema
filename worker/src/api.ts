@@ -10,6 +10,8 @@ export interface EdgeCache {
 export interface WaitUntil { waitUntil(p: Promise<unknown>): void }
 
 export const API_CACHE_SECONDS = 300;
+/** As long as an IMDb import is kept (24 h). */
+const CODE_REUSE_SECONDS = 24 * 3600;
 const FILTER_PARAMS = ["genre", "exclude_genre", "min_year", "max_year", "min_runtime", "max_runtime", "family", "language", "q"] as const;
 const PROFILE_PARAMS = ["imdb", "letterboxd", "code"] as const;
 const ROUTES: Record<string, readonly string[]> = {
@@ -101,8 +103,14 @@ async function route(ctx: ToolContext, path: string, q: URLSearchParams): Promis
       const url = str("imdb");
       if (!url) throw new ApiError(400, "missing_imdb", "imdb is required: a public IMDb profile URL like https://www.imdb.com/user/ur12345678/ratings/ or the bare ur / p. id");
       const imp = await callTool(ctx, "profile_from_imdb_url", { url });
-      const saved = await callTool(ctx, "save_profile", { profile: imp.profile });
-      return { body: { code: saved.token, rated: imp.rated, watchlist: imp.watchlist }, personal: true };
+      // One code per import: repeat calls while the import is cached get the same code, not a new KV entry each time.
+      const reuse = `apicode:${String(imp.imdb_user)}:${String(imp.fetched_at)}`;
+      let code = await ctx.profiles.get(reuse);
+      if (!code) {
+        code = String((await callTool(ctx, "save_profile", { profile: imp.profile })).token);
+        await ctx.profiles.put(reuse, code, { expirationTtl: CODE_REUSE_SECONDS });
+      }
+      return { body: { code, rated: imp.rated, watchlist: imp.watchlist }, personal: true };
     }
   }
   throw new ApiError(404, "not_found", `no such endpoint; try ${Object.keys(ROUTES).join(", ")}`);
@@ -120,8 +128,13 @@ function reply(body: unknown, status: number, pretty: boolean, cacheControl: str
   return new Response(JSON.stringify(body, null, pretty ? 2 : undefined) + (pretty ? "\n" : ""), { status, headers: { ...HEADERS, "Cache-Control": cacheControl } });
 }
 
-/** GET /api/... ; cache is the edge cache for non-personal answers. */
+/** GET /api/... ; cache is the edge cache for non-personal answers. HEAD gets the same headers and no body. */
 export async function handleApi(req: Request, ctx: ToolContext, cache?: EdgeCache, wait?: WaitUntil): Promise<Response> {
+  const res = await answer(req, ctx, cache, wait);
+  return req.method === "HEAD" ? new Response(null, res) : res;
+}
+
+async function answer(req: Request, ctx: ToolContext, cache?: EdgeCache, wait?: WaitUntil): Promise<Response> {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: HEADERS });
   const url = new URL(req.url);
   const pretty = ["1", "true"].includes(url.searchParams.get("pretty") ?? "");
@@ -135,12 +148,13 @@ export async function handleApi(req: Request, ctx: ToolContext, cache?: EdgeCach
   if (!(path in ROUTES)) return reply({ error: "not_found", hint: `no such endpoint; try ${Object.keys(ROUTES).join(", ")}` }, 404, pretty, "no-store");
 
   // Only profile-free calls can be cached; checking the params first keeps a personal call from ever reaching the cache.
-  const personalCall = path === "/api/profile" || PROFILE_PARAMS.some((k) => url.searchParams.get(k)?.trim());
+  // Any profile param, even a blank or repeated one, keeps the call out of the cache.
+  const personalCall = path === "/api/profile" || PROFILE_PARAMS.some((k) => url.searchParams.has(k));
   const key = new Request(url.toString(), { method: "GET" });
   if (!personalCall && cache) {
     const hit = await cache.match(key);
     if (hit) {
-      const r = new Response(req.method === "HEAD" ? null : hit.body, hit);
+      const r = new Response(hit.body, hit);
       r.headers.set("X-Seatback-Cache", "hit");
       return r;
     }
@@ -149,8 +163,8 @@ export async function handleApi(req: Request, ctx: ToolContext, cache?: EdgeCach
   let res: Response;
   try {
     const { body, personal } = await route(ctx, path, url.searchParams);
-    res = reply(body, 200, pretty, personal ? "private, no-store" : `public, max-age=${API_CACHE_SECONDS}`);
-    if (!personal && cache) {
+    res = reply(body, 200, pretty, personal || personalCall ? "private, no-store" : `public, max-age=${API_CACHE_SECONDS}`);
+    if (!personal && !personalCall && cache) {
       const put = cache.put(key, res.clone() as Response).catch((err: unknown) => console.error("edge cache put failed", err));
       if (wait) wait.waitUntil(put); else await put;
     }
@@ -163,5 +177,5 @@ export async function handleApi(req: Request, ctx: ToolContext, cache?: EdgeCach
     }
   }
   res.headers.set("X-Seatback-Cache", personalCall ? "bypass" : "miss");
-  return req.method === "HEAD" ? new Response(null, res) : res;
+  return res;
 }

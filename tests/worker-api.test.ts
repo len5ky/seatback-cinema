@@ -178,3 +178,19 @@ test("pretty=1 indents; the app routes /api and OPTIONS through the same handler
   expect((await app.fetch(new Request(`${B}/api/picks`, { method: "OPTIONS" }), env)).status).toBe(204);
   expect((await app.fetch(new Request(`${B}/api`), env)).status).toBe(200);
 });
+
+test("review fixes: blank or repeated profile params bypass the cache, /api/profile reuses its code, HEAD has no body", async () => {
+  const t = setup();
+  for (const q of ["code=", "imdb=%20%20", "code=&code=aaaaaaaaaaaaaaaaaaaa", "letterboxd="]) {
+    const { res } = await t.get(`/api/picks?airline=emirates&${q}`);
+    expect([q, res.headers.get("x-seatback-cache")]).toEqual([q, "bypass"]);
+  }
+  expect(t.puts()).toBe(0);
+  const a = await t.get("/api/profile?imdb=ur00000001");
+  const b = await t.get("/api/profile?imdb=https://www.imdb.com/user/ur00000001/ratings/");
+  expect(b.body.code).toBe(a.body.code);
+  for (const path of ["/api", "/api/nope", "/api/airlines", "/api/profile?imdb=ur00000001"]) {
+    const res = await handleApi(new Request(B + path, { method: "HEAD" }), t.ctx);
+    expect([path, await res.text()]).toEqual([path, ""]);
+  }
+});
