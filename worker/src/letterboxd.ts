@@ -63,7 +63,10 @@ export function profileFromRss(entries: RssEntry[], r: LetterboxdResolver): Lett
   };
 }
 
-export class LetterboxdError extends Error {}
+/** status: the HTTP status the GET API answers with (502 unless the member is unknown or the diary empty). */
+export class LetterboxdError extends Error {
+  constructor(message: string, readonly status = 502) { super(message); }
+}
 
 const UA = "Mozilla/5.0 (compatible; SeatbackCinema/1.0; +https://seatback.len5ky.com)";
 
@@ -77,13 +80,13 @@ export async function fetchLetterboxd(
   } catch {
     throw new LetterboxdError("Could not reach Letterboxd. Try once more in a minute, or move on to the seen check.");
   }
-  if (res.status === 404) throw new LetterboxdError(`There is no Letterboxd member called "${user}". Check the spelling of the username (it's in their profile link, letterboxd.com/<username>/).`);
+  if (res.status === 404) throw new LetterboxdError(`There is no Letterboxd member called "${user}". Check the spelling of the username (it's in their profile link, letterboxd.com/<username>/).`, 404);
   if (res.status === 403 || res.status === 429 || res.headers.get("cf-mitigated") !== null)
     throw new LetterboxdError(`Letterboxd turned the request away (HTTP ${res.status}). Don't retry now; move on to the seen check.`);
   if (!res.ok) throw new LetterboxdError(`Letterboxd answered HTTP ${res.status}. Try once more later, or move on to the seen check.`);
   const xml = await res.text();
   if (!/<rss[\s>]/.test(xml)) throw new LetterboxdError("Letterboxd sent something that isn't a feed. Move on to the seen check.");
   const entries = parseLetterboxdRss(xml);
-  if (!entries.length) throw new LetterboxdError(`${user}'s Letterboxd diary is empty, so there is nothing to read. Move on to the seen check.`);
+  if (!entries.length) throw new LetterboxdError(`${user}'s Letterboxd diary is empty, so there is nothing to read. Move on to the seen check.`, 404);
   return profileFromRss(entries, r);
 }

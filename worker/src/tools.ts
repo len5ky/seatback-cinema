@@ -5,7 +5,7 @@ import {
   type Profile, type ProfileKind,
 } from "./profile.ts";
 import {
-  CACHE_TTL_SECONDS, DEGRADED_TTL_SECONDS, ImdbClient, ImdbError, importImdbProfile, liveDeps, parseImdbUserUrl, resolveImdbUser,
+  CACHE_TTL_SECONDS, DEGRADED_TTL_SECONDS, ImdbClient, ImdbError, ImdbNotFound, ImdbPrivate, ImdbRefusal, importImdbProfile, liveDeps, parseImdbUserUrl, resolveImdbUser,
   type ImdbDeps, type ImdbImport, type ImdbUserRef,
 } from "./imdb.ts";
 import { LATEST_ONLY_NOTE, LetterboxdError, fetchLetterboxd, parseLetterboxdUser } from "./letterboxd.ts";
@@ -21,8 +21,10 @@ export interface Importer { url: string; secret: string; fetch?: Fetcher }
 /** imdb: direct IMDb calls (the fallback); importer: Convex; web: other outbound fetches (Letterboxd). Tests stub all three. */
 export interface ToolContext { catalogue: Catalogue; profiles: ProfileStore; imdb?: ImdbDeps; importer?: Importer; web?: Fetcher }
 
-/** A failure the caller can fix; its message is shown to the model as a tool error. */
-export class ToolError extends Error {}
+/** A failure the caller can fix; its message is shown to the model as a tool error. status and code are what the GET API answers with. */
+export class ToolError extends Error {
+  constructor(message: string, readonly status = 400, readonly code = "bad_request") { super(message); }
+}
 
 type Json = Record<string, unknown>;
 const int = (description: string, minimum: number, maximum?: number) => ({ type: "integer", description, minimum, ...(maximum ? { maximum } : {}) });
@@ -202,9 +204,9 @@ function parseFilters(v: unknown): Filters {
 
 function airlineOf(ctx: ToolContext, v: unknown) {
   const ids = ctx.catalogue.bundle.airlines.map((a) => a.id).join(", ");
-  if (typeof v !== "string" || !v.trim()) throw new ToolError(`airline is required; one of: ${ids}`);
+  if (typeof v !== "string" || !v.trim()) throw new ToolError(`airline is required; one of: ${ids}`, 400, "missing_airline");
   const a = ctx.catalogue.airline(v);
-  if (!a) throw new ToolError(`unknown airline "${v}"; use one of: ${ids}`);
+  if (!a) throw new ToolError(`unknown airline "${v}"; use one of: ${ids}`, 404, "unknown_airline");
   return a;
 }
 
@@ -248,22 +250,29 @@ async function importViaConvex(ctx: ToolContext, imp: Importer, ref: ImdbUserRef
     case "capped":
       throw new ToolError(body.scope === "user"
         ? `This IMDb profile has been imported as many times as allowed today; the import from earlier is gone or failed. Try again tomorrow. ${NEXT_STEP}`
-        : `The IMDb import has reached its limit for today. Try again tomorrow. ${NEXT_STEP}`);
+        : `The IMDb import has reached its limit for today. Try again tomorrow. ${NEXT_STEP}`, 429, "capped");
     case "challenged":
-      throw new ToolError(`IMDb turned the import away this time (its bot check), so nothing was read. Don't retry now. ${NEXT_STEP}`);
+      throw new ToolError(`IMDb turned the import away this time (its bot check), so nothing was read. Don't retry now. ${NEXT_STEP}`, 503, "imdb_bot_check");
     case "private":
       throw new ToolError("IMDb shows no public ratings for this profile, so they are almost certainly private. Tell the person how to make them " +
         "public in one line: on imdb.com, Settings, then Privacy, and set ratings (and the watchlist) to public; then send the link again. " +
-        "Meanwhile, ask for their Letterboxd username, or run the seen check.");
+        "Meanwhile, ask for their Letterboxd username, or run the seen check.", 403, "private_profile");
     case "not_found":
-      throw new ToolError(`IMDb doesn't know this profile id. Ask the person to copy the link again from their IMDb profile (Share, Copy link). ${NEXT_STEP}`);
+      throw new ToolError(`IMDb doesn't know this profile id. Ask the person to copy the link again from their IMDb profile (Share, Copy link). ${NEXT_STEP}`, 404, "imdb_not_found");
     case "imdb_error":
-      throw new ToolError(message || `The IMDb import failed. ${NEXT_STEP}`);
+      throw new ToolError(message || `The IMDb import failed. ${NEXT_STEP}`, 502, "imdb_error");
     case "bad_request":
       throw new ToolError("that is not an IMDb profile URL; it should look like https://www.imdb.com/user/p.xxxx/ratings/ or https://www.imdb.com/user/ur1234567/");
     default:
       return { kind: "unavailable", why: `HTTP ${res.status}` };
   }
+}
+
+function imdbStatus(e: ImdbError): [number, string] {
+  if (e instanceof ImdbPrivate) return [403, "private_profile"];
+  if (e instanceof ImdbNotFound) return [404, "imdb_not_found"];
+  if (e instanceof ImdbRefusal) return [503, "imdb_bot_check"];
+  return [502, "imdb_error"];
 }
 
 async function remember(ctx: ToolContext, r: ImdbImport, ref: ImdbUserRef) {
@@ -275,7 +284,7 @@ async function remember(ctx: ToolContext, r: ImdbImport, ref: ImdbUserRef) {
 async function loadImdbProfile(ctx: ToolContext, user: unknown): Promise<Profile> {
   if (typeof user !== "string" || !/^ur\d{5,12}$/.test(user.trim().toLowerCase())) throw new ToolError("imdb_user must be the ur id profile_from_imdb_url returned, e.g. ur12345678");
   const raw = await ctx.profiles.get(imdbKey(user.trim().toLowerCase()));
-  if (!raw) throw new ToolError("that IMDb import has expired (imports last 24 hours); call profile_from_imdb_url again with the profile URL");
+  if (!raw) throw new ToolError("that IMDb import has expired (imports last 24 hours); call profile_from_imdb_url again with the profile URL", 404, "import_expired");
   return (JSON.parse(raw) as ImdbImport).profile;
 }
 
@@ -308,7 +317,7 @@ function fitProfile(p: Profile): Profile {
 async function loadProfile(ctx: ToolContext, token: unknown): Promise<Profile> {
   if (typeof token !== "string" || !TOKEN_RE.test(token.trim().toLowerCase())) throw new ToolError("token must be the 20-character taste code save_profile returned");
   const raw = await ctx.profiles.get(`profile:${token.trim().toLowerCase()}`);
-  if (!raw) throw new ToolError("no saved profile for that taste code; it may have expired (they last a year) or have a typo. Build a new profile from a link or export, or make a new code at https://seatback.len5ky.com/taste.");
+  if (!raw) throw new ToolError("no saved profile for that taste code; it may have expired (they last a year) or have a typo. Build a new profile from a link or export, or make a new code at https://seatback.len5ky.com/taste.", 404, "unknown_code");
   return JSON.parse(raw) as Profile;
 }
 
@@ -381,7 +390,7 @@ export async function callTool(ctx: ToolContext, name: string, args: Json): Prom
         await remember(ctx, r, ref);
         return importSummary(r, false);
       } catch (e) {
-        if (e instanceof ImdbError) throw new ToolError(e.message);
+        if (e instanceof ImdbError) throw new ToolError(e.message, ...imdbStatus(e));
         throw e;
       }
     }
@@ -392,7 +401,7 @@ export async function callTool(ctx: ToolContext, name: string, args: Json): Prom
         const r = await fetchLetterboxd(ctx.web ?? ((u, i) => fetch(u, i)), user, { tmdb: (id) => cat.tmdb(id), slug: (s) => cat.bundle.letterboxd[s] ?? null });
         return { username: user, entries: r.entries, rated: r.rated, matched: r.matched, profile: r.profile, note: LATEST_ONLY_NOTE };
       } catch (e) {
-        if (e instanceof LetterboxdError) throw new ToolError(e.message);
+        if (e instanceof LetterboxdError) throw new ToolError(e.message, e.status, e.status === 404 ? "letterboxd_not_found" : "letterboxd_error");
         throw e;
       }
     }
