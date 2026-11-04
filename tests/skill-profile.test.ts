@@ -5,7 +5,7 @@ import {
   parseImdbPage, parseLetterboxdPage, ProfileBlocked,
 } from "../skill/inflight-movie-picker/scripts/profile.ts";
 
-// Fixtures are real pages captured through a browser on 2026-10-30, reduced (see the comment at the top of each).
+// Fixtures mirror the structure of real pages captured on 2026-10-30, with every user, title and id replaced by synthetic values.
 // Nothing here touches the network: fetches go to an in-process mock or a loopback server.
 const FIX = `${import.meta.dir}/../skill/inflight-movie-picker/test/fixtures`;
 const fx = (name: string) => readFileSync(`${FIX}/${name}`, "utf8");
