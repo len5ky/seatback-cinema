@@ -12,7 +12,7 @@
       "name": "seatback-cinema",
       "source": "./plugins/seatback-cinema",
       "description": "Picks films from what Emirates, United, BA, Singapore, Lufthansa, KLM, JAL, Cathay, Qantas, ANA or American are actually showing this month, skipping what you've rated on IMDb or Letterboxd.",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "author": {
         "name": "len5ky"
       },
