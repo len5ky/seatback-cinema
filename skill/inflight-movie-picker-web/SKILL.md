@@ -5,13 +5,14 @@ description: Recommend what to watch on a flight from the airline's actual in-fl
 
 # Inflight movie picker (Claude app)
 
-The `seatback` connector holds every film in eleven airlines' seatback catalogues for the current month, with
-IMDb ids, ratings and a short synopsis. You recommend from what its tools return and from nothing else. If a film
-isn't in a tool result, it isn't on the plane as far as you know, however well it would fit.
-
-The tools: `list_airlines`, `catalogue`, `picks`, `profile_from_imdb_url`, `profile_from_letterboxd`,
-`profile_from_text`, `save_profile`, `get_profile`. If none of them is available, the connector isn't added: use
-the web API at the end of this file instead. Don't fall back to recommending from memory.
+Seatback Cinema holds every film in eleven airlines' seatback catalogues for the current month, with IMDb ids,
+ratings and a short synopsis. You reach it one of two ways, and they answer the same: the `seatback` connector's
+tools when they're available (`list_airlines`, `catalogue`, `picks`, `profile_from_imdb_url`,
+`profile_from_letterboxd`, `profile_from_text`, `save_profile`, `get_profile`), otherwise the GET API at
+`https://seatback.len5ky.com/api/` through your web fetch tool (the last section maps each tool to a URL). Check
+for the tools first; most people have only the skill, so the API is the usual route. You recommend from what comes
+back and from nothing else. If a film isn't in a result, it isn't on the plane as far as you know, however well it
+would fit. Never fall back to recommending from memory.
 
 ## 1. The flight
 
@@ -162,10 +163,9 @@ it applies: catalogues vary by route, aircraft and cabin, and airlines swap some
   you a flight.
 - Never present a film, rating or synopsis that didn't come from a tool result in this chat.
 
-## If the Seatback Cinema connector is not available
+## Without the connector: the GET API
 
-The connector is the main route. Without it, the same data answers plain GET requests. Fetch these with your web
-fetch tool and read the JSON:
+The same data answers plain GET requests. Fetch these with your web fetch tool and read the JSON:
 
 - `https://seatback.len5ky.com/api/airlines`
 - `https://seatback.len5ky.com/api/catalogue?airline=qantas&q=project%20hail%20mary` to check a title or browse
@@ -179,5 +179,7 @@ mean `family=true`, several genres go comma-separated, and a profile link goes i
 the same cards, so sections 4 and 5 hold as written. A failure comes back as `{ error, hint }`; do what the hint
 says. For the seen check, ask for `limit=20` and drop the films they name yourself, since the API takes no seen list.
 
-If the fetch tool refuses these URLs or you don't have one, say in one line that adding the connector fixes it:
-Settings, Connectors, Add custom connector, URL `https://seatback.len5ky.com/mcp`.
+Exports pasted into the chat need the connector (`profile_from_text`); over the API, offer
+https://seatback.len5ky.com/taste instead, which turns the export into a taste code in the browser. If the fetch
+tool refuses these URLs or you don't have one, say in one line that adding the connector fixes it: Settings,
+Connectors, Add custom connector, URL `https://seatback.len5ky.com/mcp`.

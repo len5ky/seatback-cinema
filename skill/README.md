@@ -12,30 +12,30 @@ The dataset is read from `https://seatback.len5ky.com` (the same files as this r
 `SEATBACK_DATASET_URL` points the script at a mirror or a local copy: `http://localhost:4173` from `bun run serve`
 in a checkout, a `public/` folder, or a `file://` URL.
 
-## Get the files
+## Install
+
+One command, from GitHub, for Claude Code, Codex, Cursor and the other agents the `skills` CLI knows:
 
 ```bash
-git clone --depth 1 https://github.com/len5ky/seatback-cinema /tmp/inflight-movie-picker-src
-# the skill is the skill/inflight-movie-picker directory; copy it to where your agent looks (below)
+npx skills add len5ky/seatback-cinema
+```
+
+Without it, fetch the folder straight into place (no clone):
+
+```bash
+mkdir -p ~/.claude/skills && curl -fsSL https://github.com/len5ky/seatback-cinema/archive/refs/heads/main.tar.gz \
+  | tar xz -C ~/.claude/skills --strip-components=2 seatback-cinema-main/skill/inflight-movie-picker
 ```
 
 ## Claude Code
 
-```bash
-cp -r /tmp/inflight-movie-picker-src/skill/inflight-movie-picker ~/.claude/skills/       # all projects
-# or: cp -r ... <project>/.claude/skills/                              # one project
-```
-
-Claude Code picks it up from the `description` in `SKILL.md`. Ask "what's good on my United flight next week?"
+`~/.claude/skills/inflight-movie-picker/` for all projects, or `<project>/.claude/skills/` for one. Claude Code
+picks it up from the `description` in `SKILL.md`. Ask "what's good on my United flight next week?"
 
 ## Codex CLI
 
-```bash
-mkdir -p ~/.codex/skills && cp -r /tmp/inflight-movie-picker-src/skill/inflight-movie-picker ~/.codex/skills/
-```
-
-If your Codex version doesn't load skills, add this line to `~/.codex/AGENTS.md`:
-`For in-flight movie questions, follow ~/.codex/skills/inflight-movie-picker/SKILL.md.`
+Same folder under `~/.codex/skills/`. If your Codex version doesn't load skills, add this line to
+`~/.codex/AGENTS.md`: `For in-flight movie questions, follow ~/.codex/skills/inflight-movie-picker/SKILL.md.`
 
 ## Cursor
 
@@ -56,15 +56,12 @@ Point the agent at `SKILL.md` (paste it, or reference it from `AGENTS.md`). It o
 
 ## Claude app (claude.ai on the web, desktop and mobile)
 
-The Claude app can't run the script, so it has its own skill, `skill/inflight-movie-picker-web/`, which talks to
-the Seatback Cinema connector instead. Two steps on claude.ai:
-
-1. Settings, Connectors, Add custom connector, URL `https://seatback.len5ky.com/mcp`.
-2. Build the zip with `scripts/package-web-skill.sh` (it lands in `tmp/inflight-movie-picker-web.zip`) and upload
-   it at Settings, Capabilities, Skills.
-
-Both carry over to the mobile apps once they're set up on the web. The main README has the details and a first
-message to try.
+The Claude app can't run the script, so it has its own skill, `skill/inflight-movie-picker-web/`, which reads the
+same data over `https://seatback.len5ky.com/api/`. Download https://seatback.len5ky.com/inflight-movie-picker-web.zip
+and upload it at Settings, Capabilities, Skills; that's the whole setup. Adding the Seatback Cinema connector
+(Settings, Connectors, Add custom connector, `https://seatback.len5ky.com/mcp`) is optional: it lets you paste an
+IMDb or Letterboxd export into the chat and doesn't depend on Claude's web fetch. Both carry over to the mobile
+apps. `scripts/package-web-skill.sh` rebuilds the zip from a checkout.
 
 ## Options
 
