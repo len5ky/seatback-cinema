@@ -1,0 +1,33 @@
+{
+  "name": "seatback-cinema",
+  "owner": {
+    "name": "len5ky",
+    "url": "https://github.com/len5ky"
+  },
+  "metadata": {
+    "description": "What to watch on your flight: the real in-flight film catalogues of 11 airlines, ranked by ratings and your taste."
+  },
+  "plugins": [
+    {
+      "name": "seatback-cinema",
+      "source": "./plugins/seatback-cinema",
+      "description": "Picks films from what Emirates, United, BA, Singapore, Lufthansa, KLM, JAL, Cathay, Qantas, ANA or American are actually showing this month, skipping what you've rated on IMDb or Letterboxd.",
+      "version": "1.0.0",
+      "author": {
+        "name": "len5ky"
+      },
+      "homepage": "https://seatback.len5ky.com",
+      "repository": "https://github.com/len5ky/seatback-cinema",
+      "license": "MIT",
+      "keywords": [
+        "movies",
+        "flight",
+        "airline",
+        "in-flight entertainment",
+        "imdb",
+        "letterboxd"
+      ],
+      "category": "entertainment"
+    }
+  ]
+}

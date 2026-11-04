@@ -1,0 +1,6 @@
+{
+  "seatback": {
+    "type": "http",
+    "url": "https://seatback.len5ky.com/mcp"
+  }
+}

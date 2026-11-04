@@ -290,7 +290,7 @@ runtime.
 
 - `skill/inflight-movie-picker/` is the public skill described above. It reads the published dataset, so nobody
   needs the pipeline.
-- `skill/inflight-movie-picker-web/` is the Claude app version: no script, it calls the connector at
+- `plugins/seatback-cinema/skills/inflight-movie-picker-web/` is the Claude app version (shipped as the `seatback-cinema` plugin): no script, it calls the connector at
   `https://seatback.len5ky.com/mcp`. `scripts/package-web-skill.sh` zips it for upload.
 - `.claude/skills/inflight-movie-picker/` is the maintainer's skill for a checkout: it drives the CLI and the local
   SQLite database, scraped ratings included.

@@ -6,7 +6,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 NAME=inflight-movie-picker-web
-SRC="$ROOT/skill/$NAME"
+SRC="$ROOT/plugins/seatback-cinema/skills/$NAME"
 OUT="${1:-$ROOT/tmp/$NAME.zip}"
 case "$OUT" in /*) ;; *) OUT="$PWD/$OUT" ;; esac
 
@@ -17,7 +17,7 @@ if grep -n "$(printf '\342\200\224')" "$SRC/SKILL.md" >&2; then echo "em dash in
 
 mkdir -p "$(dirname "$OUT")"
 rm -f "$OUT"
-(cd "$ROOT/skill" && zip -qr -X "$OUT" "$NAME" -x '*.DS_Store')
+(cd "$ROOT/plugins/seatback-cinema/skills" && zip -qr -X "$OUT" "$NAME" -x '*.DS_Store')
 cp "$OUT" "$ROOT/public/$NAME.zip"
 echo "$OUT"
 unzip -l "$OUT" | sed -n '4,$p' | head -n -2

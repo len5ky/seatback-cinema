@@ -56,7 +56,7 @@ Point the agent at `SKILL.md` (paste it, or reference it from `AGENTS.md`). It o
 
 ## Claude app (claude.ai on the web, desktop and mobile)
 
-The Claude app can't run the script, so it has its own skill, `skill/inflight-movie-picker-web/`, which reads the
+The Claude app can't run the script, so it has its own skill, `plugins/seatback-cinema/skills/inflight-movie-picker-web/`, which reads the
 same data over `https://seatback.len5ky.com/api/`. Download https://seatback.len5ky.com/inflight-movie-picker-web.zip
 and upload it at Settings, Capabilities, Skills; that's the whole setup. Adding the Seatback Cinema connector
 (Settings, Connectors, Add custom connector, `https://seatback.len5ky.com/mcp`) is optional: it lets you paste an
