@@ -14,7 +14,9 @@ in a checkout, a `public/` folder, or a `file://` URL.
 
 ## Install
 
-One command, from GitHub, for Claude Code, Codex, Cursor and the other agents the `skills` CLI knows:
+Claude Code users don't need this folder: `/plugin install seatback-cinema --marketplace len5ky/seatback-cinema`
+installs the Seatback Cinema plugin (skill plus connector) in one step. This folder is for Codex, Cursor and other
+agents, or for Claude Code without network tools. One command, from GitHub:
 
 ```bash
 npx skills add len5ky/seatback-cinema
@@ -23,14 +25,14 @@ npx skills add len5ky/seatback-cinema
 Without it, fetch the folder straight into place (no clone):
 
 ```bash
-mkdir -p ~/.claude/skills && curl -fsSL https://github.com/len5ky/seatback-cinema/archive/refs/heads/main.tar.gz \
-  | tar xz -C ~/.claude/skills --strip-components=2 seatback-cinema-main/skill/inflight-movie-picker
+mkdir -p ~/.codex/skills && curl -fsSL https://github.com/len5ky/seatback-cinema/archive/refs/heads/main.tar.gz \
+  | tar xz -C ~/.codex/skills --strip-components=2 seatback-cinema-main/skill/inflight-movie-picker
 ```
 
-## Claude Code
+## Claude Code (without the plugin)
 
-`~/.claude/skills/inflight-movie-picker/` for all projects, or `<project>/.claude/skills/` for one. Claude Code
-picks it up from the `description` in `SKILL.md`. Ask "what's good on my United flight next week?"
+Put the folder at `~/.claude/skills/inflight-movie-picker/` for all projects, or `<project>/.claude/skills/` for
+one. Claude Code picks it up from the `description` in `SKILL.md`. Ask "what's good on my United flight next week?"
 
 ## Codex CLI
 
@@ -56,12 +58,12 @@ Point the agent at `SKILL.md` (paste it, or reference it from `AGENTS.md`). It o
 
 ## Claude app (claude.ai on the web, desktop and mobile)
 
-The Claude app can't run the script, so it has its own skill, `plugins/seatback-cinema/skills/inflight-movie-picker-web/`, which reads the
-same data over `https://seatback.len5ky.com/api/`. Download https://seatback.len5ky.com/inflight-movie-picker-web.zip
-and upload it at Settings, Capabilities, Skills; that's the whole setup. Adding the Seatback Cinema connector
-(Settings, Connectors, Add custom connector, `https://seatback.len5ky.com/mcp`) is optional: it lets you paste an
-IMDb or Letterboxd export into the chat and doesn't depend on Claude's web fetch. Both carry over to the mobile
-apps. `scripts/package-web-skill.sh` rebuilds the zip from a checkout.
+The Claude app can't run the script, so it has its own skill, `plugins/seatback-cinema/skills/inflight-movie-picker-web/`,
+which reads the same data over `https://seatback.len5ky.com/api/`. It ships as the Seatback Cinema plugin:
+Customize, Plugins, Add marketplace, `len5ky/seatback-cinema`. The plugin also carries the connector
+(`https://seatback.len5ky.com/mcp`), added from its Connectors tab if wanted: that enables pasting an IMDb or
+Letterboxd export into the chat. Plans without plugins can upload the zip at
+https://seatback.len5ky.com/inflight-movie-picker-web.zip instead; `scripts/package-web-skill.sh` rebuilds it.
 
 ## Options
 

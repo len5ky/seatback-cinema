@@ -32,14 +32,17 @@ per audio track. "IMDb id" is the share matched with high or medium confidence.
 
 ## Use it in the Claude app (web and mobile)
 
-This needs a Claude plan that allows custom skills. One step, done once on claude.ai in a browser:
+Seatback Cinema is a Claude plugin, installed from this repo in one step on claude.ai (paid plans): Customize,
+Plugins, Add, Add marketplace, and enter `len5ky/seatback-cinema`; then install **Seatback Cinema**. It's saved to
+your account, so the mobile and desktop apps get it too.
 
-1. **Add the skill.** Download https://seatback.len5ky.com/inflight-movie-picker-web.zip and upload it, unopened,
-   at Settings, Capabilities, Skills. The skill reads the catalogue and your taste straight from
-   `https://seatback.len5ky.com/api/`, so nothing else is required.
-2. **Optional: add the connector.** Settings, Connectors, Add custom connector, name it Seatback Cinema and paste
-   `https://seatback.len5ky.com/mcp` (no login). The skill uses it when it's there. It adds pasting an IMDb or
-   Letterboxd export into the chat, and it keeps working when Claude's web fetch is unavailable.
+The plugin is a skill plus the Seatback Cinema connector. The skill alone is enough: it reads the catalogue and
+your taste from `https://seatback.len5ky.com/api/`. Adding the connector from the plugin's Connectors tab (one
+click, no login) is optional; it lets you paste an IMDb or Letterboxd export into the chat and keeps working when
+Claude's web fetch is unavailable.
+
+No plugins on your plan? The skill also comes as a zip, https://seatback.len5ky.com/inflight-movie-picker-web.zip:
+upload it, unopened, at Customize, Skills.
 
 After that, start a chat, on the web or in the mobile app, and say where you're flying. Any of these works:
 
@@ -68,20 +71,26 @@ or a Letterboxd export (zip) still works, attached to the chat (with the connect
 
 ## Quick start: the skill
 
-The skill is one folder, [`skill/inflight-movie-picker`](skill/inflight-movie-picker): a `SKILL.md` for the model
-and a dependency-free script that downloads one airline-month and prints it as a table. It runs on Bun, Node 22.6+
-or Deno. Install it straight from GitHub:
+In Claude Code, the same plugin installs with one command and brings the connector with it:
+
+```
+/plugin install seatback-cinema --marketplace len5ky/seatback-cinema
+```
+
+For Codex, Cursor and other agents, or for a Claude Code without network tools, there is a second skill,
+[`skill/inflight-movie-picker`](skill/inflight-movie-picker): a `SKILL.md` and a dependency-free script that
+downloads one airline-month from the open dataset and prints it as a table (Bun, Node 22.6+ or Deno). Install it
+straight from GitHub:
 
 ```bash
-npx skills add len5ky/seatback-cinema          # Claude Code, Codex, Cursor and others; asks where to put it
+npx skills add len5ky/seatback-cinema          # asks which agent to install it for
 ```
 
 Or fetch the folder yourself, no clone needed:
 
 ```bash
 curl -fsSL https://github.com/len5ky/seatback-cinema/archive/refs/heads/main.tar.gz \
-  | tar xz -C ~/.claude/skills --strip-components=2 seatback-cinema-main/skill/inflight-movie-picker     # Claude Code
-# Codex CLI: same command with -C ~/.codex/skills (mkdir -p it first)
+  | tar xz -C ~/.codex/skills --strip-components=2 seatback-cinema-main/skill/inflight-movie-picker     # Codex CLI
 ```
 
 Start a new session and ask about your flight; the four prompts in the Claude app section above work here too. For Cursor, copy the folder into your project and add a rule that

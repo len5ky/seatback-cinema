@@ -1,6 +1,8 @@
 {
-  "seatback": {
-    "type": "http",
-    "url": "https://seatback.len5ky.com/mcp"
+  "mcpServers": {
+    "seatback": {
+      "type": "http",
+      "url": "https://seatback.len5ky.com/mcp"
+    }
   }
 }
