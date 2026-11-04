@@ -11,8 +11,8 @@
     {
       "name": "seatback-cinema",
       "source": "./plugins/seatback-cinema",
-      "description": "Picks films from what Emirates, United, BA, Singapore, Lufthansa, KLM, JAL, Cathay, Qantas, ANA or American are actually showing this month, skipping what you've rated on IMDb or Letterboxd.",
-      "version": "1.0.2",
+      "description": "What to watch on your flight, picked from the films Emirates, United, British Airways, Singapore Airlines, Lufthansa, KLM, Japan Airlines, Cathay Pacific, Qantas, ANA and American Airlines are actually showing this month, skipping what you've already rated on IMDb or Letterboxd.",
+      "version": "1.0.3",
       "author": {
         "name": "len5ky"
       },
@@ -21,9 +21,11 @@
       "license": "MIT",
       "keywords": [
         "movies",
+        "films",
         "flight",
         "airline",
         "in-flight entertainment",
+        "travel",
         "imdb",
         "letterboxd"
       ],
