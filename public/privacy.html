@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seatback Cinema privacy</title>
+<meta name="description" content="Turn your IMDb or Letterboxd export into a short code for flight picks in the Claude app.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='1' y='3' width='14' height='10' rx='2' fill='%231c5cab'/%3E%3Cpath d='M6 6v4l4-2z' fill='white'/%3E%3C/svg%3E">
+<style>
+:root {
+  color-scheme: light;
+  --surface-0: #f4f4f2;
+  --surface-1: #fcfcfb;
+  --surface-2: #efeeea;
+  --border: #e3e2de;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #6f6e69;
+  --link: #1c5cab;
+  --accent: #1c5cab;
+  --accent-ink: #ffffff;
+  --drop: #e8f0fb;
+  --warn-bg: #fff4dc;
+  --warn-ink: #6b4a00;
+  --ok-ink: #1d6b3a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-0: #121211;
+    --surface-1: #1a1a19;
+    --surface-2: #232321;
+    --border: #2e2e2c;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7;
+    --text-muted: #9a998f;
+    --link: #86b6ef;
+    --accent: #5598e7;
+    --accent-ink: #0b0b0b;
+    --drop: #17263a;
+    --warn-bg: #3a2c08;
+    --warn-ink: #f3d58a;
+    --ok-ink: #7fd39c;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0: #121211;
+  --surface-1: #1a1a19;
+  --surface-2: #232321;
+  --border: #2e2e2c;
+  --text-primary: #f0efec;
+  --text-secondary: #c3c2b7;
+  --text-muted: #9a998f;
+  --link: #86b6ef;
+  --accent: #5598e7;
+  --accent-ink: #0b0b0b;
+  --drop: #17263a;
+  --warn-bg: #3a2c08;
+  --warn-ink: #f3d58a;
+  --ok-ink: #7fd39c;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 640px; margin: 0 auto; padding: 28px 16px 48px; }
+h1 { font-size: 26px; line-height: 1.2; margin: 0 0 8px; font-weight: 650; letter-spacing: -0.01em; }
+h2 { font-size: 17px; margin: 0 0 8px; font-weight: 600; }
+p { margin: 0 0 12px; }
+.lede { color: var(--text-secondary); margin-bottom: 20px; }
+a { color: var(--link); }
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+.small { font-size: 14px; color: var(--text-secondary); }
+.drop {
+  display: block; border: 2px dashed var(--border); border-radius: 10px; padding: 22px 14px; text-align: center;
+  cursor: pointer; margin: 4px 0 14px; transition: background .15s, border-color .15s;
+}
+.drop.over { background: var(--drop); border-color: var(--accent); }
+.drop strong { display: block; font-size: 17px; margin-bottom: 4px; }
+.drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+button, .btn {
+  font: inherit; font-weight: 600; border: 0; border-radius: 9px; padding: 11px 18px; cursor: pointer;
+  background: var(--accent); color: var(--accent-ink); text-decoration: none; display: inline-block;
+}
+button.ghost { background: var(--surface-2); color: var(--text-primary); border: 1px solid var(--border); }
+button:disabled { opacity: .5; cursor: default; }
+ul.files { list-style: none; padding: 0; margin: 0 0 12px; font-size: 14px; }
+ul.files li { padding: 6px 0; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: space-between; }
+ul.files li span:last-child { color: var(--text-secondary); text-align: right; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 4px 0 12px; }
+.stat { background: var(--surface-2); border-radius: 9px; padding: 10px; }
+.stat b { display: block; font-size: 22px; line-height: 1.2; }
+.stat span { font-size: 13px; color: var(--text-secondary); }
+.code {
+  font: 600 clamp(18px, 5.6vw, 34px)/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .06em; word-break: break-all; background: var(--surface-2); border-radius: 10px;
+  padding: 14px; text-align: center; margin: 6px 0 12px; user-select: all;
+}
+.sentence { background: var(--surface-2); border-radius: 10px; padding: 12px 14px; margin: 6px 0 12px; user-select: all; overflow-wrap: anywhere; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+select, input[type="number"] {
+  font: inherit; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface-1); color: var(--text-primary);
+}
+input[type="number"] { width: 5.5em; }
+.msg { padding: 10px 12px; border-radius: 9px; font-size: 14px; margin: 8px 0; }
+.warn { background: var(--warn-bg); color: var(--warn-ink); }
+.ok { color: var(--ok-ink); font-size: 14px; }
+ol { padding-left: 22px; margin: 0 0 8px; }
+ol li { margin-bottom: 8px; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; word-break: break-all; }
+[hidden] { display: none !important; }
+footer { font-size: 13px; color: var(--text-muted); margin-top: 24px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Privacy</h1>
+  <p class="lede">Seatback Cinema is a hobby project run by one person. There are no accounts, no cookies, no analytics
+  and no advertising. This page says what the service sees when you use the Claude plugin, the connector or the API.</p>
+
+  <section class="card">
+    <h2>What is sent to seatback.len5ky.com</h2>
+    <ul class="small">
+      <li><strong>Your flight question:</strong> the airline, flight length and filters (genre, family, year), so the server can rank the catalogue.</li>
+      <li><strong>Your taste, only if you give it:</strong> a public IMDb profile link, a Letterboxd username, a pasted or uploaded IMDb/Letterboxd export, or a taste code from an earlier visit.</li>
+    </ul>
+    <p class="small">Nothing identifies you beyond what you choose to send. The server does not see your Claude account or your conversation.</p>
+  </section>
+
+  <section class="card">
+    <h2>What is kept, and for how long</h2>
+    <ul class="small">
+      <li><strong>IMDb and Letterboxd imports</strong> (the film ids you rated or listed, your scores) are cached for 24 hours so repeat questions in a day cost nothing, then deleted.</li>
+      <li><strong>Taste codes</strong> store the same film ids and scores under a random 20-character code for one year, so you can reuse them. There is no link between a code and a person.</li>
+      <li><strong>Request logs</strong> are Cloudflare's standard, short-lived operational logs. The service keeps no log of its own.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>Third parties</h2>
+    <p class="small">The service runs on Cloudflare Workers and Convex. When you give an IMDb link, the import fetches your
+    public ratings from imdb.com; a Letterboxd username fetches your public diary feed from letterboxd.com. Film ratings and
+    synopses come from IMDb's non-commercial datasets and public pages and are never redistributed beyond the picks you see.</p>
+  </section>
+
+  <section class="card">
+    <h2>Deleting your data</h2>
+    <p class="small">Imports expire on their own within a day. To remove a taste code early, or for any question, open an
+    issue at <a href="https://github.com/len5ky/seatback-cinema/issues">github.com/len5ky/seatback-cinema</a> or email
+    <a href="mailto:len5ky@len5ky.com">len5ky@len5ky.com</a>.</p>
+  </section>
+
+  <footer><a href="./">Seatback Cinema</a>: monthly in-flight film catalogues for 11 airlines. <a href="privacy">Privacy</a>.</footer>
+</main>
+</body>
+</html>
