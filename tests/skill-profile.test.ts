@@ -94,15 +94,15 @@ test("IMDb challenge and private pages are reported as blocked", () => {
 test("Letterboxd films page: 72 per page, title and year split, half-star ratings on a 10-point scale", () => {
   const p = parseLetterboxdPage(fx("letterboxd-films-page1.html"));
   expect(p.items).toHaveLength(72);
-  expect(p.items[0]).toEqual({ slug: "wildwood-2026", title: "Wildwood", year: 2026, rating: 9 });
-  expect(p.items[1]).toEqual({ slug: "whalefall", title: "Whalefall", year: 2026, rating: 7 });
+  expect(p.items[0]).toEqual({ slug: "synthetic-film-01", title: "Synthetic Film 01", year: 2026, rating: 9 });
+  expect(p.items[1]).toEqual({ slug: "synthetic-film-02", title: "Synthetic Film 02", year: 2026, rating: 7 });
   expect(p.hasNext).toBe(true);
   expect(p.lastPage).toBe(37);
   const p2 = parseLetterboxdPage(fx("letterboxd-films-page2.html"));
-  expect(p2.items[0]).toMatchObject({ slug: "the-thursday-murder-club", title: "The Thursday Murder Club", year: 2025, rating: 6 });
-  expect(p2.items.find((i) => i.slug.startsWith("lilo"))?.title).toBe("Lilo & Stitch");
+  expect(p2.items[0]).toMatchObject({ slug: "synthetic-film-73", title: "Synthetic Film 73", year: 2025, rating: 6 });
+  expect(p2.items.find((i) => i.slug === "synthetic-film-105")?.title).toBe("Synthetic Film 105 & Friends"); // &amp; in the markup is decoded
   const w = parseLetterboxdPage(fx("letterboxd-watchlist-page1.html"));
-  expect(w.items[0]).toEqual({ slug: "big-world-2024", title: "Big World", year: 2024, rating: null });
+  expect(w.items[0]).toEqual({ slug: "synthetic-film-145", title: "Synthetic Film 145", year: 2024, rating: null });
   expect(w.lastPage).toBe(23);
 });
 
@@ -264,33 +264,33 @@ test("fetchLetterboxdProfile: slugs map to IMDb ids through ids.json, the rest s
   const calls: string[] = [];
   const f = async (url: string): Promise<Response> => {
     calls.push(url);
-    if (url.endsWith("/dave/films/")) return html(fx("letterboxd-films-page1.html"));
-    if (url.endsWith("/dave/films/page/2/")) return html(fx("letterboxd-films-page2.html"));
-    if (url.endsWith("/dave/watchlist/")) return html(fx("letterboxd-watchlist-page1.html"));
+    if (url.endsWith("/example_user/films/")) return html(fx("letterboxd-films-page1.html"));
+    if (url.endsWith("/example_user/films/page/2/")) return html(fx("letterboxd-films-page2.html"));
+    if (url.endsWith("/example_user/watchlist/")) return html(fx("letterboxd-watchlist-page1.html"));
     return html("not found", 404);
   };
-  const slugs = new Map([["wildwood-2026", "tt0000001"], ["big-world-2024", "tt0000002"]]);
-  const p = await fetchLetterboxdProfile("https://letterboxd.com/dave/films/ratings/", slugs, { fetch: f, delayMs: 0 });
+  const slugs = new Map([["synthetic-film-01", "tt0000001"], ["synthetic-film-145", "tt0000002"]]);
+  const p = await fetchLetterboxdProfile("https://letterboxd.com/example_user/films/ratings/", slugs, { fetch: f, delayMs: 0 });
   expect(p.seen).toEqual(["tt0000001"]);
   expect(p.ratings).toEqual({ tt0000001: 9 });
   expect(p.watchlist).toEqual(["tt0000002"]);
   expect(p.unmatched.seen).toHaveLength(72 * 2 - 1);
-  expect(p.unmatched.seen[0]).toEqual({ title: "Whalefall", year: 2026, rating: 7 });
+  expect(p.unmatched.seen[0]).toEqual({ title: "Synthetic Film 02", year: 2026, rating: 7 });
   expect(p.unmatched.watchlist).toHaveLength(27);
-  expect(p.source).toBe("letterboxd:dave");
-  expect(calls).toContain("https://letterboxd.com/dave/films/page/3/"); // a 404 past the fixtures ends the list
+  expect(p.source).toBe("letterboxd:example_user");
+  expect(calls).toContain("https://letterboxd.com/example_user/films/page/3/"); // a 404 past the fixtures ends the list
 });
 
 test("a refusal after page 1 keeps the pages already read and notes it; on page 1 it throws", async () => {
   const cf = () => html("<title>Just a moment...</title>", 403, { "cf-mitigated": "challenge" });
-  const f = async (url: string): Promise<Response> => (url.endsWith("/dave/films/") ? html(fx("letterboxd-films-page1.html")) : cf());
-  const p = await fetchLetterboxdProfile("dave", new Map(), { fetch: f, delayMs: 0 });
+  const f = async (url: string): Promise<Response> => (url.endsWith("/example_user/films/") ? html(fx("letterboxd-films-page1.html")) : cf());
+  const p = await fetchLetterboxdProfile("example_user", new Map(), { fetch: f, delayMs: 0 });
   expect(p.unmatched.seen).toHaveLength(72);
   expect(p.notes).toEqual([
     "Letterboxd films: stopped at page 2 (Letterboxd refused the request (HTTP 403, challenge)); kept the first 72",
     "watchlist skipped (Letterboxd refused the request (HTTP 403, challenge))",
   ]);
-  await expect(fetchLetterboxdProfile("dave", new Map(), { fetch: async () => cf(), delayMs: 0 })).rejects.toBeInstanceOf(ProfileBlocked);
+  await expect(fetchLetterboxdProfile("example_user", new Map(), { fetch: async () => cf(), delayMs: 0 })).rejects.toBeInstanceOf(ProfileBlocked);
 });
 
 // ---- the CLI end to end, against a loopback server serving the fixtures --------------------------------------
