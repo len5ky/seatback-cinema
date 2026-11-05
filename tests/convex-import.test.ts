@@ -120,6 +120,17 @@ test("runImport: imports a p. link, caches it 24 h under the ur id and the alias
   expect(later.body).toMatchObject({ ok: true, cached: false });
 });
 
+test("runImport: force skips the cache (ur and p. ids), re-imports, and still counts against the caps", async () => {
+  const m = memoryStore({ daily: 10, perUser: 2 }), f = fakeImdb();
+  await runImport(m.store, f.deps, P);
+  expect((await runImport(m.store, f.deps, "ur00000001")).body).toMatchObject({ ok: true, cached: true });
+  const forced = await runImport(m.store, f.deps, "ur00000001", { force: true });
+  expect(forced.body).toMatchObject({ ok: true, cached: false });
+  expect(forced.calls).toBe(3);
+  const forcedP = await runImport(m.store, f.deps, P, { force: true });
+  expect(forcedP.body).toMatchObject({ ok: false, error: "capped", scope: "user" }); // ur00000001 hit its cap of 2
+});
+
 test("runImport: a degraded import (no scores) is kept an hour", () => {
   const imp = { degraded: true } as ImdbImport;
   expect(expiresAt(imp, 1000)).toBe(1000 + DEGRADED_MS);
