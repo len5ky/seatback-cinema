@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, readdirSync, rmSync } from "node:fs";
 import {
-  type AaDetail, type AaRecord, AmericanPageError, american, extractDetails, extractRscRecords, fetchAmerican, fetchDetails, mergeDetails, servedMonth,
+  type AaDetail, type AaRecord, AmericanPageError, american, detailKey, extractDetails, extractRscRecords, fetchAmerican, fetchDetails, mergeDetails, servedMonth,
 } from "../src/airlines/american.ts";
 import records from "./fixtures/american-records.json";
 import nov from "./fixtures/american-records-2026-11.json";
@@ -125,20 +125,20 @@ test("mergeDetails / parse: fills imdb_id and subtitles only where the gallery r
   const flat = nov as unknown as AaRecord[];
   const [a, b, c] = flat as [AaRecord, AaRecord, AaRecord];
   const details: Record<string, AaDetail> = {
-    [a.id]: { id: a.id, slug: a.slug, imdb_id: "tt22084616", subtitles: "English, Spanish (Latin)" },
-    [b.id]: { id: b.id, slug: b.slug, imdb_id: "tt9999999", subtitles: "French" },
-    [c.id]: { id: c.id, slug: "some-other-film-2019", imdb_id: "tt7777777", subtitles: "German" },
+    [detailKey(a.id, a.slug)]: { id: a.id, slug: a.slug, imdb_id: "tt22084616", subtitles: "English, Spanish (Latin)" },
+    [detailKey(b.id, b.slug)]: { id: b.id, slug: b.slug, imdb_id: "tt9999999", subtitles: "French" },
+    [detailKey(c.id, "some-other-film-2019")]: { id: c.id, slug: "some-other-film-2019", imdb_id: "tt7777777", subtitles: "German" },
   };
   const merged = mergeDetails([a, { ...b, imdb_id: "tt0000001" }, c], details);
   expect(merged[0]).toMatchObject({ imdb_id: "tt22084616", subtitles: "English, Spanish (Latin)" });
   expect(merged[1]!.imdb_id).toBe("tt0000001");
   expect(merged[2]).toBe(c); // same id, different slug: not applied
-  expect(mergeDetails([a], { [a.id]: { id: a.id, imdb_id: "tt1" } })[0]).toBe(a); // no slug on the detail: not applied
+  expect(mergeDetails([a], { [detailKey(a.id, null)]: { id: a.id, imdb_id: "tt1" } })[0]).toBe(a); // no slug on the detail: not applied
   expect(a.imdb_id).toBeUndefined(); // input untouched
   const films = american.parse({ pages: [flat], details });
   expect(films.find((f) => f.sourceId === a.id)).toMatchObject({ imdbId: "tt22084616", subtitles: ["English", "Spanish (Latin)"] });
   const r0 = page1.find((r) => r.imdb_id)!;
-  const old = american.parse({ pages: [page1], details: { [r0.id]: { id: r0.id, slug: r0.slug, imdb_id: "tt0000002" } } });
+  const old = american.parse({ pages: [page1], details: { [detailKey(r0.id, r0.slug)]: { id: r0.id, slug: r0.slug, imdb_id: "tt0000002" } } });
   expect(old.find((f) => f.sourceId === r0.id)!.imdbId).toBe(r0.imdb_id!);
 });
 
@@ -283,6 +283,87 @@ test("fetchDetails: AMERICAN_DETAIL_MAX caps requests, retries included", async 
     expect(logs.some((m) => m.startsWith("american details: 2 requests"))).toBe(true);
   } finally {
     if (prev === undefined) delete process.env.AMERICAN_DETAIL_MAX; else process.env.AMERICAN_DETAIL_MAX = prev;
+    rmSync(cacheDir, { recursive: true, force: true });
+  }
+});
+
+// Round 2 review fixes
+
+test("fetchDetails: a reused id with another slug does not shadow the detail whose slug matches", async () => {
+  const cacheDir = mkdtempSync(`${tmpRoot()}/american-`);
+  const base = (nov as unknown as AaRecord[])[0]!;
+  const row = (rs: object[]) => `9:${JSON.stringify(["$", "div", null, { items: rs }])}`;
+  const embedded = (slug: string, imdb: string) => ({ id: "b", name: "B", slug, imdb_id: imdb, summaries: [] });
+  // film-a's page carries id b under an old slug; film-c's page carries id b under the gallery's slug
+  const bodies: Record<string, string> = {
+    "film-a": row([embedded("old-b", "tt1000001")]),
+    "film-c": row([embedded("film-b", "tt1000002")]),
+  };
+  const raw = { pages: [["a", "b", "c"].map((id) => ({ ...base, id, slug: `film-${id}` }))] };
+  const open = async () => ({ fetchTitle: async (slug: string) => ({ status: 200, body: bodies[slug] ?? row([]) }), close: async () => {} });
+  try {
+    const details = await fetchDetails(raw, cacheDir, open, { concurrency: 1, spacingMs: 1, log: () => {} });
+    expect(details[detailKey("b", "old-b")]?.imdb_id).toBe("tt1000001");
+    expect(details[detailKey("b", "film-b")]?.imdb_id).toBe("tt1000002");
+    expect(american.parse({ ...raw, details }).find((f) => f.sourceId === "b")?.imdbId).toBe("tt1000002");
+    // and straight through mergeDetails, in either insertion order
+    const g = { ...base, id: "b", slug: "film-b" };
+    for (const order of [["old-b", "film-b"], ["film-b", "old-b"]]) {
+      const ds = Object.fromEntries(order.map((sl, i) => [detailKey("b", sl), { id: "b", slug: sl, imdb_id: `tt200000${i}` }]));
+      expect(mergeDetails([g], ds)[0]!.imdb_id).toBe(ds[detailKey("b", "film-b")]!.imdb_id);
+    }
+  } finally {
+    rmSync(cacheDir, { recursive: true, force: true });
+  }
+});
+
+test("fetchDetails: an outer timeout aborts the pending title request instead of leaving it running", async () => {
+  const cacheDir = mkdtempSync(`${tmpRoot()}/american-`);
+  const base = (nov as unknown as AaRecord[])[0]!;
+  const raw = { pages: [[1, 2, 3].map((i) => ({ ...base, id: `r${i}`, slug: `film-${i}` }))] };
+  let pending = 0, maxPending = 0, aborted = 0, started = 0;
+  const open = async () => ({
+    // a stalled in-page evaluation: settles only when the caller aborts it
+    fetchTitle: (_slug: string, signal?: AbortSignal) => new Promise<{ status: number; body: string }>((_res, rej) => {
+      started++;
+      maxPending = Math.max(maxPending, ++pending);
+      signal?.addEventListener("abort", () => { aborted++; pending--; rej(new Error("page closed")); }, { once: true });
+    }),
+    close: async () => {},
+  });
+  try {
+    await fetchDetails(raw, cacheDir, open, { timeoutMs: 30, spacingMs: 1, retryMs: 1, log: () => {} });
+    expect(started).toBe(3);
+    expect(aborted).toBe(3);
+    expect(pending).toBe(0);
+    expect(maxPending).toBeLessThanOrEqual(2); // never more than the two workers' own requests
+  } finally {
+    rmSync(cacheDir, { recursive: true, force: true });
+  }
+});
+
+test("fetchDetails: a browser that never opens is abandoned after openTimeoutMs, and closed if it opens late", async () => {
+  const cacheDir = mkdtempSync(`${tmpRoot()}/american-`);
+  const base = (nov as unknown as AaRecord[])[0]!;
+  const raw = { pages: [[{ ...base, id: "a", slug: "film-a" }]] };
+  const logs: string[] = [];
+  let closed = 0, asked = 0;
+  const lateOpen = () => new Promise<{ fetchTitle: () => Promise<{ status: number; body: string }>; close: () => Promise<void> }>((res) =>
+    setTimeout(() => res({ fetchTitle: async () => { asked++; return { status: 200, body: titleRsc }; }, close: async () => { closed++; } }), 80));
+  const failingOpen = async (): Promise<{ close: () => Promise<void> }> => { throw new Error("goto timeout"); };
+  try {
+    const t0 = Date.now();
+    const details = await fetchDetails(raw, cacheDir, lateOpen, { openTimeoutMs: 30, log: (m) => logs.push(m) });
+    expect(Date.now() - t0).toBeLessThan(75);
+    expect(details).toEqual({});
+    expect(logs.some((m) => m.includes("did not open within 0.03s"))).toBe(true);
+    await Bun.sleep(100);
+    expect(closed).toBe(1);
+    expect(asked).toBe(0);
+    logs.length = 0;
+    expect(await fetchDetails(raw, cacheDir, failingOpen, { log: (m) => logs.push(m) })).toEqual({});
+    expect(logs.some((m) => m.includes("failed to open (goto timeout)"))).toBe(true);
+  } finally {
     rmSync(cacheDir, { recursive: true, force: true });
   }
 });

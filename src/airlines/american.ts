@@ -33,7 +33,9 @@ export interface AaRecord {
 }
 /** What a title page's embedded records tell about a film: IMDb id (null = the site has none) and subtitles. */
 export interface AaDetail { id: string; slug?: string | null; imdb_id: string | null; subtitles?: string | null }
+/** Details are keyed by id and slug together, so a reused id with another slug never shadows the matching one. */
 export interface AmericanRaw { pages: AaRecord[][]; details?: Record<string, AaDetail> }
+export const detailKey = (id: string, slug: string | null | undefined): string => `${id}/${slug ?? ""}`;
 
 /** Parse a `text/x-component` RSC payload: every JSON row, walked for title objects (`name` plus `imdb_id` or `cycle_start`). */
 export function extractRscRecords(text: string): AaRecord[] {
@@ -86,10 +88,8 @@ export function extractDetails(text: string): AaDetail[] {
 }
 
 /** A harvested detail applies to a gallery record only when both id and slug agree (a reused id never crosses films). */
-const detailFor = (r: AaRecord, details: Record<string, AaDetail>): AaDetail | undefined => {
-  const d = details[r.id];
-  return d && d.slug && r.slug && d.slug === r.slug ? d : undefined;
-};
+const detailFor = (r: AaRecord, details: Record<string, AaDetail>): AaDetail | undefined =>
+  r.slug ? details[detailKey(r.id, r.slug)] : undefined;
 
 /** Fill imdb_id (and, on flat records, subtitles) from title-page details, only where the gallery record has none. */
 export function mergeDetails(records: AaRecord[], details: Record<string, AaDetail> = {}): AaRecord[] {
@@ -133,10 +133,20 @@ export function parseAmerican(raw: unknown): CatalogueFilm[] {
   return [...films.values()];
 }
 
+/** `p`, or `fallback` once `ms` pass; `onTimeout` runs when the fallback wins (to cancel or clean up the loser). */
+function bounded<T>(p: Promise<T>, ms: number, fallback: T, onTimeout?: () => void): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return Promise.race([p, new Promise<T>((res) => { timer = setTimeout(() => { onTimeout?.(); res(fallback); }, ms); })])
+    .finally(() => clearTimeout(timer));
+}
+const CLOSE_TIMEOUT_MS = 30_000;
+const OPEN_TIMEOUT_MS = 120_000;
+
 /** Fetch one gallery page's RSC payload from inside the browser page (same origin, browser TLS). */
 export type PageFetcher = (n: number) => Promise<string>;
 /** Fetch one title page's RSC payload (/en/title/<slug>, same context and headers as the gallery). */
-export type TitleFetcher = (slug: string) => Promise<{ status: number; body: string }>;
+/** When `signal` aborts, the in-page request is torn down (its page closed) and the promise settles. */
+export type TitleFetcher = (slug: string, signal?: AbortSignal) => Promise<{ status: number; body: string }>;
 
 /** A non-200 gallery page; 429 is the site's rate limit / bot checkpoint. */
 export class AmericanPageError extends Error {
@@ -174,11 +184,18 @@ async function openBrowser(): Promise<{ fetchPage: PageFetcher; fetchTitle: Titl
     throw new Error("american needs Playwright: bun add -d playwright (Chromium from ~/.cache/ms-playwright is reused)");
   }
   const browser = await chromium.launch({ headless: true, executablePath: chromiumPath(chromium.executablePath()) });
+  const close = () => bounded(browser.close().catch(() => {}), CLOSE_TIMEOUT_MS, undefined);
   try {
-    const page = await (await browser.newContext({ userAgent: BROWSER_UA })).newPage();
-    await page.goto(`${SITE}/en/movies`, { waitUntil: "load", timeout: 60_000 });
+    const context = await browser.newContext({ userAgent: BROWSER_UA });
+    const freshPage = async () => {
+      const p = await context.newPage();
+      await p.goto(`${SITE}/en/movies`, { waitUntil: "load", timeout: 60_000 });
+      return p;
+    };
+    let current = freshPage();
+    await current;
     // Each in-page request aborts after REQUEST_TIMEOUT_MS so a hung fetch cannot stall a worker or the run.
-    const rsc = (url: string) => page.evaluate(async ([u, ms]) => {
+    const rsc = async (url: string) => (await current).evaluate(async ([u, ms]) => {
       const res = await fetch(u, { headers: { RSC: "1" }, signal: AbortSignal.timeout(ms) });
       return { status: res.status, body: await res.text() };
     }, [url, REQUEST_TIMEOUT_MS] as const);
@@ -187,10 +204,29 @@ async function openBrowser(): Promise<{ fetchPage: PageFetcher; fetchTitle: Titl
       if (r.status !== 200) throw new AmericanPageError(n, r.status, r.body);
       return r.body;
     };
-    const fetchTitle: TitleFetcher = (slug) => rsc(`/en/title/${encodeURIComponent(slug)}`);
-    return { fetchPage, fetchTitle, close: () => browser.close() };
+    // A caller-side abort means the page's JS is stuck: close that page (which rejects every evaluation still running
+    // on it) and open a fresh one on the same origin for the next request.
+    const fetchTitle: TitleFetcher = async (slug, signal) => {
+      const used = current;
+      const page = await used;
+      const onAbort = () => {
+        if (current === used) { current = freshPage(); current.catch(() => {}); }
+        void bounded(page.close().catch(() => {}), CLOSE_TIMEOUT_MS, undefined);
+      };
+      if (signal?.aborted) onAbort();
+      signal?.addEventListener("abort", onAbort, { once: true });
+      try {
+        return await page.evaluate(async ([u, ms]) => {
+          const res = await fetch(u, { headers: { RSC: "1" }, signal: AbortSignal.timeout(ms) });
+          return { status: res.status, body: await res.text() };
+        }, [`/en/title/${encodeURIComponent(slug)}`, REQUEST_TIMEOUT_MS] as const);
+      } finally {
+        signal?.removeEventListener("abort", onAbort);
+      }
+    };
+    return { fetchPage, fetchTitle, close };
   } catch (e) {
-    await browser.close();
+    await close();
     throw e;
   }
 }
@@ -260,6 +296,7 @@ export interface DetailOptions {
   concurrency?: number;  // in flight at once, at most 2
   timeoutMs?: number;    // per request; a request that has not settled by then counts as failed
   deadlineMs?: number;   // whole walk; no new request starts after it (default 30 min)
+  openTimeoutMs?: number; // browser launch + first page load (default 2 min)
   spacingMs?: number;    // minimum gap between request starts
   retryMs?: number;      // back-off before the single retry on 429/5xx
   log?: (msg: string) => void;
@@ -276,7 +313,7 @@ export async function fetchDetails(raw: AmericanRaw, cacheDir: string,
   const envMax = Number(process.env.AMERICAN_DETAIL_MAX);
   const {
     max = Number.isFinite(envMax) && process.env.AMERICAN_DETAIL_MAX ? envMax : 800, spacingMs = 300, retryMs = 5_000,
-    timeoutMs = REQUEST_TIMEOUT_MS + 5_000, deadlineMs = 30 * 60_000, log = console.log,
+    timeoutMs = REQUEST_TIMEOUT_MS + 5_000, deadlineMs = 30 * 60_000, openTimeoutMs = OPEN_TIMEOUT_MS, log = console.log,
   } = opts;
   const concurrency = Math.min(opts.concurrency ?? 2, 2);
   const deadline = Date.now() + deadlineMs;
@@ -287,7 +324,13 @@ export async function fetchDetails(raw: AmericanRaw, cacheDir: string,
   const dir = `${cacheDir}/american/detail/${cycle}`;
   const path = (slug: string) => `${dir}/${slug.replace(/[^a-z0-9-]/gi, "_")}.json`;
   const details: Record<string, AaDetail> = {};
-  const add = (ds: AaDetail[]) => { for (const d of ds) if (!details[d.id]?.imdb_id) details[d.id] = d; };
+  const add = (ds: AaDetail[]) => {
+    for (const d of ds) {
+      if (!d.slug) continue;
+      const k = detailKey(d.id, d.slug);
+      if (!details[k]?.imdb_id) details[k] = d;
+    }
+  };
   const missing = records.filter((r) => !r.imdb_id && r.slug && (!r.content_type || r.content_type === "Film"));
   const done = new Set<string>();
   for (const r of missing) {
@@ -298,7 +341,18 @@ export async function fetchDetails(raw: AmericanRaw, cacheDir: string,
   const todo = () => missing.filter((r) => !detailFor(r, details) && !done.has(r.slug!));
   if (!todo().length) return details;
   if (max <= 0) { log(`american details: AMERICAN_DETAIL_MAX=${max}; ${todo().length} title pages not fetched`); return details; }
-  const browser = await open();
+  // opening is bounded too: a launch or first page load that never settles must not hold the run
+  let openTimedOut = false;
+  const opening = open();
+  const browser = await bounded(opening.catch((e: unknown) => { log(`american details: browser failed to open (${e instanceof Error ? e.message : e})`); return undefined; }),
+    openTimeoutMs, undefined, () => {
+      openTimedOut = true;
+      opening.then((b) => b.close(), () => {}); // close it if it ever opens
+    });
+  if (!browser) {
+    if (openTimedOut) log(`american details: browser did not open within ${openTimeoutMs / 1000}s; ${todo().length} title pages not fetched`);
+    return details;
+  }
   let fetched = 0, failed = 0, capped = false, timedOut = false, nextStart = 0;
   /** Wait for this request's start slot: request starts are at least spacingMs apart across workers. */
   const slot = async () => {
@@ -314,16 +368,14 @@ export async function fetchDetails(raw: AmericanRaw, cacheDir: string,
     fetched++;
     return true;
   };
-  const withTimeout = <T,>(p: Promise<T>, ms: number, fallback: T): Promise<T> => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    return Promise.race([p, new Promise<T>((res) => { timer = setTimeout(() => res(fallback), ms); })]).finally(() => clearTimeout(timer));
-  };
   const get = async (slug: string): Promise<string | undefined> => {
     for (let attempt = 0; ; attempt++) {
       if (attempt) await slot();
       if (!reserve()) return undefined;
-      const r = await withTimeout(browser.fetchTitle!(slug).catch((e: unknown) => ({ status: 0, body: String(e) })), timeoutMs,
-        { status: 0, body: `no answer in ${timeoutMs / 1000}s` });
+      // on timeout the fetcher is told to tear the request down, so no evaluation keeps running behind the race
+      const ctl = new AbortController();
+      const r = await bounded(browser.fetchTitle!(slug, ctl.signal).catch((e: unknown) => ({ status: 0, body: String(e) })), timeoutMs,
+        { status: 0, body: `no answer in ${timeoutMs / 1000}s` }, () => ctl.abort());
       if (r.status === 200) return r.body;
       if (attempt === 0 && (r.status === 429 || r.status >= 500)) { await Bun.sleep(retryMs * (1 + Math.random())); continue; }
       log(`american details: ${slug} -> ${r.status || r.body.slice(0, 120)}; kept without an id`);
@@ -355,7 +407,7 @@ export async function fetchDetails(raw: AmericanRaw, cacheDir: string,
     if (!browser.fetchTitle) return details;
     await Promise.all(Array.from({ length: concurrency }, worker));
   } finally {
-    await withTimeout(browser.close().catch(() => {}), 30_000, undefined);
+    await bounded(browser.close().catch(() => {}), CLOSE_TIMEOUT_MS, undefined);
   }
   if (capped) log(`american details: hit AMERICAN_DETAIL_MAX=${max} requests; ${todo().length} title pages left for the next run`);
   if (timedOut) log(`american details: stopped at the ${deadlineMs / 60_000} min deadline; ${todo().length} title pages left for the next run`);
