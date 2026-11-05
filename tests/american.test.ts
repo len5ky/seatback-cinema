@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, rmSync } from "node:fs";
 import {
   type AaDetail, type AaRecord, AmericanPageError, american, extractDetails, extractRscRecords, fetchAmerican, fetchDetails, mergeDetails, servedMonth,
 } from "../src/airlines/american.ts";
@@ -125,26 +125,29 @@ test("mergeDetails / parse: fills imdb_id and subtitles only where the gallery r
   const flat = nov as unknown as AaRecord[];
   const [a, b, c] = flat as [AaRecord, AaRecord, AaRecord];
   const details: Record<string, AaDetail> = {
-    [a.id]: { id: a.id, imdb_id: "tt22084616", subtitles: "English, Spanish (Latin)" },
-    [b.id]: { id: b.id, imdb_id: "tt9999999", subtitles: "French" },
+    [a.id]: { id: a.id, slug: a.slug, imdb_id: "tt22084616", subtitles: "English, Spanish (Latin)" },
+    [b.id]: { id: b.id, slug: b.slug, imdb_id: "tt9999999", subtitles: "French" },
+    [c.id]: { id: c.id, slug: "some-other-film-2019", imdb_id: "tt7777777", subtitles: "German" },
   };
   const merged = mergeDetails([a, { ...b, imdb_id: "tt0000001" }, c], details);
   expect(merged[0]).toMatchObject({ imdb_id: "tt22084616", subtitles: "English, Spanish (Latin)" });
   expect(merged[1]!.imdb_id).toBe("tt0000001");
-  expect(merged[2]).toBe(c);
+  expect(merged[2]).toBe(c); // same id, different slug: not applied
+  expect(mergeDetails([a], { [a.id]: { id: a.id, imdb_id: "tt1" } })[0]).toBe(a); // no slug on the detail: not applied
   expect(a.imdb_id).toBeUndefined(); // input untouched
   const films = american.parse({ pages: [flat], details });
   expect(films.find((f) => f.sourceId === a.id)).toMatchObject({ imdbId: "tt22084616", subtitles: ["English", "Spanish (Latin)"] });
   const r0 = page1.find((r) => r.imdb_id)!;
-  const old = american.parse({ pages: [page1], details: { [r0.id]: { id: r0.id, imdb_id: "tt0000002" } } });
+  const old = american.parse({ pages: [page1], details: { [r0.id]: { id: r0.id, slug: r0.slug, imdb_id: "tt0000002" } } });
   expect(old.find((f) => f.sourceId === r0.id)!.imdbId).toBe(r0.imdb_id!);
 });
 
 test("fetchDetails: polite walk, harvests ids, caches per slug+cycle, caps, survives failures", async () => {
   const cacheDir = mkdtempSync(`${tmpRoot()}/american-`);
   const base = (nov as unknown as AaRecord[])[0]!;
-  // three flat records without ids (their ids sit on page-1's embedded row) and one whose page answers 503 twice
-  const recs = extractDetails(titleRsc).map((d, i) => ({ ...base, id: d.id, slug: `page-${i}` }));
+  // three flat records without ids (their ids sit on S1's page) and one whose page answers 503 twice
+  const recs = extractDetails(titleRsc).map((d) => ({ ...base, id: d.id, slug: d.slug }));
+  const [S0, S1] = recs.map((r) => r.slug!) as [string, string];
   const raw = { pages: [[...recs, { ...base, id: "broken", slug: "broken" }]] };
   const asked: string[] = [];
   const starts: number[] = [];
@@ -155,10 +158,10 @@ test("fetchDetails: polite walk, harvests ids, caches per slug+cycle, caps, surv
       fetchTitle: async (slug: string) => {
         asked.push(slug); starts.push(Date.now());
         maxInFlight = Math.max(maxInFlight, ++inFlight);
-        await Bun.sleep(slug === "page-0" ? 80 : 20); // page-0 overlaps the next requests
+        await Bun.sleep(slug === S0 ? 80 : 20); // S0 overlaps the next requests
         inFlight--;
         if (slug === "broken") return { status: 503, body: "down" };
-        return { status: 200, body: slug === "page-0" ? "0:[]" : titleRsc };
+        return { status: 200, body: slug === S0 ? "0:[]" : titleRsc };
       },
       close: async () => {},
     };
@@ -167,12 +170,12 @@ test("fetchDetails: polite walk, harvests ids, caches per slug+cycle, caps, surv
   const dir = `${cacheDir}/american/detail/${base.cycle_start}`;
   try {
     const details = await fetchDetails(raw, cacheDir, open, { spacingMs: 30, retryMs: 1, log: (m) => logs.push(m) });
-    expect(asked).toEqual(["page-0", "page-1", "broken", "broken"]); // page-2 already resolved by page-1; 5xx retried once
+    expect(asked).toEqual([S0, S1, "broken", "broken"]); // the third already resolved by S1; 5xx retried once
     expect(maxInFlight).toBe(2);
     for (let i = 1; i < starts.length; i++) expect(starts[i]! - starts[i - 1]!).toBeGreaterThanOrEqual(28);
     expect(american.parse({ ...raw, details }).filter((f) => f.imdbId)).toHaveLength(3);
     expect(logs.some((m) => m.includes("broken -> 503"))).toBe(true);
-    expect(await Bun.file(`${dir}/page-1.json`).exists()).toBe(true);
+    expect(await Bun.file(`${dir}/${S1}.json`).exists()).toBe(true);
     expect(await Bun.file(`${dir}/broken.json`).exists()).toBe(false);
     // second run: cached pages reused, only the failed page asked again
     asked.length = 0;
@@ -183,13 +186,103 @@ test("fetchDetails: polite walk, harvests ids, caches per slug+cycle, caps, surv
     rmSync(`${cacheDir}/american/detail`, { recursive: true, force: true });
     asked.length = 0; logs.length = 0;
     await fetchDetails(raw, cacheDir, open, { max: 1, spacingMs: 1, retryMs: 1, log: (m) => logs.push(m) });
-    expect(asked).toEqual(["page-0"]);
-    expect(logs.some((m) => m.includes("hit AMERICAN_DETAIL_MAX=1"))).toBe(true);
+    expect(asked).toEqual([S0]);
+    expect(logs.some((m) => m.includes("hit AMERICAN_DETAIL_MAX=1 requests"))).toBe(true);
     // nothing missing: no browser
     opened = 0;
     await fetchDetails({ pages: [page1.filter((r) => r.imdb_id)] }, cacheDir, open, { log: () => {} });
     expect(opened).toBe(0);
   } finally {
+    rmSync(cacheDir, { recursive: true, force: true });
+  }
+});
+
+// Round 1 review fixes
+
+const hangOpen = (closed: { n: number }) => async () => ({
+  fetchTitle: (_slug: string) => new Promise<{ status: number; body: string }>(() => {}), // never settles
+  close: async () => { closed.n++; },
+});
+
+test("fetchDetails: a hung request times out, the deadline stops the walk, the browser is closed", async () => {
+  const cacheDir = mkdtempSync(`${tmpRoot()}/american-`);
+  const base = (nov as unknown as AaRecord[])[0]!;
+  const raw = { pages: [[1, 2, 3, 4, 5, 6, 7, 8].map((i) => ({ ...base, id: `r${i}`, slug: `film-${i}` }))] };
+  const closed = { n: 0 };
+  const logs: string[] = [];
+  try {
+    const t0 = Date.now();
+    await fetchDetails(raw, cacheDir, hangOpen(closed), { timeoutMs: 40, deadlineMs: 60, spacingMs: 1, retryMs: 1, log: (m) => logs.push(m) });
+    expect(Date.now() - t0).toBeLessThan(1_000);
+    expect(closed.n).toBe(1);
+    expect(logs.some((m) => m.includes("no answer in 0.04s"))).toBe(true);
+    expect(logs.some((m) => m.includes("min deadline"))).toBe(true);
+  } finally {
+    rmSync(cacheDir, { recursive: true, force: true });
+  }
+});
+
+test("fetchDetails: the cache is keyed by the served cycle, not the first record's", async () => {
+  const cacheDir = mkdtempSync(`${tmpRoot()}/american-`);
+  const base = (nov as unknown as AaRecord[])[0]!;
+  const d = extractDetails(titleRsc)[0]!;
+  const raw = { pages: [[
+    { ...base, id: "old", slug: "old-film", imdb_id: "tt0000009", cycle_start: "2026-10-01", is_current_cycle: false },
+    { ...base, id: d.id, slug: d.slug }, { ...base, id: "x2", slug: "x2" },
+  ]] };
+  const open = async () => ({ fetchTitle: async () => ({ status: 200, body: titleRsc }), close: async () => {} });
+  try {
+    await fetchDetails(raw, cacheDir, open, { spacingMs: 1, log: () => {} });
+    expect(readdirSync(`${cacheDir}/american/detail`)).toEqual(["2026-11-01"]);
+    rmSync(`${cacheDir}/american/detail`, { recursive: true, force: true });
+    await fetchDetails(raw, cacheDir, open, { month: "2026-11", spacingMs: 1, log: () => {} });
+    expect(readdirSync(`${cacheDir}/american/detail`)).toEqual(["2026-11-01"]);
+  } finally {
+    rmSync(cacheDir, { recursive: true, force: true });
+  }
+});
+
+test("fetchDetails: a 200 page without records is not cached and is asked again next run", async () => {
+  const cacheDir = mkdtempSync(`${tmpRoot()}/american-`);
+  const base = (nov as unknown as AaRecord[])[0]!;
+  const raw = { pages: [[{ ...base, id: "a", slug: "film-a" }]] };
+  const asked: string[] = [];
+  const logs: string[] = [];
+  const open = async () => ({
+    fetchTitle: async (slug: string) => { asked.push(slug); return { status: 200, body: "<!DOCTYPE html><title>Vercel Security Checkpoint</title>" }; },
+    close: async () => {},
+  });
+  try {
+    await fetchDetails(raw, cacheDir, open, { spacingMs: 1, log: (m) => logs.push(m) });
+    await fetchDetails(raw, cacheDir, open, { spacingMs: 1, log: () => {} });
+    expect(asked).toEqual(["film-a", "film-a"]);
+    expect(logs.some((m) => m.includes("200 without records") && m.includes("not cached"))).toBe(true);
+    expect(logs.some((m) => m.includes("(1 pages failed)"))).toBe(true);
+    expect(await Bun.file(`${cacheDir}/american/detail/${base.cycle_start}/film-a.json`).exists()).toBe(false);
+  } finally {
+    rmSync(cacheDir, { recursive: true, force: true });
+  }
+});
+
+test("fetchDetails: AMERICAN_DETAIL_MAX caps requests, retries included", async () => {
+  const cacheDir = mkdtempSync(`${tmpRoot()}/american-`);
+  const base = (nov as unknown as AaRecord[])[0]!;
+  const raw = { pages: [[1, 2, 3].map((i) => ({ ...base, id: `r${i}`, slug: `film-${i}` }))] };
+  const asked: string[] = [];
+  const logs: string[] = [];
+  const open = async () => ({
+    fetchTitle: async (slug: string) => { asked.push(slug); return slug === "film-1" && asked.length === 1 ? { status: 429, body: "slow down" } : { status: 200, body: titleRsc }; },
+    close: async () => {},
+  });
+  const prev = process.env.AMERICAN_DETAIL_MAX;
+  process.env.AMERICAN_DETAIL_MAX = "2";
+  try {
+    await fetchDetails(raw, cacheDir, open, { concurrency: 1, spacingMs: 1, retryMs: 1, log: (m) => logs.push(m) });
+    expect(asked).toEqual(["film-1", "film-1"]); // 429 + its retry use up the cap of 2
+    expect(logs.some((m) => m.includes("hit AMERICAN_DETAIL_MAX=2 requests"))).toBe(true);
+    expect(logs.some((m) => m.startsWith("american details: 2 requests"))).toBe(true);
+  } finally {
+    if (prev === undefined) delete process.env.AMERICAN_DETAIL_MAX; else process.env.AMERICAN_DETAIL_MAX = prev;
     rmSync(cacheDir, { recursive: true, force: true });
   }
 });

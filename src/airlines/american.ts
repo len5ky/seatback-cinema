@@ -14,6 +14,7 @@ import { splitNames } from "../text.ts";
 import { languageName } from "./lang.ts";
 
 const SITE = "https://entertainment.aa.com";
+const REQUEST_TIMEOUT_MS = 20_000; // per in-page request (gallery page or title page)
 const MAX_PAGES = 40; // 683 films / 28 per page = 25 pages in Oct 2026; the loop stops at the first empty page
 
 interface AaProgramming { audio?: string | null; subtitles?: string | null; content_type?: string | null }
@@ -84,10 +85,16 @@ export function extractDetails(text: string): AaDetail[] {
   });
 }
 
+/** A harvested detail applies to a gallery record only when both id and slug agree (a reused id never crosses films). */
+const detailFor = (r: AaRecord, details: Record<string, AaDetail>): AaDetail | undefined => {
+  const d = details[r.id];
+  return d && d.slug && r.slug && d.slug === r.slug ? d : undefined;
+};
+
 /** Fill imdb_id (and, on flat records, subtitles) from title-page details, only where the gallery record has none. */
 export function mergeDetails(records: AaRecord[], details: Record<string, AaDetail> = {}): AaRecord[] {
   return records.map((r) => {
-    const d = details[r.id];
+    const d = detailFor(r, details);
     if (!d) return r;
     const out = { ...r };
     if (!r.imdb_id && d.imdb_id) out.imdb_id = d.imdb_id;
@@ -170,10 +177,11 @@ async function openBrowser(): Promise<{ fetchPage: PageFetcher; fetchTitle: Titl
   try {
     const page = await (await browser.newContext({ userAgent: BROWSER_UA })).newPage();
     await page.goto(`${SITE}/en/movies`, { waitUntil: "load", timeout: 60_000 });
-    const rsc = (url: string) => page.evaluate(async (u) => {
-      const res = await fetch(u, { headers: { RSC: "1" } });
+    // Each in-page request aborts after REQUEST_TIMEOUT_MS so a hung fetch cannot stall a worker or the run.
+    const rsc = (url: string) => page.evaluate(async ([u, ms]) => {
+      const res = await fetch(u, { headers: { RSC: "1" }, signal: AbortSignal.timeout(ms) });
       return { status: res.status, body: await res.text() };
-    }, url);
+    }, [url, REQUEST_TIMEOUT_MS] as const);
     const fetchPage: PageFetcher = async (n) => {
       const r = await rsc(`/en/movies?page=${n}`);
       if (r.status !== 200) throw new AmericanPageError(n, r.status, r.body);
@@ -247,8 +255,11 @@ export async function fetchAmerican(month: string, cacheDir: string, refresh = f
 }
 
 export interface DetailOptions {
-  max?: number;          // cap on title-page requests per run (AMERICAN_DETAIL_MAX, default 800)
+  month?: string;        // YYYY-MM the gallery was fetched for; picks the cycle the cache is keyed by
+  max?: number;          // cap on title-page requests per run, retries included (AMERICAN_DETAIL_MAX, default 800)
   concurrency?: number;  // in flight at once, at most 2
+  timeoutMs?: number;    // per request; a request that has not settled by then counts as failed
+  deadlineMs?: number;   // whole walk; no new request starts after it (default 30 min)
   spacingMs?: number;    // minimum gap between request starts
   retryMs?: number;      // back-off before the single retry on 429/5xx
   log?: (msg: string) => void;
@@ -263,11 +274,16 @@ export interface DetailOptions {
 export async function fetchDetails(raw: AmericanRaw, cacheDir: string,
   open: () => Promise<{ fetchTitle?: TitleFetcher; close: () => Promise<void> }>, opts: DetailOptions = {}): Promise<Record<string, AaDetail>> {
   const envMax = Number(process.env.AMERICAN_DETAIL_MAX);
-  const { max = Number.isFinite(envMax) && process.env.AMERICAN_DETAIL_MAX ? envMax : 800, spacingMs = 300, retryMs = 5_000, log = console.log } = opts;
+  const {
+    max = Number.isFinite(envMax) && process.env.AMERICAN_DETAIL_MAX ? envMax : 800, spacingMs = 300, retryMs = 5_000,
+    timeoutMs = REQUEST_TIMEOUT_MS + 5_000, deadlineMs = 30 * 60_000, log = console.log,
+  } = opts;
   const concurrency = Math.min(opts.concurrency ?? 2, 2);
+  const deadline = Date.now() + deadlineMs;
   const records = [...new Map(raw.pages.flat().filter((r) => r?.id).map((r) => [r.id, r])).values()];
-  const served = servedMonth(raw);
-  const cycle = records.find((r) => r.cycle_start)?.cycle_start ?? (served ? `${served}-01` : "unknown");
+  // the served cycle, not whichever record comes first: an older-cycle row on page 1 must not key the cache
+  const month = opts.month ?? servedMonth(raw);
+  const cycle = month ? (records.find((r) => r.cycle_start?.startsWith(month))?.cycle_start ?? `${month}-01`) : "unknown";
   const dir = `${cacheDir}/american/detail/${cycle}`;
   const path = (slug: string) => `${dir}/${slug.replace(/[^a-z0-9-]/gi, "_")}.json`;
   const details: Record<string, AaDetail> = {};
@@ -279,11 +295,11 @@ export async function fetchDetails(raw: AmericanRaw, cacheDir: string,
     add(((await Bun.file(path(r.slug!)).json()) as { records: AaDetail[] }).records);
     done.add(r.slug!);
   }
-  const todo = () => missing.filter((r) => !(r.id in details) && !done.has(r.slug!));
+  const todo = () => missing.filter((r) => !detailFor(r, details) && !done.has(r.slug!));
   if (!todo().length) return details;
   if (max <= 0) { log(`american details: AMERICAN_DETAIL_MAX=${max}; ${todo().length} title pages not fetched`); return details; }
   const browser = await open();
-  let pages = 0, fetched = 0, failed = 0, capped = false, nextStart = 0;
+  let fetched = 0, failed = 0, capped = false, timedOut = false, nextStart = 0;
   /** Wait for this request's start slot: request starts are at least spacingMs apart across workers. */
   const slot = async () => {
     const now = Date.now();
@@ -291,11 +307,23 @@ export async function fetchDetails(raw: AmericanRaw, cacheDir: string,
     nextStart = start + spacingMs;
     if (start > now) await Bun.sleep(start - now);
   };
+  /** Reserve one request against the cap and the deadline; false stops the walk. */
+  const reserve = (): boolean => {
+    if (fetched >= max) { capped = true; return false; }
+    if (Date.now() >= deadline) { timedOut = true; return false; }
+    fetched++;
+    return true;
+  };
+  const withTimeout = <T,>(p: Promise<T>, ms: number, fallback: T): Promise<T> => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    return Promise.race([p, new Promise<T>((res) => { timer = setTimeout(() => res(fallback), ms); })]).finally(() => clearTimeout(timer));
+  };
   const get = async (slug: string): Promise<string | undefined> => {
     for (let attempt = 0; ; attempt++) {
       if (attempt) await slot();
-      fetched++;
-      const r = await browser.fetchTitle!(slug).catch((e: unknown) => ({ status: 0, body: String(e) }));
+      if (!reserve()) return undefined;
+      const r = await withTimeout(browser.fetchTitle!(slug).catch((e: unknown) => ({ status: 0, body: String(e) })), timeoutMs,
+        { status: 0, body: `no answer in ${timeoutMs / 1000}s` });
       if (r.status === 200) return r.body;
       if (attempt === 0 && (r.status === 429 || r.status >= 500)) { await Bun.sleep(retryMs * (1 + Math.random())); continue; }
       log(`american details: ${slug} -> ${r.status || r.body.slice(0, 120)}; kept without an id`);
@@ -306,14 +334,18 @@ export async function fetchDetails(raw: AmericanRaw, cacheDir: string,
     for (;;) {
       await slot(); // pick the next film after the wait, so pages that landed meanwhile can resolve it
       const r = todo()[0];
-      if (!r) return;
-      if (pages >= max) { capped = true; return; }
-      pages++;
+      if (!r || capped || timedOut) return;
       const slug = r.slug!;
       done.add(slug);
       const body = await get(slug);
-      if (body === undefined) { failed++; continue; }
+      if (body === undefined) { if (!capped && !timedOut) failed++; continue; }
       const ds = extractDetails(body);
+      if (!ds.length) {
+        // a 200 without records is likely a checkpoint or error page: not cached, so the next run asks again
+        failed++;
+        log(`american details: ${slug} -> 200 without records (${body.slice(0, 80).replace(/\s+/g, " ")}); not cached`);
+        continue;
+      }
       add(ds);
       mkdirSync(dir, { recursive: true });
       await Bun.write(path(slug), JSON.stringify({ slug, cycle_start: cycle, fetchedAt: new Date().toISOString(), records: ds }));
@@ -323,10 +355,11 @@ export async function fetchDetails(raw: AmericanRaw, cacheDir: string,
     if (!browser.fetchTitle) return details;
     await Promise.all(Array.from({ length: concurrency }, worker));
   } finally {
-    await browser.close();
+    await withTimeout(browser.close().catch(() => {}), 30_000, undefined);
   }
-  if (capped) log(`american details: hit AMERICAN_DETAIL_MAX=${max} title pages; ${todo().length} title pages left for the next run`);
-  const filled = missing.filter((r) => details[r.id]?.imdb_id).length;
+  if (capped) log(`american details: hit AMERICAN_DETAIL_MAX=${max} requests; ${todo().length} title pages left for the next run`);
+  if (timedOut) log(`american details: stopped at the ${deadlineMs / 60_000} min deadline; ${todo().length} title pages left for the next run`);
+  const filled = missing.filter((r) => detailFor(r, details)?.imdb_id).length;
   log(`american details: ${fetched} requests (${failed} pages failed); IMDb ids for ${filled}/${missing.length} records that had none`);
   return details;
 }
@@ -336,7 +369,7 @@ export const american: AirlineAdapter = {
   name: "American Airlines",
   fetchMonth: async (month, { cacheDir, refresh }) => {
     const raw = await fetchAmerican(month, cacheDir, refresh);
-    return { ...raw, details: await fetchDetails(raw, cacheDir, openBrowser) };
+    return { ...raw, details: await fetchDetails(raw, cacheDir, openBrowser, { month }) };
   },
   parse: parseAmerican,
 };
