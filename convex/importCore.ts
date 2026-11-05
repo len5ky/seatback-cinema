@@ -58,13 +58,13 @@ export interface ImportResult { status: number; body: ImportBody; calls: number 
 const fail = (status: number, error: ImportError, message: string, calls: number, scope?: "daily" | "user"): ImportResult =>
   ({ status, body: { ok: false, error, message, ...(scope ? { scope } : {}) }, calls });
 
-/** Cache, then caps, then IMDb. Every IMDb call is counted against both caps before it is made. */
-export async function runImport(store: ImportStore, deps: ImdbDeps, user: string): Promise<ImportResult> {
+/** Cache, then caps, then IMDb. Every IMDb call is counted against both caps before it is made. `force` skips the cache (the canary). */
+export async function runImport(store: ImportStore, deps: ImdbDeps, user: string, o: { force?: boolean } = {}): Promise<ImportResult> {
   let calls = 0;
   const counted: ImdbDeps = { fetch: (url, init) => { calls++; return deps.fetch(url, init); }, sleep: deps.sleep };
   const ref = parseImdbUserUrl(user);
   if (!ref) return fail(400, "bad_request", "user must be an IMDb profile URL, a ur id or a p. id", 0);
-  const hit = await store.cached(ref.id);
+  const hit = o.force ? null : await store.cached(ref.id);
   if (hit) return { status: 200, body: { ok: true, cached: true, import: hit }, calls };
   const capped = (r: Reservation) => (r.ok ? null : fail(429, "capped", r.scope === "daily"
     ? "The import service has reached its limit for today."
@@ -77,7 +77,7 @@ export async function runImport(store: ImportStore, deps: ImdbDeps, user: string
     let alias: string | null = null;
     if (ref.kind === "p") {
       alias = ref.id;
-      const known = await store.cached(ur);
+      const known = o.force ? null : await store.cached(ur);
       if (known) { await store.alias(alias, ur); return { status: 200, body: { ok: true, cached: true, import: known }, calls }; }
       const second = capped(await store.reserve(ur, false));
       if (second) return second;
