@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import {
   API_PAGES_PER_REQUEST, blockedHelp, fetchImdbProfile, MAX_PAGES, fetchLetterboxdProfile, imdbUserId, isChallenge, letterboxdUser, parseImdbOwnerRatings,
-  parseImdbPage, parseLetterboxdPage, ProfileBlocked,
+  parseImdbPage, permanentNote, parseLetterboxdPage, ProfileBlocked,
 } from "../skill/inflight-movie-picker/scripts/profile.ts";
 
 // Fixtures mirror the structure of real pages captured on 2026-10-30, with every user, title and id replaced by synthetic values.
@@ -122,6 +122,22 @@ test("fetchImdbProfile (page fallback): paginates until no new ids, reads scores
   expect(calls.filter((u) => u.includes("graphql"))).toHaveLength(2);
 });
 
+test("permanentNote: the page cap, a scoreless profile and a private watchlist are cached; blips, blocks and 429s are not", () => {
+  for (const n of [
+    `IMDb ratings: stopped at the ${MAX_PAGES}-page limit; kept the first ${MAX_PAGES} of 20000`,
+    `Letterboxd films: stopped at the ${MAX_PAGES}-page limit of 80; kept the first 3600`,
+    "IMDb returned no scores for the rated films; they still count as seen",
+    "watchlist skipped (IMDb's API returned none; it may be private)",
+    "watchlist skipped (this IMDb list is private)",
+  ]) expect(permanentNote(n)).toBe(true);
+  for (const n of [
+    "IMDb ratings: stopped at page 2 (IMDb's API refused the ratings list (HTTP 429)); kept the first 6",
+    "IMDb watchlist: stopped at page 2 (IMDb's API returned no data for it); kept the first 1",
+    "could not read the scores themselves (network down); rated films still count as seen",
+    "watchlist skipped (IMDb refused the request (HTTP 429))",
+  ]) expect(permanentNote(n)).toBe(false);
+});
+
 test("fetchImdbProfile: a failed score lookup keeps the seen list and says so; a WAF 202 throws ProfileBlocked", async () => {
   const noScores = await fetchImdbProfile(IMDB_URL, { fetch: imdbMock({ graphqlStatus: 403 }).f, delayMs: 0 });
   expect(noScores.seen).toHaveLength(80);
@@ -145,7 +161,7 @@ const gqlFx = (name: string) => new Response(fx(name), { headers: { "content-typ
 const SYN_URL = "https://www.imdb.com/user/p.syntheticprofile01/ratings/";
 
 /** A fake api.graphql.imdb.com: answers by what the query asks for; `fail` picks a request to break. */
-function apiMock(opts: { fail?: "resolve" | "first" | "rest" | "scores"; failWith?: number } = {}) {
+function apiMock(opts: { fail?: "resolve" | "first" | "rest" | "scores"; failWith?: number; scoresBody?: string } = {}) {
   const bodies: { query?: string; operationName?: string; variables?: { idArray?: string[] } }[] = [];
   const pages: string[] = [];
   const f = async (url: string, init?: RequestInit): Promise<Response> => {
@@ -154,7 +170,7 @@ function apiMock(opts: { fail?: "resolve" | "first" | "rest" | "scores"; failWit
     bodies.push(b);
     const kind = b.operationName === "PersonalizedUserData" ? "scores" : b.query?.includes("userProfile") ? "resolve" : b.query?.includes("p0:") ? "first" : "rest";
     if (opts.fail === kind) return opts.failWith ? new Response("", { status: opts.failWith }) : new Response(JSON.stringify({ errors: [{ message: "Cannot query field" }], data: null }), { status: 400 });
-    if (kind === "scores") return gqlFx("imdb-gql-scores.json");
+    if (kind === "scores") return opts.scoresBody !== undefined ? new Response(opts.scoresBody) : gqlFx("imdb-gql-scores.json");
     return gqlFx(kind === "resolve" ? "imdb-gql-user-profile.json" : kind === "first" ? "imdb-gql-first.json" : "imdb-gql-rest.json");
   };
   return { f, bodies, pages };
@@ -206,6 +222,19 @@ test("fetchImdbProfile (API): a failure after the first request keeps the first 
   expect(scores.seen).toHaveLength(8);
   expect(scores.ratings).toBeUndefined();
   expect(scores.notes[0]).toContain("could not read the scores themselves");
+});
+
+test("fetchImdbProfile (API): a 200 with unreadable score JSON is a transient note, not a scoreless profile", async () => {
+  for (const scoresBody of ["<html>not json", JSON.stringify({ data: null })]) {
+    const p = await fetchImdbProfile(SYN_URL, { fetch: apiMock({ scoresBody }).f, delayMs: 0 });
+    expect(p.seen).toHaveLength(8);
+    expect(p.notes).toHaveLength(1);
+    expect(p.notes[0]).toContain("could not read the scores themselves");
+    expect(permanentNote(p.notes[0]!)).toBe(false);
+  }
+  const empty = await fetchImdbProfile(SYN_URL, { fetch: apiMock({ scoresBody: JSON.stringify({ data: { titles: [] } }) }).f, delayMs: 0 });
+  expect(empty.notes).toEqual(["IMDb returned no scores for the rated films; they still count as seen"]);
+  expect(empty.notes.every(permanentNote)).toBe(true);
 });
 
 test(`fetchImdbProfile (API): a profile past ${MAX_PAGES} pages stops at the limit and says so`, async () => {

@@ -44,6 +44,10 @@ function memoryStore(caps: Caps = DEFAULT_CAPS, clock = { now: Date.UTC(2026, 9,
       const target = row.data !== undefined ? row : rows.get(row.ur);
       return target?.data !== undefined && target.expiresAt > clock.now ? (JSON.parse(target.data) as ImdbImport) : null;
     },
+    async aliasOf(alias) {
+      const row = rows.get(alias);
+      return row && row.data === undefined ? row.ur : null;
+    },
     async reserve(key, countGlobal): Promise<Reservation> {
       const day = dayOf(clock.now), g = `g:${day}`, u = `u:${key}:${day}`;
       const r = checkCaps(countGlobal ? counters.get(g) ?? 0 : null, counters.get(u) ?? 0, caps);
@@ -155,6 +159,28 @@ test("runImport: a capped ur id stops a p. link to the same profile after the re
   m.rows.clear();
   const r = await runImport(m.store, f.deps, P);
   expect(r).toMatchObject({ status: 429, body: { error: "capped", scope: "user" }, calls: 1 });
+});
+
+test("runImport: a p. link with a known alias reserves once against its capped ur id, with no IMDb call", async () => {
+  const m = memoryStore({ daily: 100, perUser: 1 }), f = fakeImdb();
+  expect((await runImport(m.store, f.deps, P)).status).toBe(200);
+  for (const row of m.rows.values()) row.expiresAt = m.clock.now; // expired, same day, alias row not pruned yet
+  const before = [...m.counters];
+  const r = await runImport(m.store, f.deps, P);
+  expect(r).toMatchObject({ status: 429, body: { error: "capped", scope: "user" }, calls: 0 });
+  expect([...m.counters]).toEqual(before);
+});
+
+test("runImport: a p. link with a known alias re-imports its ur id without a resolve call or a p. slot", async () => {
+  const m = memoryStore(), f = fakeImdb();
+  await runImport(m.store, f.deps, P);
+  for (const row of m.rows.values()) row.expiresAt = m.clock.now;
+  f.ops.length = 0;
+  const r = await runImport(m.store, f.deps, P);
+  expect(r.body).toMatchObject({ ok: true, cached: false });
+  expect(f.ops).toEqual(["ratings", "scores", "watchlist"]);
+  expect([...m.counters]).toEqual([["g:2026-10-31", 2], ["u:p.examplepublicid00000000:2026-10-31", 1], ["u:ur00000001:2026-10-31", 2]]);
+  expect((await runImport(m.store, f.deps, P)).body).toMatchObject({ ok: true, cached: true });
 });
 
 test("runImport: bot check, private ratings, unknown profile and a bad id map to their own error codes", async () => {

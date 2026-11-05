@@ -16,6 +16,7 @@ export const run = internalAction({
         const data = await ctx.runQuery(internal.store.cached, { key });
         return data === null ? null : (JSON.parse(data) as ImdbImport);
       },
+      aliasOf: (alias) => ctx.runQuery(internal.store.aliasOf, { alias }),
       reserve: (key, countGlobal) => ctx.runMutation(internal.store.reserve, { key, countGlobal, ...caps }),
       alias: async (alias, ur) => { await ctx.runMutation(internal.store.alias, { alias, ur }); },
       save: async (imp, alias) => {

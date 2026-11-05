@@ -43,6 +43,8 @@ export function safeEqual(a: string, b: string): boolean {
 /** What runImport needs from the database. `key` is a ur id, or a p. profile id that aliases one. */
 export interface ImportStore {
   cached(key: string): Promise<ImdbImport | null>;
+  /** The ur id a p. alias row points at, even after its import expired, or null. */
+  aliasOf(alias: string): Promise<string | null>;
   reserve(key: string, countGlobal: boolean): Promise<Reservation>;
   save(imp: ImdbImport, alias: string | null): Promise<void>;
   /** Point a p. alias at an already cached ur import, keeping that import's expiry. */
@@ -58,7 +60,9 @@ export interface ImportResult { status: number; body: ImportBody; calls: number 
 const fail = (status: number, error: ImportError, message: string, calls: number, scope?: "daily" | "user"): ImportResult =>
   ({ status, body: { ok: false, error, message, ...(scope ? { scope } : {}) }, calls });
 
-/** Cache, then caps, then IMDb. Every IMDb call is counted against both caps before it is made. `force` skips the cache (the canary). */
+/** Cache, then caps, then IMDb. Every IMDb call is counted against both caps before it is made.
+ *  A p. link with a known alias skips the resolve call and reserves once, against its ur id.
+ *  `force` skips every cache lookup (the canary) but still counts against the caps. */
 export async function runImport(store: ImportStore, deps: ImdbDeps, user: string, o: { force?: boolean } = {}): Promise<ImportResult> {
   let calls = 0;
   const counted: ImdbDeps = { fetch: (url, init) => { calls++; return deps.fetch(url, init); }, sleep: deps.sleep };
@@ -69,16 +73,23 @@ export async function runImport(store: ImportStore, deps: ImdbDeps, user: string
   const capped = (r: Reservation) => (r.ok ? null : fail(429, "capped", r.scope === "daily"
     ? "The import service has reached its limit for today."
     : "This IMDb profile has been imported as often as allowed today.", calls, r.scope));
-  const first = capped(await store.reserve(ref.id, true));
+  const fromCache = async (alias: string, ur: string): Promise<ImportResult | null> => {
+    const known = o.force ? null : await store.cached(ur);
+    if (!known) return null;
+    await store.alias(alias, ur);
+    return { status: 200, body: { ok: true, cached: true, import: known }, calls };
+  };
+  const alias = ref.kind === "p" ? ref.id : null;
+  const knownUr = alias ? await store.aliasOf(alias) : null;
+  if (alias && knownUr) { const known = await fromCache(alias, knownUr); if (known) return known; }
+  const first = capped(await store.reserve(knownUr ?? ref.id, true));
   if (first) return first;
   const client = new ImdbClient(counted);
   try {
-    const ur = await resolveImdbUser(client, ref);
-    let alias: string | null = null;
-    if (ref.kind === "p") {
-      alias = ref.id;
-      const known = o.force ? null : await store.cached(ur);
-      if (known) { await store.alias(alias, ur); return { status: 200, body: { ok: true, cached: true, import: known }, calls }; }
+    const ur = knownUr ?? await resolveImdbUser(client, ref);
+    if (alias && !knownUr) {
+      const known = await fromCache(alias, ur);
+      if (known) return known;
       const second = capped(await store.reserve(ur, false));
       if (second) return second;
     }
