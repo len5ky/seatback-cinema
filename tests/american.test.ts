@@ -1,6 +1,8 @@
 import { expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
-import { type AaRecord, AmericanPageError, american, extractRscRecords, fetchAmerican, servedMonth } from "../src/airlines/american.ts";
+import {
+  type AaDetail, type AaRecord, AmericanPageError, american, extractDetails, extractRscRecords, fetchAmerican, fetchDetails, mergeDetails, servedMonth,
+} from "../src/airlines/american.ts";
 import records from "./fixtures/american-records.json";
 import nov from "./fixtures/american-records-2026-11.json";
 
@@ -103,6 +105,90 @@ test("fetchAmerican: one back-off retry on 429, then a clear error", async () =>
     expect((await fetchAmerican("2026-10", cacheDir, false, flaky, 1)).pages.flat()).toHaveLength(28);
     expect(calls).toBe(3); // 429, retry ok, empty page 2
     await expect(fetchAmerican("2026-10", cacheDir, true, blocked, 1)).rejects.toThrow("still 429 after");
+  } finally {
+    rmSync(cacheDir, { recursive: true, force: true });
+  }
+});
+
+// Reduced /en/title/top-gun-maverick-2022 RSC payload (probed 2026-11-05): the page's own film is plain JSX, the
+// "You may also like" row embeds full records of other films.
+const titleRsc = await Bun.file(`${import.meta.dir}/fixtures/american/title-top-gun-maverick-2022.rsc`).text();
+
+test("extractDetails: a title page's embedded records give IMDb ids and subtitles, never the page's own film", () => {
+  const ds = extractDetails(titleRsc);
+  expect(ds.map((d) => d.slug)).toEqual(["john-wick-chapter-3-parabellum-2019", "bridesmaids-2011", "iron-man-2008"]);
+  expect(ds[0]).toEqual({ id: "44850458-94ec-40f4-9463-d6de6874116b", slug: "john-wick-chapter-3-parabellum-2019", imdb_id: "tt6146586", subtitles: "English" });
+  expect(ds[2]!.subtitles).toBe("English, Spanish (Latin), Portuguese (Brazilian), French (Parisian)");
+});
+
+test("mergeDetails / parse: fills imdb_id and subtitles only where the gallery record has none", () => {
+  const flat = nov as unknown as AaRecord[];
+  const [a, b, c] = flat as [AaRecord, AaRecord, AaRecord];
+  const details: Record<string, AaDetail> = {
+    [a.id]: { id: a.id, imdb_id: "tt22084616", subtitles: "English, Spanish (Latin)" },
+    [b.id]: { id: b.id, imdb_id: "tt9999999", subtitles: "French" },
+  };
+  const merged = mergeDetails([a, { ...b, imdb_id: "tt0000001" }, c], details);
+  expect(merged[0]).toMatchObject({ imdb_id: "tt22084616", subtitles: "English, Spanish (Latin)" });
+  expect(merged[1]!.imdb_id).toBe("tt0000001");
+  expect(merged[2]).toBe(c);
+  expect(a.imdb_id).toBeUndefined(); // input untouched
+  const films = american.parse({ pages: [flat], details });
+  expect(films.find((f) => f.sourceId === a.id)).toMatchObject({ imdbId: "tt22084616", subtitles: ["English", "Spanish (Latin)"] });
+  const r0 = page1.find((r) => r.imdb_id)!;
+  const old = american.parse({ pages: [page1], details: { [r0.id]: { id: r0.id, imdb_id: "tt0000002" } } });
+  expect(old.find((f) => f.sourceId === r0.id)!.imdbId).toBe(r0.imdb_id!);
+});
+
+test("fetchDetails: polite walk, harvests ids, caches per slug+cycle, caps, survives failures", async () => {
+  const cacheDir = mkdtempSync(`${tmpRoot()}/american-`);
+  const base = (nov as unknown as AaRecord[])[0]!;
+  // three flat records without ids (their ids sit on page-1's embedded row) and one whose page answers 503 twice
+  const recs = extractDetails(titleRsc).map((d, i) => ({ ...base, id: d.id, slug: `page-${i}` }));
+  const raw = { pages: [[...recs, { ...base, id: "broken", slug: "broken" }]] };
+  const asked: string[] = [];
+  const starts: number[] = [];
+  let inFlight = 0, maxInFlight = 0, opened = 0;
+  const open = async () => {
+    opened++;
+    return {
+      fetchTitle: async (slug: string) => {
+        asked.push(slug); starts.push(Date.now());
+        maxInFlight = Math.max(maxInFlight, ++inFlight);
+        await Bun.sleep(slug === "page-0" ? 80 : 20); // page-0 overlaps the next requests
+        inFlight--;
+        if (slug === "broken") return { status: 503, body: "down" };
+        return { status: 200, body: slug === "page-0" ? "0:[]" : titleRsc };
+      },
+      close: async () => {},
+    };
+  };
+  const logs: string[] = [];
+  const dir = `${cacheDir}/american/detail/${base.cycle_start}`;
+  try {
+    const details = await fetchDetails(raw, cacheDir, open, { spacingMs: 30, retryMs: 1, log: (m) => logs.push(m) });
+    expect(asked).toEqual(["page-0", "page-1", "broken", "broken"]); // page-2 already resolved by page-1; 5xx retried once
+    expect(maxInFlight).toBe(2);
+    for (let i = 1; i < starts.length; i++) expect(starts[i]! - starts[i - 1]!).toBeGreaterThanOrEqual(28);
+    expect(american.parse({ ...raw, details }).filter((f) => f.imdbId)).toHaveLength(3);
+    expect(logs.some((m) => m.includes("broken -> 503"))).toBe(true);
+    expect(await Bun.file(`${dir}/page-1.json`).exists()).toBe(true);
+    expect(await Bun.file(`${dir}/broken.json`).exists()).toBe(false);
+    // second run: cached pages reused, only the failed page asked again
+    asked.length = 0;
+    const again = await fetchDetails(raw, cacheDir, open, { spacingMs: 1, retryMs: 1, log: () => {} });
+    expect(Object.keys(again).sort()).toEqual(Object.keys(details).sort());
+    expect(asked).toEqual(["broken", "broken"]);
+    // cap: fresh cache, max 1 -> one title page and a log line
+    rmSync(`${cacheDir}/american/detail`, { recursive: true, force: true });
+    asked.length = 0; logs.length = 0;
+    await fetchDetails(raw, cacheDir, open, { max: 1, spacingMs: 1, retryMs: 1, log: (m) => logs.push(m) });
+    expect(asked).toEqual(["page-0"]);
+    expect(logs.some((m) => m.includes("hit AMERICAN_DETAIL_MAX=1"))).toBe(true);
+    // nothing missing: no browser
+    opened = 0;
+    await fetchDetails({ pages: [page1.filter((r) => r.imdb_id)] }, cacheDir, open, { log: () => {} });
+    expect(opened).toBe(0);
   } finally {
     rmSync(cacheDir, { recursive: true, force: true });
   }
