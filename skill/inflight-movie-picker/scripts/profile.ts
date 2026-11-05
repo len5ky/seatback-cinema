@@ -283,6 +283,10 @@ async function imdbOwnerRatings(userId: string, ids: string[], o: FetchOpts): Pr
     });
     const text = await res.text();
     if (!res.ok || isChallenge(res.status, res.headers, text)) throw new Error(`IMDb rating lookup -> HTTP ${res.status}${res.headers.get("x-amzn-waf-action") ? ", bot check" : ""}`);
+    // A 200 that is not a titles answer is a failed lookup, not a scoreless profile (whose note is cached).
+    let titles: unknown;
+    try { titles = obj(obj(JSON.parse(text) as Json).data).titles; } catch { titles = undefined; }
+    if (!Array.isArray(titles)) throw new Error(`IMDb rating lookup -> HTTP ${res.status} without a titles list`);
     for (const [k, v] of parseImdbOwnerRatings(text)) out.set(k, v);
   }
   return out;

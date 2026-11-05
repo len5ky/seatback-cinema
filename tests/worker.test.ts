@@ -4,7 +4,7 @@ import { scorePick } from "../src/rank-core.ts";
 import { createApp, type Env } from "../worker/src/app.ts";
 import { Catalogue, isFamily } from "../worker/src/catalogue.ts";
 import { PROTOCOL_VERSIONS } from "../worker/src/mcp.ts";
-import { TOKEN_RE, newToken, profileFromText, validateProfile } from "../worker/src/profile.ts";
+import { TOKEN_RE, mergeProfiles, newToken, profileFromText, validateProfile } from "../worker/src/profile.ts";
 import type { ProfileStore } from "../worker/src/tools.ts";
 
 const bundle = (await Bun.file(`${import.meta.dir}/../worker/test/fixtures/catalogue.sample.json`).json()) as Bundle;
@@ -69,9 +69,17 @@ test("profile: a film rated on both IMDb and Letterboxd counts once, with the IM
   for (const ratings of [{ tt31193180: 10, "Sinners (2025)": 2 }, { "Sinners (2025)": 2, tt31193180: 10 }]) {
     expect(cat.applyProfile({ seen: [], ratings }, "test").model).toEqual(imdbOnly.model);
   }
+  // A Letterboxd row keyed by the tconst itself, merged before or after the IMDb profile.
+  const imdb = { seen: ["tt31193180"], ratings: { tt31193180: 10 }, source: "imdb_csv" };
+  const lb = { seen: ["tt31193180"], ratings: { tt31193180: 2 }, source: "letterboxd_page" };
+  for (const [x, y] of [[imdb, lb], [lb, imdb]] as const) {
+    const merged = mergeProfiles(x, y);
+    expect(merged.source).toBe("imdb_csv+letterboxd_page");
+    expect(cat.applyProfile(merged, "test").model).toEqual(imdbOnly.model);
+  }
   // Two Letterboxd rows for one film: the last wins.
-  const lb = cat.applyProfile({ seen: [], ratings: { "lb:the-dark-knight": 3, "The Dark Knight (2008)": 9 } }, "test");
-  expect(lb.model).toEqual(cat.applyProfile({ seen: [], ratings: { tt0468569: 9 } }, "test").model);
+  const lbTwice = cat.applyProfile({ seen: [], ratings: { "lb:the-dark-knight": 3, "The Dark Knight (2008)": 9 } }, "test");
+  expect(lbTwice.model).toEqual(cat.applyProfile({ seen: [], ratings: { tt0468569: 9 } }, "test").model);
 });
 
 test("flight_minutes drops films longer than the flight minus 30", () => {

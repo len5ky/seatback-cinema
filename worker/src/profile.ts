@@ -187,12 +187,16 @@ export function profileFromText(text: string, kind: ProfileKind, slugs: Record<s
   }
 }
 
-/** Union of two profiles (later ratings win), for combining several pages or files. */
+/** Union of two profiles, for combining several pages or files. Later ratings win, except that an IMDb profile's
+ *  rating beats a Letterboxd one for the same film in either order; the source then names both. */
 export function mergeProfiles(a: Profile, b: Profile): Profile {
   const u = (x?: string[], y?: string[]) => [...new Set([...(x ?? []), ...(y ?? [])])];
+  const imdb = (p: Profile) => /imdb/.test(p.source ?? "");
+  const mixed = imdb(a) !== imdb(b) && !!a.source && !!b.source;
   return validateProfile({
-    seen: u(a.seen, b.seen), ratings: { ...a.ratings, ...b.ratings }, watchlist: u(a.watchlist, b.watchlist),
+    seen: u(a.seen, b.seen), ratings: imdb(a) && !imdb(b) ? { ...b.ratings, ...a.ratings } : { ...a.ratings, ...b.ratings },
+    watchlist: u(a.watchlist, b.watchlist),
     liked_directors: u(a.liked_directors, b.liked_directors), liked_genres: u(a.liked_genres, b.liked_genres),
-    disliked_genres: u(a.disliked_genres, b.disliked_genres), source: b.source ?? a.source,
+    disliked_genres: u(a.disliked_genres, b.disliked_genres), source: mixed ? [a.source, b.source].sort().join("+") : b.source ?? a.source,
   });
 }
