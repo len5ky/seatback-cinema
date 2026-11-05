@@ -3,7 +3,9 @@
 // blocks curl on TLS fingerprint, so the pages are fetched from inside a headless Chromium session.
 // Two record shapes: through Oct 2026 each record nested its shelves and languages in `summaries` and carried
 // `imdb_id`; from Nov 2026 the gallery serves flat per-cycle rows (`cycle_start`, `categories`, ISO `audio` codes,
-// `image_url`) with no IMDb id, so those films are matched on title, year and director.
+// `image_url`) with no IMDb id and no subtitles. A title page (/en/title/<slug>) does not carry its own film's id,
+// but it embeds ~20 recommended films as full nested records (imdb_id and subtitles included), so walking the title
+// pages of the films still missing an id harvests ids for the rest of the catalogue (fetchDetails).
 import type { AirlineAdapter, CatalogueFilm } from "./types.ts";
 import { existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import { homedir } from "node:os";
@@ -12,6 +14,7 @@ import { splitNames } from "../text.ts";
 import { languageName } from "./lang.ts";
 
 const SITE = "https://entertainment.aa.com";
+const REQUEST_TIMEOUT_MS = 20_000; // per in-page request (gallery page or title page)
 const MAX_PAGES = 40; // 683 films / 28 per page = 25 pages in Oct 2026; the loop stops at the first empty page
 
 interface AaProgramming { audio?: string | null; subtitles?: string | null; content_type?: string | null }
@@ -26,9 +29,13 @@ export interface AaRecord {
   mpaa_rating?: string | null; synopsis?: string | null; poster?: string | null; summaries?: AaSummary[] | null;
   // flat shape (Nov 2026 on)
   cycle_start?: string | null; is_current_cycle?: boolean | null; categories?: string[] | null; audio?: string[] | null;
-  image_url?: string | null;
+  image_url?: string | null; subtitles?: string | null;
 }
-export interface AmericanRaw { pages: AaRecord[][] }
+/** What a title page's embedded records tell about a film: IMDb id (null = the site has none) and subtitles. */
+export interface AaDetail { id: string; slug?: string | null; imdb_id: string | null; subtitles?: string | null }
+/** Details are keyed by id and slug together, so a reused id with another slug never shadows the matching one. */
+export interface AmericanRaw { pages: AaRecord[][]; details?: Record<string, AaDetail> }
+export const detailKey = (id: string, slug: string | null | undefined): string => `${id}/${slug ?? ""}`;
 
 /** Parse a `text/x-component` RSC payload: every JSON row, walked for title objects (`name` plus `imdb_id` or `cycle_start`). */
 export function extractRscRecords(text: string): AaRecord[] {
@@ -55,7 +62,7 @@ const currentSummaries = (r: AaRecord): AaSummary[] => {
   if (!r.summaries) {
     // flat shape: the record is its own (single-cycle) summary
     return [{ cycles: { cycle_start: r.cycle_start ?? null, is_current_cycle: r.is_current_cycle ?? null }, picks: r.categories ?? [],
-      programming: r.audio?.length ? [{ audio: uniq(r.audio.map(languageName)).join(", ") }] : [] }];
+      programming: r.audio?.length || r.subtitles ? [{ audio: uniq((r.audio ?? []).map(languageName)).join(", "), subtitles: r.subtitles ?? null }] : [] }];
   }
   const all = r.summaries;
   const current = all.filter((s) => s.cycles?.is_current_cycle);
@@ -72,9 +79,34 @@ export function servedMonth(raw: AmericanRaw): string | undefined {
   return [...counts].sort((a, b) => b[1] - a[1])[0]?.[0];
 }
 
+/** Embedded records of a title page's RSC payload (the recommended films; never the page's own film). */
+export function extractDetails(text: string): AaDetail[] {
+  return extractRscRecords(text).filter((r) => "imdb_id" in r).map((r) => {
+    const subtitles = uniq((r.summaries ?? []).flatMap((s) => (s.programming ?? []).flatMap((p) => splitList(p.subtitles))));
+    return { id: r.id, slug: r.slug ?? null, imdb_id: r.imdb_id?.startsWith("tt") ? r.imdb_id : null, ...(subtitles.length ? { subtitles: subtitles.join(", ") } : {}) };
+  });
+}
+
+/** A harvested detail applies to a gallery record only when both id and slug agree (a reused id never crosses films). */
+const detailFor = (r: AaRecord, details: Record<string, AaDetail>): AaDetail | undefined =>
+  r.slug ? details[detailKey(r.id, r.slug)] : undefined;
+
+/** Fill imdb_id (and, on flat records, subtitles) from title-page details, only where the gallery record has none. */
+export function mergeDetails(records: AaRecord[], details: Record<string, AaDetail> = {}): AaRecord[] {
+  return records.map((r) => {
+    const d = detailFor(r, details);
+    if (!d) return r;
+    const out = { ...r };
+    if (!r.imdb_id && d.imdb_id) out.imdb_id = d.imdb_id;
+    if (!r.summaries && !r.subtitles && d.subtitles) out.subtitles = d.subtitles;
+    return out;
+  });
+}
+
 export function parseAmerican(raw: unknown): CatalogueFilm[] {
   const films = new Map<string, CatalogueFilm>();
-  for (const r of (raw as AmericanRaw).pages.flat()) {
+  const { pages, details } = raw as AmericanRaw;
+  for (const r of mergeDetails(pages.flat().filter(Boolean), details)) {
     if (!r?.id || films.has(r.id) || (r.content_type && r.content_type !== "Film")) continue;
     const summaries = currentSummaries(r);
     const programming = summaries.flatMap((s) => s.programming ?? []);
@@ -101,8 +133,20 @@ export function parseAmerican(raw: unknown): CatalogueFilm[] {
   return [...films.values()];
 }
 
+/** `p`, or `fallback` once `ms` pass; `onTimeout` runs when the fallback wins (to cancel or clean up the loser). */
+function bounded<T>(p: Promise<T>, ms: number, fallback: T, onTimeout?: () => void): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return Promise.race([p, new Promise<T>((res) => { timer = setTimeout(() => { onTimeout?.(); res(fallback); }, ms); })])
+    .finally(() => clearTimeout(timer));
+}
+const CLOSE_TIMEOUT_MS = 30_000;
+const OPEN_TIMEOUT_MS = 120_000;
+
 /** Fetch one gallery page's RSC payload from inside the browser page (same origin, browser TLS). */
 export type PageFetcher = (n: number) => Promise<string>;
+/** Fetch one title page's RSC payload (/en/title/<slug>, same context and headers as the gallery). */
+/** When `signal` aborts, the in-page request is torn down (its page closed) and the promise settles. */
+export type TitleFetcher = (slug: string, signal?: AbortSignal) => Promise<{ status: number; body: string }>;
 
 /** A non-200 gallery page; 429 is the site's rate limit / bot checkpoint. */
 export class AmericanPageError extends Error {
@@ -132,7 +176,7 @@ function chromiumPath(pinned: string): string | undefined {
 }
 
 /** Open headless Chromium on /en/movies and return an in-page fetcher. Playwright is imported lazily so the CLI runs without it. */
-async function openBrowser(): Promise<{ fetchPage: PageFetcher; close: () => Promise<void> }> {
+async function openBrowser(): Promise<{ fetchPage: PageFetcher; fetchTitle: TitleFetcher; close: () => Promise<void> }> {
   let chromium: typeof import("playwright").chromium;
   try {
     ({ chromium } = await import("playwright"));
@@ -140,20 +184,49 @@ async function openBrowser(): Promise<{ fetchPage: PageFetcher; close: () => Pro
     throw new Error("american needs Playwright: bun add -d playwright (Chromium from ~/.cache/ms-playwright is reused)");
   }
   const browser = await chromium.launch({ headless: true, executablePath: chromiumPath(chromium.executablePath()) });
+  const close = () => bounded(browser.close().catch(() => {}), CLOSE_TIMEOUT_MS, undefined);
   try {
-    const page = await (await browser.newContext({ userAgent: BROWSER_UA })).newPage();
-    await page.goto(`${SITE}/en/movies`, { waitUntil: "load", timeout: 60_000 });
+    const context = await browser.newContext({ userAgent: BROWSER_UA });
+    const freshPage = async () => {
+      const p = await context.newPage();
+      await p.goto(`${SITE}/en/movies`, { waitUntil: "load", timeout: 60_000 });
+      return p;
+    };
+    let current = freshPage();
+    await current;
+    // Each in-page request aborts after REQUEST_TIMEOUT_MS so a hung fetch cannot stall a worker or the run.
+    const rsc = async (url: string) => (await current).evaluate(async ([u, ms]) => {
+      const res = await fetch(u, { headers: { RSC: "1" }, signal: AbortSignal.timeout(ms) });
+      return { status: res.status, body: await res.text() };
+    }, [url, REQUEST_TIMEOUT_MS] as const);
     const fetchPage: PageFetcher = async (n) => {
-      const r = await page.evaluate(async (url) => {
-        const res = await fetch(url, { headers: { RSC: "1" } });
-        return { status: res.status, body: await res.text() };
-      }, `/en/movies?page=${n}`);
+      const r = await rsc(`/en/movies?page=${n}`);
       if (r.status !== 200) throw new AmericanPageError(n, r.status, r.body);
       return r.body;
     };
-    return { fetchPage, close: () => browser.close() };
+    // A caller-side abort means the page's JS is stuck: close that page (which rejects every evaluation still running
+    // on it) and open a fresh one on the same origin for the next request.
+    const fetchTitle: TitleFetcher = async (slug, signal) => {
+      const used = current;
+      const page = await used;
+      const onAbort = () => {
+        if (current === used) { current = freshPage(); current.catch(() => {}); }
+        void bounded(page.close().catch(() => {}), CLOSE_TIMEOUT_MS, undefined);
+      };
+      if (signal?.aborted) onAbort();
+      signal?.addEventListener("abort", onAbort, { once: true });
+      try {
+        return await page.evaluate(async ([u, ms]) => {
+          const res = await fetch(u, { headers: { RSC: "1" }, signal: AbortSignal.timeout(ms) });
+          return { status: res.status, body: await res.text() };
+        }, [`/en/title/${encodeURIComponent(slug)}`, REQUEST_TIMEOUT_MS] as const);
+      } finally {
+        signal?.removeEventListener("abort", onAbort);
+      }
+    };
+    return { fetchPage, fetchTitle, close };
   } catch (e) {
-    await browser.close();
+    await close();
     throw e;
   }
 }
@@ -180,7 +253,7 @@ async function fetchPatiently(fetchPage: PageFetcher, n: number, retryMs: number
  * Walk the gallery pages until one has no new records. Each page's extracted records are cached as
  * page-N.json; complete.json marks a finished walk so later runs need no browser.
  */
-export async function fetchAmerican(month: string, cacheDir: string, refresh = false, open = openBrowser, retryMs = 30_000): Promise<AmericanRaw> {
+export async function fetchAmerican(month: string, cacheDir: string, refresh = false, open: () => Promise<{ fetchPage: PageFetcher; close: () => Promise<void> }> = openBrowser, retryMs = 30_000): Promise<AmericanRaw> {
   const dir = monthDir(cacheDir, "american", month);
   const donePath = `${dir}/complete.json`;
   const pagePath = (n: number) => `${dir}/page-${n}.json`;
@@ -217,9 +290,138 @@ export async function fetchAmerican(month: string, cacheDir: string, refresh = f
   return { pages };
 }
 
+export interface DetailOptions {
+  month?: string;        // YYYY-MM the gallery was fetched for; picks the cycle the cache is keyed by
+  max?: number;          // cap on title-page requests per run, retries included (AMERICAN_DETAIL_MAX, default 800)
+  concurrency?: number;  // in flight at once, at most 2
+  timeoutMs?: number;    // per request; a request that has not settled by then counts as failed
+  deadlineMs?: number;   // whole walk; no new request starts after it (default 30 min)
+  openTimeoutMs?: number; // browser launch + first page load (default 2 min)
+  spacingMs?: number;    // minimum gap between request starts
+  retryMs?: number;      // back-off before the single retry on 429/5xx
+  log?: (msg: string) => void;
+}
+
+/**
+ * Harvest IMDb ids for gallery records that have none, from the title pages of those films (each page embeds ~20
+ * other films' full records). Each page's extract is cached as <cacheDir>/american/detail/<cycle_start>/<slug>.json,
+ * outside the month dir so a --refresh of the gallery does not refetch it: once per cycle per slug. A failed page is
+ * logged and skipped, never failing the run. The browser opens only if some needed page is not cached.
+ */
+export async function fetchDetails(raw: AmericanRaw, cacheDir: string,
+  open: () => Promise<{ fetchTitle?: TitleFetcher; close: () => Promise<void> }>, opts: DetailOptions = {}): Promise<Record<string, AaDetail>> {
+  const envMax = Number(process.env.AMERICAN_DETAIL_MAX);
+  const {
+    max = Number.isFinite(envMax) && process.env.AMERICAN_DETAIL_MAX ? envMax : 800, spacingMs = 300, retryMs = 5_000,
+    timeoutMs = REQUEST_TIMEOUT_MS + 5_000, deadlineMs = 30 * 60_000, openTimeoutMs = OPEN_TIMEOUT_MS, log = console.log,
+  } = opts;
+  const concurrency = Math.min(opts.concurrency ?? 2, 2);
+  const deadline = Date.now() + deadlineMs;
+  const records = [...new Map(raw.pages.flat().filter((r) => r?.id).map((r) => [r.id, r])).values()];
+  // the served cycle, not whichever record comes first: an older-cycle row on page 1 must not key the cache
+  const month = opts.month ?? servedMonth(raw);
+  const cycle = month ? (records.find((r) => r.cycle_start?.startsWith(month))?.cycle_start ?? `${month}-01`) : "unknown";
+  const dir = `${cacheDir}/american/detail/${cycle}`;
+  const path = (slug: string) => `${dir}/${slug.replace(/[^a-z0-9-]/gi, "_")}.json`;
+  const details: Record<string, AaDetail> = {};
+  const add = (ds: AaDetail[]) => {
+    for (const d of ds) {
+      if (!d.slug) continue;
+      const k = detailKey(d.id, d.slug);
+      if (!details[k]?.imdb_id) details[k] = d;
+    }
+  };
+  const missing = records.filter((r) => !r.imdb_id && r.slug && (!r.content_type || r.content_type === "Film"));
+  const done = new Set<string>();
+  for (const r of missing) {
+    if (!existsSync(path(r.slug!))) continue;
+    add(((await Bun.file(path(r.slug!)).json()) as { records: AaDetail[] }).records);
+    done.add(r.slug!);
+  }
+  const todo = () => missing.filter((r) => !detailFor(r, details) && !done.has(r.slug!));
+  if (!todo().length) return details;
+  if (max <= 0) { log(`american details: AMERICAN_DETAIL_MAX=${max}; ${todo().length} title pages not fetched`); return details; }
+  // opening is bounded too: a launch or first page load that never settles must not hold the run
+  let openTimedOut = false;
+  const opening = open();
+  const browser = await bounded(opening.catch((e: unknown) => { log(`american details: browser failed to open (${e instanceof Error ? e.message : e})`); return undefined; }),
+    openTimeoutMs, undefined, () => {
+      openTimedOut = true;
+      opening.then((b) => b.close(), () => {}); // close it if it ever opens
+    });
+  if (!browser) {
+    if (openTimedOut) log(`american details: browser did not open within ${openTimeoutMs / 1000}s; ${todo().length} title pages not fetched`);
+    return details;
+  }
+  let fetched = 0, failed = 0, capped = false, timedOut = false, nextStart = 0;
+  /** Wait for this request's start slot: request starts are at least spacingMs apart across workers. */
+  const slot = async () => {
+    const now = Date.now();
+    const start = Math.max(now, nextStart);
+    nextStart = start + spacingMs;
+    if (start > now) await Bun.sleep(start - now);
+  };
+  /** Reserve one request against the cap and the deadline; false stops the walk. */
+  const reserve = (): boolean => {
+    if (fetched >= max) { capped = true; return false; }
+    if (Date.now() >= deadline) { timedOut = true; return false; }
+    fetched++;
+    return true;
+  };
+  const get = async (slug: string): Promise<string | undefined> => {
+    for (let attempt = 0; ; attempt++) {
+      if (attempt) await slot();
+      if (!reserve()) return undefined;
+      // on timeout the fetcher is told to tear the request down, so no evaluation keeps running behind the race
+      const ctl = new AbortController();
+      const r = await bounded(browser.fetchTitle!(slug, ctl.signal).catch((e: unknown) => ({ status: 0, body: String(e) })), timeoutMs,
+        { status: 0, body: `no answer in ${timeoutMs / 1000}s` }, () => ctl.abort());
+      if (r.status === 200) return r.body;
+      if (attempt === 0 && (r.status === 429 || r.status >= 500)) { await Bun.sleep(retryMs * (1 + Math.random())); continue; }
+      log(`american details: ${slug} -> ${r.status || r.body.slice(0, 120)}; kept without an id`);
+      return undefined;
+    }
+  };
+  const worker = async () => {
+    for (;;) {
+      await slot(); // pick the next film after the wait, so pages that landed meanwhile can resolve it
+      const r = todo()[0];
+      if (!r || capped || timedOut) return;
+      const slug = r.slug!;
+      done.add(slug);
+      const body = await get(slug);
+      if (body === undefined) { if (!capped && !timedOut) failed++; continue; }
+      const ds = extractDetails(body);
+      if (!ds.length) {
+        // a 200 without records is likely a checkpoint or error page: not cached, so the next run asks again
+        failed++;
+        log(`american details: ${slug} -> 200 without records (${body.slice(0, 80).replace(/\s+/g, " ")}); not cached`);
+        continue;
+      }
+      add(ds);
+      mkdirSync(dir, { recursive: true });
+      await Bun.write(path(slug), JSON.stringify({ slug, cycle_start: cycle, fetchedAt: new Date().toISOString(), records: ds }));
+    }
+  };
+  try {
+    if (!browser.fetchTitle) return details;
+    await Promise.all(Array.from({ length: concurrency }, worker));
+  } finally {
+    await bounded(browser.close().catch(() => {}), CLOSE_TIMEOUT_MS, undefined);
+  }
+  if (capped) log(`american details: hit AMERICAN_DETAIL_MAX=${max} requests; ${todo().length} title pages left for the next run`);
+  if (timedOut) log(`american details: stopped at the ${deadlineMs / 60_000} min deadline; ${todo().length} title pages left for the next run`);
+  const filled = missing.filter((r) => detailFor(r, details)?.imdb_id).length;
+  log(`american details: ${fetched} requests (${failed} pages failed); IMDb ids for ${filled}/${missing.length} records that had none`);
+  return details;
+}
+
 export const american: AirlineAdapter = {
   id: "american",
   name: "American Airlines",
-  fetchMonth: (month, { cacheDir, refresh }) => fetchAmerican(month, cacheDir, refresh),
+  fetchMonth: async (month, { cacheDir, refresh }) => {
+    const raw = await fetchAmerican(month, cacheDir, refresh);
+    return { ...raw, details: await fetchDetails(raw, cacheDir, openBrowser, { month }) };
+  },
   parse: parseAmerican,
 };
