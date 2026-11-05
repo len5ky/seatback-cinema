@@ -83,3 +83,23 @@ test("ids sync seeds from ids.json and queries nothing when every ranked tconst 
 test("ids sync on an empty table with nothing ranked makes no requests", async () => {
   expect(await syncIds(openDb(":memory:"))).toEqual({ seeded: 0, queried: 0, known: 0, batches: 0, failedBatches: 0 });
 });
+
+test("ids sync re-queries 'none' rows older than 30 days and skips fresh ones", async () => {
+  const db = openDb(":memory:");
+  db.run("INSERT INTO snapshots VALUES ('ek','2026-10','x','d',1)");
+  db.run("INSERT INTO movies (airline, month, source_id, title) VALUES ('ek','2026-10','a','Moon'), ('ek','2026-10','b','Nine')");
+  db.run("INSERT INTO matches VALUES ('ek','a','tt1182345','high',1,'','x'), ('ek','b','tt9','high',1,'','x')");
+  const now = new Date("2026-11-05T00:00:00.000Z");
+  storeIds(db, ["tt1182345"], [], new Date(now.getTime() - 31 * 86400_000).toISOString());
+  storeIds(db, ["tt9"], [], new Date(now.getTime() - 86400_000).toISOString());
+  const asked: string[][] = [];
+  const query = async (t: string[]): Promise<SparqlResponse> => {
+    asked.push(t);
+    return { results: { bindings: saved.results.bindings.filter((b) => t.includes(b.imdb?.value ?? "")) } };
+  };
+  expect(await syncIds(db, { now, query })).toEqual({ seeded: 0, queried: 1, known: 1, batches: 1, failedBatches: 0 });
+  expect(asked).toEqual([["tt1182345"]]);
+  expect(db.query("SELECT tmdb_id, source, fetched_at FROM external_ids WHERE tconst = 'tt1182345'").get())
+    .toEqual({ tmdb_id: 17431, source: "wikidata", fetched_at: now.toISOString() });
+  expect((await syncIds(db, { now, query })).batches).toBe(0); // both rows are fresh now
+});

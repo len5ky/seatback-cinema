@@ -46,7 +46,7 @@ async function querySparql(tconsts: string[]): Promise<SparqlResponse> {
   return (await res.json()) as SparqlResponse;
 }
 
-/** Store ids for a queried batch; tconsts Wikidata does not know get an all-null 'none' row so they are not re-queried. */
+/** Store ids for a queried batch; tconsts Wikidata does not know get an all-null 'none' row so they are only re-queried once stale (see NONE_RETRY_MS). */
 export function storeIds(db: Database, queried: string[], found: ExternalIds[], now = new Date().toISOString()): void {
   const ins = db.prepare("INSERT OR REPLACE INTO external_ids VALUES (?,?,?,?,?,?,?)");
   const known = new Map(found.map((e) => [e.tconst, e]));
@@ -93,20 +93,28 @@ export function seedIds(db: Database, path: string, now = new Date().toISOString
 
 export interface IdsSyncResult { seeded: number; queried: number; known: number; batches: number; failedBatches: number }
 
-/** Seed from `seedFile` if given, then query Wikidata for tconsts that still have no external_ids row, 200 per POST, 1 req/s. */
-export async function syncIds(db: Database, o: { airline?: string; limit?: number; seedFile?: string; log?: (s: string) => void } = {}): Promise<IdsSyncResult> {
+/** 'none' rows older than this are asked again: Wikidata keeps adding ids for new releases. */
+export const NONE_RETRY_MS = 30 * 24 * 3600_000;
+
+/** Seed from `seedFile` if given, then query Wikidata for tconsts with no external_ids row or a stale 'none' row, 200 per POST, 1 req/s. */
+export async function syncIds(db: Database, o: {
+  airline?: string; limit?: number; seedFile?: string; log?: (s: string) => void;
+  now?: Date; query?: (tconsts: string[]) => Promise<SparqlResponse>;
+} = {}): Promise<IdsSyncResult> {
   const seeded = o.seedFile ? seedIds(db, o.seedFile) : 0;
   if (seeded) o.log?.(`seeded ${seeded} ids from ${o.seedFile}`);
-  const has = db.query<{ n: number }, [string]>("SELECT 1 AS n FROM external_ids WHERE tconst = ?");
-  let todo = rankedTconsts(db, o.airline).filter((t) => !has.get(t));
+  const now = o.now ?? new Date();
+  const staleBefore = new Date(now.getTime() - NONE_RETRY_MS).toISOString();
+  const fresh = db.query<{ n: number }, [string, string]>("SELECT 1 AS n FROM external_ids WHERE tconst = ? AND NOT (source = 'none' AND fetched_at < ?)");
+  let todo = rankedTconsts(db, o.airline).filter((t) => !fresh.get(t, staleBefore));
   if (o.limit !== undefined) todo = todo.slice(0, o.limit);
   const r: IdsSyncResult = { seeded, queried: 0, known: 0, batches: 0, failedBatches: 0 };
   for (let i = 0; i < todo.length; i += WIKIDATA_BATCH) {
     const batch = todo.slice(i, i + WIKIDATA_BATCH);
     r.batches++;
     try {
-      const found = parseSparql(await querySparql(batch));
-      storeIds(db, batch, found);
+      const found = parseSparql(await (o.query ?? querySparql)(batch));
+      storeIds(db, batch, found, now.toISOString());
       r.queried += batch.length;
       r.known += found.length;
       o.log?.(`wikidata batch ${r.batches}: ${found.length}/${batch.length} known`);
