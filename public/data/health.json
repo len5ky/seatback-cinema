@@ -99,9 +99,9 @@
       "reason": "fetched locally",
       "exitCode": 0,
       "films": 708,
-      "seconds": 19,
-      "checkedAt": "2026-11-01T10:55:01Z",
-      "lastSuccess": "2026-11-01T10:55:01Z",
+      "seconds": 10,
+      "checkedAt": "2026-11-05T11:33:03Z",
+      "lastSuccess": "2026-11-05T11:33:03Z",
       "error": null
     }
   }
