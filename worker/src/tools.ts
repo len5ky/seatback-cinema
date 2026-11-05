@@ -58,6 +58,7 @@ const PROFILE = {
     liked_genres: strList("Genres they like."),
     disliked_genres: strList("Genres they avoid."),
     source: { type: "string", description: "Where the profile came from, e.g. imdb_csv." },
+    imdb_rated: strList("Rating keys that came from IMDb (set by profile_from_text when it merges IMDb and Letterboxd; pass it back unchanged)."),
   },
   required: ["seen"],
 };

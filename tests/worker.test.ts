@@ -74,12 +74,27 @@ test("profile: a film rated on both IMDb and Letterboxd counts once, with the IM
   const lb = { seen: ["tt31193180"], ratings: { tt31193180: 2 }, source: "letterboxd_page" };
   for (const [x, y] of [[imdb, lb], [lb, imdb]] as const) {
     const merged = mergeProfiles(x, y);
-    expect(merged.source).toBe("imdb_csv+letterboxd_page");
+    expect(merged.source).toBe(`${x.source}+${y.source}`);
+    expect(merged.imdb_rated).toEqual(["tt31193180"]);
     expect(cat.applyProfile(merged, "test").model).toEqual(imdbOnly.model);
   }
   // Two Letterboxd rows for one film: the last wins.
   const lbTwice = cat.applyProfile({ seen: [], ratings: { "lb:the-dark-knight": 3, "The Dark Knight (2008)": 9 } }, "test");
   expect(lbTwice.model).toEqual(cat.applyProfile({ seen: [], ratings: { tt0468569: 9 } }, "test").model);
+});
+
+test("mergeProfiles: IMDb wins per rating key, otherwise the later rating; the source joins each part once, in order", () => {
+  const imdb = (ratings: Record<string, number>) => ({ seen: Object.keys(ratings), ratings, source: "imdb_csv" });
+  const lb = (ratings: Record<string, number>) => ({ seen: Object.keys(ratings), ratings, source: "letterboxd_page" });
+  // IMDb(tt1) + Letterboxd(tt2=2), then a later Letterboxd(tt2=8): the later Letterboxd rating wins; tt1 stays IMDb's.
+  const first = mergeProfiles(imdb({ tt0000001: 9 }), lb({ tt0000002: 2 }));
+  const later = mergeProfiles(validateProfile(JSON.parse(JSON.stringify(first))), lb({ tt0000002: 8, tt0000001: 3 }));
+  expect(later.ratings).toEqual({ tt0000001: 9, tt0000002: 8 });
+  expect(later.imdb_rated).toEqual(["tt0000001"]);
+  expect(mergeProfiles(later, imdb({ tt0000002: 6 })).ratings).toEqual({ tt0000001: 9, tt0000002: 6 });
+  expect(mergeProfiles(first, imdb({ tt0000003: 7 })).source).toBe("imdb_csv+letterboxd_page");
+  expect(later.source).toBe("imdb_csv+letterboxd_page");
+  expect(mergeProfiles(lb({ tt0000002: 2 }), lb({ tt0000002: 5 }))).toEqual({ seen: ["tt0000002"], ratings: { tt0000002: 5 }, source: "letterboxd_page" });
 });
 
 test("flight_minutes drops films longer than the flight minus 30", () => {
@@ -220,6 +235,13 @@ test("tools/call: list_airlines, catalogue paging, picks with errors the model c
   expect(bad.content[0]!.text).toContain("emirates");
   expect((await call("catalogue", { airline: "emirates", filters: { colour: "red" } })).content[0]!.text).toContain("valid filters");
   expect((await rpc("tools/call", { name: "nope", arguments: {} })).body.error?.code).toBe(-32602);
+});
+
+test("save_profile keeps a merged profile's imdb_rated through KV", async () => {
+  const merged = mergeProfiles({ seen: ["tt0111161"], ratings: { tt0111161: 9 }, source: "imdb_csv" }, { seen: ["tt0468569"], ratings: { tt0468569: 4 }, source: "letterboxd_page" });
+  const s = await call("save_profile", { profile: merged });
+  const g = await call("get_profile", { token: s.structuredContent?.token });
+  expect(g.structuredContent).toEqual({ ...merged, imdb_rated: ["tt0111161"] });
 });
 
 test("save_profile and get_profile round-trip through KV with a one-year TTL", async () => {

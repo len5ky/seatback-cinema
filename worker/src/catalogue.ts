@@ -2,7 +2,7 @@
 import type { Bundle, BundleAirline, BundleFilm } from "../../src/bundle.ts";
 import { genreSet, inYears, learnAffinities, scorePick, type PickRow, type RatedFilm, type Taste, type TasteModel } from "../../src/rank-core.ts";
 import { normalizeTitle } from "../../src/text.ts";
-import type { Profile } from "./profile.ts";
+import { ratingFromImdb, type Profile } from "./profile.ts";
 
 export interface Filters {
   genre?: string[]; exclude_genre?: string[]; min_year?: number; max_year?: number; min_runtime?: number; max_runtime?: number;
@@ -118,12 +118,13 @@ export class Catalogue {
     const watched = new Set<string>(), watchlist = new Set<string>();
     for (const k of p.seen) { const id = this.resolve(k); if (id) watched.add(id); }
     for (const k of p.watchlist ?? []) { const id = this.resolve(k); if (id) watchlist.add(id); }
-    // One rating per film: a combined IMDb + Letterboxd import keeps the IMDb (tconst) row, otherwise the last one.
+    // One rating per film: a combined IMDb + Letterboxd import keeps the IMDb row, otherwise the last one.
+    const fromImdb = ratingFromImdb(p);
     const byId = new Map<string, { rating: number; imdb: boolean }>();
     for (const [k, rating] of Object.entries(p.ratings ?? {})) {
       const id = this.resolve(k);
       if (!id) continue;
-      const imdb = /^tt\d+$/.test(k.trim());
+      const imdb = fromImdb(k);
       if (imdb || !byId.get(id)?.imdb) byId.set(id, { rating, imdb });
     }
     const rated: RatedFilm[] = [];

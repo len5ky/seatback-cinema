@@ -7,6 +7,8 @@ import { learnAffinities } from "../../src/rank-core.ts";
 export interface Profile {
   seen: string[]; ratings?: Record<string, number>; watchlist?: string[];
   liked_directors?: string[]; liked_genres?: string[]; disliked_genres?: string[]; source?: string;
+  /** Rating keys that came from IMDb, set once IMDb and Letterboxd are merged. Without it the source decides (ratingFromImdb). */
+  imdb_rated?: string[];
 }
 export type ProfileKind = "imdb_csv" | "letterboxd_csv" | "imdb_page" | "letterboxd_page";
 export const PROFILE_KINDS: readonly ProfileKind[] = ["imdb_csv", "letterboxd_csv", "imdb_page", "letterboxd_page"];
@@ -43,7 +45,24 @@ export function validateProfile(v: unknown): Profile {
     if (list.length) p[f] = list;
   }
   if (typeof v.source === "string" && v.source.trim()) p.source = v.source.trim().slice(0, NAME_MAX);
+  if (v.imdb_rated !== undefined && p.ratings) {
+    const rated = p.ratings;
+    p.imdb_rated = strings(v.imdb_rated, "imdb_rated", KEY_MAX, KEYS_MAX).filter((k) => k in rated);
+  }
   return p;
+}
+
+const sourceParts = (s?: string) => (s ?? "").split("+").filter(Boolean);
+const isImdbSource = (s: string) => s.startsWith("imdb");
+
+/** Whether the rating under a key came from IMDb: imdb_rated when present, else the source when it names one site,
+ *  else (a mixed or unnamed source) a tconst key counts as IMDb's. */
+export function ratingFromImdb(p: Profile): (key: string) => boolean {
+  if (p.imdb_rated) { const s = new Set(p.imdb_rated); return (k) => s.has(k); }
+  const parts = sourceParts(p.source);
+  const imdb = parts.some(isImdbSource), other = parts.some((s) => !isImdbSource(s));
+  if (imdb !== other) return () => imdb;
+  return (k) => /^tt\d+$/.test(k.trim());
 }
 
 const B32 = "abcdefghijklmnopqrstuvwxyz234567";
@@ -187,16 +206,24 @@ export function profileFromText(text: string, kind: ProfileKind, slugs: Record<s
   }
 }
 
-/** Union of two profiles, for combining several pages or files. Later ratings win, except that an IMDb profile's
- *  rating beats a Letterboxd one for the same film in either order; the source then names both. */
+/** Union of two profiles, for combining several pages or files. Per rating key an IMDb rating beats a Letterboxd one
+ *  in either order, otherwise the later one wins; the source joins both sources' parts, deduped, in order. */
 export function mergeProfiles(a: Profile, b: Profile): Profile {
   const u = (x?: string[], y?: string[]) => [...new Set([...(x ?? []), ...(y ?? [])])];
-  const imdb = (p: Profile) => /imdb/.test(p.source ?? "");
-  const mixed = imdb(a) !== imdb(b) && !!a.source && !!b.source;
+  const ratings: Record<string, number> = {}, fromImdb = new Set<string>();
+  for (const [p, imdb] of [[a, ratingFromImdb(a)], [b, ratingFromImdb(b)]] as const) {
+    for (const [k, x] of Object.entries(p.ratings ?? {})) {
+      if (fromImdb.has(k) && !imdb(k)) continue;
+      ratings[k] = x;
+      if (imdb(k)) fromImdb.add(k); else fromImdb.delete(k);
+    }
+  }
+  const source = u(sourceParts(a.source), sourceParts(b.source));
+  const mixed = source.some(isImdbSource) && source.some((s) => !isImdbSource(s));
   return validateProfile({
-    seen: u(a.seen, b.seen), ratings: imdb(a) && !imdb(b) ? { ...b.ratings, ...a.ratings } : { ...a.ratings, ...b.ratings },
-    watchlist: u(a.watchlist, b.watchlist),
+    seen: u(a.seen, b.seen), ratings, watchlist: u(a.watchlist, b.watchlist),
     liked_directors: u(a.liked_directors, b.liked_directors), liked_genres: u(a.liked_genres, b.liked_genres),
-    disliked_genres: u(a.disliked_genres, b.disliked_genres), source: mixed ? [a.source, b.source].sort().join("+") : b.source ?? a.source,
+    disliked_genres: u(a.disliked_genres, b.disliked_genres), source: source.join("+"),
+    ...(mixed ? { imdb_rated: [...fromImdb] } : {}),
   });
 }
