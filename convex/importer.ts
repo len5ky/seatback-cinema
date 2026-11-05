@@ -8,8 +8,8 @@ import { capsFromEnv, expiresAt, runImport, type ImportStore } from "./importCor
 
 /** Returns { status, body } with body as JSON text: a profile can hold more keys than a Convex object allows. */
 export const run = internalAction({
-  args: { user: v.string() },
-  handler: async (ctx, { user }): Promise<{ status: number; body: string }> => {
+  args: { user: v.string(), force: v.optional(v.boolean()) },
+  handler: async (ctx, { user, force }): Promise<{ status: number; body: string }> => {
     const caps = capsFromEnv(process.env);
     const store: ImportStore = {
       cached: async (key) => {
@@ -25,7 +25,7 @@ export const run = internalAction({
       },
     };
     const t0 = Date.now();
-    const r = await runImport(store, liveDeps, user);
+    const r = await runImport(store, liveDeps, user, { force });
     // Counts only: no ids, no titles.
     const b = r.body;
     console.log(b.ok
