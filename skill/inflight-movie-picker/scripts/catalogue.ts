@@ -25,7 +25,7 @@ import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { blockedHelp, fetchImdbProfile, fetchLetterboxdProfile, type FetchedProfile, type FetchOpts, imdbUserId, letterboxdUser, type Profile,
-  PROFILE_TTL_MS, type TitleRef, ProfileBlocked } from "./profile.ts";
+  permanentNote, PROFILE_TTL_MS, type TitleRef, ProfileBlocked } from "./profile.ts";
 import { getProfile, pasteSentence, saveProfile } from "./seatback.ts";
 
 const DEFAULT_BASE_URL = "https://seatback.len5ky.com";
@@ -356,8 +356,9 @@ async function loadProfile(site: "imdb" | "letterboxd", url: string, refresh: bo
     if (e instanceof ProfileBlocked) { console.error(blockedHelp(e.site, e.message)); process.exit(1); }
     return fail(e instanceof Error ? e.message : String(e));
   }
-  // A partial profile (a block partway, scores missing) is not cached, so the next run tries again.
-  if (!p.notes.length) {
+  // A partial profile (a block partway, scores unreadable) is not cached, so the next run tries again;
+  // one cut at the page cap, scoreless or with a private watchlist is, since a refetch would say the same.
+  if (p.notes.every(permanentNote)) {
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(path, JSON.stringify(p));
   }

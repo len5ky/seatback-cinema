@@ -49,6 +49,11 @@ export class ProfileBlocked extends Error {
 
 export const MAX_PAGES = 50;
 export const PROFILE_TTL_MS = 24 * 3600 * 1000;
+
+/** A note a refetch would only repeat (the page cap, a scoreless profile, a private watchlist), unlike a network blip,
+ *  a block or a 429 partway. A profile whose notes are all permanent is cached like a clean one. */
+export const permanentNote = (note: string) =>
+  /-page limit/.test(note) || note.startsWith("IMDb returned no scores for the rated films") || /^watchlist skipped \(.*private\)$/.test(note);
 export const BROWSER_HEADERS: Record<string, string> = {
   "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
   Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",

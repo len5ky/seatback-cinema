@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import {
   API_PAGES_PER_REQUEST, blockedHelp, fetchImdbProfile, MAX_PAGES, fetchLetterboxdProfile, imdbUserId, isChallenge, letterboxdUser, parseImdbOwnerRatings,
-  parseImdbPage, parseLetterboxdPage, ProfileBlocked,
+  parseImdbPage, permanentNote, parseLetterboxdPage, ProfileBlocked,
 } from "../skill/inflight-movie-picker/scripts/profile.ts";
 
 // Fixtures mirror the structure of real pages captured on 2026-10-30, with every user, title and id replaced by synthetic values.
@@ -120,6 +120,22 @@ test("fetchImdbProfile (page fallback): paginates until no new ids, reads scores
   // the refused API call, pages 1, 2 and 3 (3 repeats 2, so the loop stops), one watchlist page, one score batch
   expect(calls.filter((u) => u.includes("/ratings/"))).toHaveLength(3);
   expect(calls.filter((u) => u.includes("graphql"))).toHaveLength(2);
+});
+
+test("permanentNote: the page cap, a scoreless profile and a private watchlist are cached; blips, blocks and 429s are not", () => {
+  for (const n of [
+    `IMDb ratings: stopped at the ${MAX_PAGES}-page limit; kept the first ${MAX_PAGES} of 20000`,
+    `Letterboxd films: stopped at the ${MAX_PAGES}-page limit of 80; kept the first 3600`,
+    "IMDb returned no scores for the rated films; they still count as seen",
+    "watchlist skipped (IMDb's API returned none; it may be private)",
+    "watchlist skipped (this IMDb list is private)",
+  ]) expect(permanentNote(n)).toBe(true);
+  for (const n of [
+    "IMDb ratings: stopped at page 2 (IMDb's API refused the ratings list (HTTP 429)); kept the first 6",
+    "IMDb watchlist: stopped at page 2 (IMDb's API returned no data for it); kept the first 1",
+    "could not read the scores themselves (network down); rated films still count as seen",
+    "watchlist skipped (IMDb refused the request (HTTP 429))",
+  ]) expect(permanentNote(n)).toBe(false);
 });
 
 test("fetchImdbProfile: a failed score lookup keeps the seen list and says so; a WAF 202 throws ProfileBlocked", async () => {
