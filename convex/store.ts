@@ -18,6 +18,15 @@ export const cached = internalQuery({
   },
 });
 
+/** The ur id behind a p. alias row, fresh or expired (until pruned), or null. */
+export const aliasOf = internalQuery({
+  args: { alias: v.string() },
+  handler: async (ctx, { alias }) => {
+    const row = await ctx.db.query("imports").withIndex("by_key", (q) => q.eq("key", alias)).first();
+    return row && row.data === undefined ? row.ur : null;
+  },
+});
+
 async function counter(ctx: MutationCtx, key: string, day: string) {
   const row = await ctx.db.query("counters").withIndex("by_key", (q) => q.eq("key", key)).first();
   return { row, count: row?.count ?? 0, bump: async () => {
