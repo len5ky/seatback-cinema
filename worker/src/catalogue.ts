@@ -116,12 +116,18 @@ export class Catalogue {
 
   applyProfile(p: Profile, source: string): AppliedProfile {
     const watched = new Set<string>(), watchlist = new Set<string>();
-    const rated: RatedFilm[] = [];
     for (const k of p.seen) { const id = this.resolve(k); if (id) watched.add(id); }
     for (const k of p.watchlist ?? []) { const id = this.resolve(k); if (id) watchlist.add(id); }
+    // One rating per film: a combined IMDb + Letterboxd import keeps the IMDb (tconst) row, otherwise the last one.
+    const byId = new Map<string, { rating: number; imdb: boolean }>();
     for (const [k, rating] of Object.entries(p.ratings ?? {})) {
       const id = this.resolve(k);
       if (!id) continue;
+      const imdb = /^tt\d+$/.test(k.trim());
+      if (imdb || !byId.get(id)?.imdb) byId.set(id, { rating, imdb });
+    }
+    const rated: RatedFilm[] = [];
+    for (const [id, { rating }] of byId) {
       watched.add(id);
       const f = this.byId.get(id);
       if (f) rated.push({ rating, genres: f.imdbGenres, directors: f.directorIds });

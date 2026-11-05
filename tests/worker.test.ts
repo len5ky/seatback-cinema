@@ -64,6 +64,16 @@ test("profile: seen films hidden and counted, watchlist boosted, ratings learn a
   expect(profile.model.rated).toBe(2);
 });
 
+test("profile: a film rated on both IMDb and Letterboxd counts once, with the IMDb rating", () => {
+  const imdbOnly = cat.applyProfile({ seen: [], ratings: { tt31193180: 10 } }, "test");
+  for (const ratings of [{ tt31193180: 10, "Sinners (2025)": 2 }, { "Sinners (2025)": 2, tt31193180: 10 }]) {
+    expect(cat.applyProfile({ seen: [], ratings }, "test").model).toEqual(imdbOnly.model);
+  }
+  // Two Letterboxd rows for one film: the last wins.
+  const lb = cat.applyProfile({ seen: [], ratings: { "lb:the-dark-knight": 3, "The Dark Knight (2008)": 9 } }, "test");
+  expect(lb.model).toEqual(cat.applyProfile({ seen: [], ratings: { tt0468569: 9 } }, "test").model);
+});
+
 test("flight_minutes drops films longer than the flight minus 30", () => {
   const r = cat.picks(emirates, { filters: {}, flightMinutes: 150, profile: null, limit: 20 });
   expect(r.picks.length).toBeGreaterThan(0);
