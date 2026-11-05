@@ -1,0 +1,35 @@
+# Weekly canary for the IMDb import path (issue #14): calls the production Convex POST /import/imdb for one known
+# profile and fails unless its ratings come back with scores. Catches IMDb switching off raw GraphQL queries or
+# rotating the PersonalizedUserData persisted hash. A failed run emails the repo owner; that email is the alert.
+#
+# Required repo secrets (Settings > Secrets and variables > Actions > New repository secret):
+#   CONVEX_SITE_URL   production Convex HTTP actions URL, https://<deployment>.convex.site
+#   IMPORT_SECRET     the shared x-import-secret the Worker sends (re-set it here after scripts/rotate-import-secret.sh)
+#   CANARY_IMDB_USER  a public IMDb profile ur id with scored ratings, e.g. ur12345678
+name: imdb-canary
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+
+      - name: Import the canary profile
+        env:
+          CONVEX_SITE_URL: ${{ secrets.CONVEX_SITE_URL }}
+          IMPORT_SECRET: ${{ secrets.IMPORT_SECRET }}
+          CANARY_IMDB_USER: ${{ secrets.CANARY_IMDB_USER }}
+        run: bun scripts/imdb-canary.ts
